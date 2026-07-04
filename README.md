@@ -337,29 +337,7 @@ This produces a report with three independent checks:
 
 The repository also includes **RLE-format solution analysis** (`results/result_rle_n7-19.csv`), computed by parsing GPU-generated solution files from [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) using `analysis/analyze_rle.py`. This extends the missing-center analysis to n = 7–19 without requiring local exhaustive search for n ≥ 14.
 
-## Future Research Directions
-
-### Direction 1: Constructive Missing-Center Solutions
-
-Prove that missing-center solutions exist for all sufficiently large n by **explicit construction**.
-
-**Approach**: The column pairing graph (each column appears exactly twice) decomposes into cycles. Design cycle structures with controlled distance-ring occupancy. The d=34 and d=82 rings appear in **every** missing-center solution for n=12 — suggesting they are "universal" building blocks.
-
-**Progress**: The counting-matrix M[i][j] formalism (see Section 2 above) provides a linear-algebraic framework for constructing assignments that satisfy the distance-ring constraint. The remaining challenge is incorporating the collinearity constraint into the construction.
-
-### Direction 2: Circumcircle Spectrum
-
-Map **every** grid point's role as a circumcenter. For a solution with 2n points, the C(2n, 3) triples each determine a circumcenter (which may or may not be another grid point).
-
-**Key results (n=12 analysis)**:
-- Missing-center and has-center solutions have nearly identical spectrum sizes (~1870 unique centers)
-- The only consistent difference is the absence of the grid center itself in missing-center spectra
-- Pairwise sharing between solutions is only ~6% — each solution's spectrum is highly individual
-- 83% of circumcenters are at non-integer coordinates
-
-**Conclusion**: No exploitable pattern was found. The circumcenter spectrum does not provide a constructive handle for the missing-center problem.
-
-### Direction 3: The C₄ Theorem — A Proven Result ✔
+## The C₄ Theorem — A Proven Result ✔
 
 A solution has **C₄ symmetry** if it is invariant under 90° rotation about the grid center. We prove:
 
@@ -386,19 +364,13 @@ d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2 = (2R(x)_x-(n-1))^2 + (2R(x)_y-(n-1))^2
 
 The threshold at n=12 is caused by the interaction between distance-ring capacity and the collinearity constraint. The matrix M[i][j] analysis shows that the ring constraint alone is satisfiable at n=8, but the collinearity constraint eliminates all such assignments. At n=12, the 19 rings provide enough geometric diversity for both constraints to be satisfied simultaneously.
 
-**Next question**: At what n does the next even threshold appear? (n=14? n=16?) The search for n≥14 requires cloud‑grade computing.
-
-### Direction 6: Relaxing the Row Constraint — Explored
+### Relaxing the Row Constraint — Explored
 
 Removing the "2 points per row" constraint massively increases the solution space (n=7: 132→1.3M solutions, 4→11,922 missing-center). However, the even-n threshold at n=12 remains intact — confirming it is a genuine geometric property, not a search heuristic artifact.
 
 **Code**: `d4_relaxed.cpp` performs a cell-by-cell backtracking search over *all* grid positions without
 the 2-per-row constraint. It uses the same forbid_accumulator approach but allows 0–N points per row.
 This is a distinct algorithm from `no3line.cpp` and lives in its own file for clarity.
-
-### Direction 7: Spectral Analysis of the Forbid Matrix
-
-The forbid_accum algorithm effectively builds a **collinearity-avoidance graph** on grid positions. Analyzing the eigenvalues or algebraic connectivity of this graph may reveal deeper structure about why n=12 is the transition point.
 
 ## Citation
 
