@@ -1,0 +1,30 @@
+Three-Factor Model: Quantitative Validation
+===========================================
+
+Model: missing_rate ~ β₀ + β₁·mod4 + β₂·is_prime + β₃·log(ring_pairs)
+
+Data source: Full reconstructed counts from D4 analysis (n=7-22)
+Method: Weighted least squares (weights = full_total / mean)
+
+Results:
+--------
+  Intercept:  16.09  (baseline missing rate)
+  mod4:        0.19  (very weak — mod4 effect is indirect, not direct)
+  is_prime:    4.08  (prime n have ~4% higher missing-center rate)
+  log(rp):    -2.29  (more constraints → lower rate)
+  R-squared:  0.620  (62% of variance explained)
+
+Interpretation:
+  - The model captures a meaningful portion of the variation
+  - mod4 has a surprisingly small direct effect — its influence is 
+    mediated through ring_pairs (which grows with n)
+  - Primes show higher missing rates than composites at similar n
+  - The negative log(ring_pairs) coefficient shows that denser 
+    constraint graphs suppress missing-center solutions
+  - 38% unexplained variance suggests additional factors (e.g., 
+    number of BB vs GG subgrid rings, 2-per-row constraint details)
+
+For a more refined model, consider:
+  1. Separate models for odd vs even n
+  2. Interaction terms (mod4 × is_prime)
+  3. Non-linear terms (n², n³)
