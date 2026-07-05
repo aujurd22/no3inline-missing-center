@@ -658,23 +658,27 @@ We developed a C++ hill-climbing search with ring-constrained initialization tha
 
 **Comparison with known results (OEIS A277433 / Aichholzer et al. 2023):**
 
-| n | Literature optimal k | Our best bound | Our solutions found | Missing-center |
-|:-:|:-------------------:|:--------------:|:------------------:|:-------------:|
-| 1 | 1 | 1 (confirmed) | — | — |
-| 2 | 4 | 4 (confirmed) | — | — |
-| 3 | 4 | 4 (confirmed) | — | — |
-| 4 | 4 | 4 (confirmed) | — | — |
-| 5 | 6 | 6 (confirmed) | — | — |
-| 6 | 6 | 6 (confirmed) | — | — |
-| 7 | **8** (proven optimal) | 8 (confirmed) | 451 | 72.7% |
-| 8 | **8** (proven optimal) | 8 (confirmed) | 88 | 65.9% |
-| 9 | **8** (proven optimal) | 8 (confirmed) | 8 | 0.0% |
-| 10 | **8** (proven optimal) | 8 (confirmed) | 4 | 0.0% |
-| 11 | **10** (proven optimal) | 10 (confirmed) | 1+ (partial sample) | full data unavailable |
-| 12 | **10** (proven optimal) | 10 (confirmed) | 1 (partial sample) | full data unavailable |
-| **13** | **not listed in OEIS** | **≤13** ✅ | **5** | **80–100%** |
-| **14** | **not listed in OEIS** | **≤15** ✅ | **13** | **100%** |
-| **15** | **not listed in OEIS** | **≤16** ✅ | **3** | **100%** |
+| n | Literature optimal k | Literature total solutions | D₄-inequiv. | Our sample | Missing-center |
+|:-:|:-------------------:|:------------------------:|:-----------:|:----------:|:-------------:|
+| 1 | 1 | — | — | — | — |
+| 2 | 4 | — | — | — | — |
+| 3 | 4 | — | — | — | — |
+| 4 | 4 | — | — | — | — |
+| 5 | 6 | — | — | — | — |
+| 6 | 6 | — | — | — | — |
+| 7 | **8** (proven) | — | — | 451 | 72.7% |
+| 8 | **8** (proven) | — | — | 88 | 65.9% |
+| 9 | **8** (proven) | — | — | 8 | 0.0% |
+| 10 | **8** (proven) | — | — | 4 | 0.0% |
+| 11 | **10** (proven) | **114** | **4** | 1 found | coordinates unavailable |
+| 12 | **10** (proven) | **108** | **4** | 1 found | coordinates unavailable |
+| **13** | **not in OEIS** | — | — | **5** | **80–100%** |
+| **14** | **not in OEIS** | — | — | **13** | **100%** |
+| **15** | **not in OEIS** | — | — | **3** | **100%** |
+
+*For n≤10, the literature solution counts were not tabulated in the accessible paper excerpts.
+For n=11,12, Aichholzer et al. found 114 and 108 total solutions respectively (4 D₄-inequivalent each),
+but the individual coordinates are not publicly available, so missing-center rates cannot be computed from the full set.*
 
 **New upper bounds (not in OEIS A277433):**
 
