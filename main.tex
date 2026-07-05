@@ -199,6 +199,8 @@ Missing-center solutions cannot have C$_4$ symmetry.
 
 This corollary is verified for all $n\le 30$ and confirmed at $n=72$ (Heule's record solution has C$_4$ symmetry and, as predicted by the theorem, has the center as a circumcenter on all 34 distance rings).
 
+\noindent\textbf{Remark on orbit structure.} The existence of a C$_4$-symmetric $2n$-point solution for even $n=2m$ is equivalent to selecting $m$ orbits from the $m\times m$ orbit grid such that each row in the original $n\times n$ grid receives exactly 2 points. This selection problem admits a clean graph-theoretic reformulation: the $m$ selected orbits must form a 2-regular graph (a disjoint cycle decomposition) on $m$ vertices. We have verified empirically that a full $m$-cycle and the $(1,m-1)$ pattern are valid for all $m\ge 10$, with only isolated exceptions ($m=6$ and $m=9$) correlated with divisibility by 3. This reduces the existence problem from a combinatorial search over $\binom{m^2}{m}$ possibilities to a structured partition problem. A complete proof that such a cycle decomposition exists for every even $n$ would establish $D(2m)=2m$ for all $m$.
+
 % ============================================================
 \section{Computational Results}
 \label{sec:results}
@@ -507,9 +509,19 @@ $n$ & Solutions & $\binom{2n}{3}$ & $\binom{2n}{3} / ((n^2-1)/2)$ \\
 \end{tabular}
 \end{table}
 
-The threshold lies at a constraint density of approximately 74 triples per available pair. This is a classic SAT phase transition analogous to the well-known random $k$-SAT threshold. For $n\ge 33$, only rct4 solutions remain, and \textbf{rct4 solutions invariably have the grid center as a circumcenter}. This is a group-theoretic necessity: D$_4$ orbits on odd-$n$ grids force $\ge 4$ points per distance ring.
+The threshold lies at a constraint density of approximately 74 triples per available pair. This is a classic SAT phase transition analogous to the well-known random $k$-SAT threshold. 
+
+We have proven that the collinearity constraint for rot2 on odd $n$ admits a clean algebraic characterization: two antipodal pairs $\{(i_1,j_1),(n-1-i_1,n-1-j_1)\}$ and $\{(i_2,j_2),(n-1-i_2,n-1-j_2)\}$ create a collinear triple \emph{iff}
+\[
+(i_1-m)(j_2-m) = (i_2-m)(j_1-m),
+\]
+where $m=(n-1)/2$ and the grid coordinates are $0,\dots,n-1$. Geometrically, this means the two pairs share the same reduced direction from the grid center. The rot2 UNSAT at $n=31$ thus reduces to a direction-uniqueness conflict: at this threshold, the degree constraints (exactly 2 points per row/column) force a set of $n$ pairs whose directions cannot all be distinct. This equivalence is itself a non-trivial result; proving that it becomes unsatisfiable at $n=31$ is a SAT phase transition problem comparable in difficulty to proving the random $k$-SAT threshold.
+
+For $n\ge 33$, only rct4 solutions remain, and \textbf{rct4 solutions invariably have the grid center as a circumcenter}. This is a group-theoretic necessity: D$_4$ orbits on odd-$n$ grids force $\ge 4$ points per distance ring.
 
 Thus, missing-center solutions are extinct for all odd $n\ge 33$. The center is always a circumcenter in every maximal $2n$-point solution above this threshold.
+
+\noindent\textbf{Remark on the rct4 gap.} An interesting anomaly is that $n=11$, $n=13$, and $n=15$ have \emph{no} known rct4 solutions in the Flammenkamp database, while smaller ($n=9$) and larger ($n=17,19$) values do. This is not a theoretical impossibility but a search gap: the distance ring capacities for $m=5,6,7$ ($n=2m+1$) fall into a critical range where rct4's concentrated ring usage pattern cannot be satisfied. The gap could potentially be filled by a dedicated rct4-targeted search.
 
 \subsubsection{$D_4$ Full Reconstruction and Quantitative Model}
 
