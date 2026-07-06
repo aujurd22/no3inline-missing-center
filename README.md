@@ -44,7 +44,9 @@ Earlier conjectures based on small-n patterns — prime residue classification (
 | 7 | Odd P (4k+3) | 132 | 128 | 4 | ✅ |
 | 9 | Odd C | 368 | 360 | 8 | ✅ |
 | 11 | Odd P (4k+3) | 1,120 | 1,084 | 36 | ✅ |
-| 13 | Odd P (4k+1) | 3,622 | 3,330 | **292** | ✅ *(mode 1)* |
+| 13 | Odd P (4k+1) | 3,622 $^\\dagger$ | 3,330 | **292** | ✅ *(mode 1)* |
+
+$^\\dagger$ Mode 0 counts only 2‑per‑row solutions. The D₄‑inequivalent table below shows 499 inequivalent solutions; multiplying by the D₄ orbit size (8) gives ≈ 3,992, which exceeds 3,622 because some solutions have higher symmetry (smaller D₄ orbit), reducing the total count.
 
 **Extended analysis via D₄‑inequivalent solutions** (parsed from GPU-generated RLE data, [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line)):
 
@@ -565,8 +567,10 @@ This reduces the search space from $\binom{m^2}{m}$ (combinatorial explosion) to
 | 3 | 6 | ✅ | — | |
 | 4 | 8 | ✅ | ❌ | |
 | 5 | 10 | ✅ | ✅ | $(1,2,2)$ |
-| 6 | 12 | ❌ | ✅ | $(3,3)$ |
+| 6 | 12 | ❌ $^\\dagger$ | ✅ | $(3,3)$ |
 | 7 | 14 | ✅ | ✅ | $(3,4)$ |
+
+$^\\dagger$ m=6 has no full 6-cycle, but admits $[5,1]$ and $[3,3]$ decompositions.
 | 8 | 16 | ✅ | ✅ | $(1,3,4)$ |
 | 9 | 18 | ✅ | ❌ | |
 | 10 | 20 | ✅ | ✅ | $(4,6),\\(5,5)$ |
@@ -583,7 +587,7 @@ This reduces the search space from $\binom{m^2}{m}$ (combinatorial explosion) to
 
 **Code**: `analysis/c4_cycles.cpp`, `analysis/c4_cycles_ext.cpp` — C++ cycle decomposition explorer; `analysis/c4_actual_orbits.py` — Flammenkamp orbit extraction.
 
-### Direction B: Ring Collision Graph — Sum-of-Two-Squares Structure
+### Direction 4: Ring Collision Graph — Sum-of-Two-Squares Structure
 
 The **ring collision graph** connects two distance rings if they contain points that form a collinear triple. Understanding this graph is key to explaining why the collinearity constraint eliminates certain orbit selections.
 
@@ -610,7 +614,7 @@ We computed the collision graph for $n=12$ to $n=30$ and correlated each ring's 
 
 **Code**: `analysis/direction_b_ring_collision.py` — ring collision graph builder and correlation analysis.
 
-### Direction C: Odd $n$ Missing-Center Existence Bounds
+### Direction 5: Odd $n$ Missing-Center Existence Bounds
 
 We analyzed the precise conditions under which odd $n$ grids admit missing-center solutions, using $n=7$ to $n=45$ with $D_4$-inequivalent data.
 
@@ -631,7 +635,7 @@ We analyzed the precise conditions under which odd $n$ grids admit missing-cente
 
 **Code**: `analysis/direction_c_odd_existence.py` — ring capacity, diversity, and extinction threshold analysis.
 
-### Direction D: Proving the rot2 UNSAT Threshold at $n=31$
+### Direction 6: Proving the rot2 UNSAT Threshold at $n=31$
 
 We investigated the sharp SAT→UNSAT transition of the rot2 symmetry class at $n=31$ (44,828 solutions at $n=29$, zero at $n=31$).
 
@@ -667,7 +671,7 @@ The transition occurs at **≈78.9 constraints per variable** — a threshold va
 
 **Code**: `analysis/direction_d_rot2_threshold.py` — line-capacity and constraint-density analysis; `analysis/direction_d_conflict_graph.py` — pairwise conflict graph and independence number estimation; `analysis/direction_d_deep_reason.py` — SAT phase transition characterization.
 
-### Direction 5: The Even n Threshold — Empirically Characterized
+### Direction 7: The Even n Threshold — Empirically Characterized
 
 **Important caveat**: This threshold is an **empirical finding** based on exhaustive search up to n=13 and D₄-inequivalent analysis up to n=19. It has not been proven mathematically. The matrix analysis explains why the threshold exists (interaction between ring capacity and collinearity), but does not constitute a proof that n=12 is the exact transition point.
 
@@ -796,6 +800,8 @@ We discovered a fundamental structural property of C₄ (90° rotational symmetr
     deg(k) = |{orbits where i=k}| + |{orbits where j=k}|.
 
 Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to deg(k) = 2 for all k ∈ [0,m-1].
+
+**Proof**: Each orbit (i,j) contributes 4 points to rows {i, j, n-1-i, n-1-j} — one per row via each of the four C₄ rotations. For any row r ∈ [0, n-1], the two C₄ copies that land in row r are those with first coordinate = r (from orbit (r, *) or its rotation) or second coordinate = r (from orbit (*, r) or its rotation). Row r therefore contains exactly deg(r) points when r < m, and exactly deg(n-1-r) points when r ≥ m. Hence every row has 2 points ⇔ deg(k) = 2 for all k.
 
 **Computational verification**: All 32,578 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100%.
 
