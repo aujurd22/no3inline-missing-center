@@ -787,6 +787,34 @@ A refined weighted least squares model incorporating $r_2$-based features achiev
 **Code**: `analysis/d4_reconstruct.py` (reconstruction), `analysis/sum_of_two_squares.py` (number theory),
 `analysis/three_factor_model.txt` (results)
 
+### Structure of C₄ Solutions and the Row-Degree Theorem
+
+We discovered a fundamental structural property of C₄ (90° rotational symmetric) solutions:
+
+**Theorem (Row-Degree Equivalence for C₄)**. For any C₄-symmetric 2n-point solution on an even n×n grid, let m = n/2 and represent the solution by its m C₄ orbits (i₁,j₁), …, (iₘ,jₘ) with iₖ, jₖ ∈ [0,m-1]. Define the degree of vertex k as
+
+    deg(k) = |{orbits where i=k}| + |{orbits where j=k}|.
+
+Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to deg(k) = 2 for all k ∈ [0,m-1].
+
+**Computational verification**: All 32,578 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100%.
+
+**Consequence**: A C₄ solution is exactly a 2-regular graph on m vertices. Each edge (i,j) in the graph corresponds to one C₄ orbit, and the 4 rotated copies of each orbit automatically guarantee correct row coverage. This reduces the C₄ solution search from geometry to pure graph theory.
+
+**Attempted n=74 C₄ solution**: Applying this to n=74 (m=37), the problem reduces to finding a 2-regular graph on 37 vertices where no 3 of the resulting 148 points are collinear. Multiple approaches were tested:
+
+| Approach | Method | Result | Time |
+|:---------|:-------|:-------|:----:|
+| Partition (28+9, 27+10, 18+12+7, etc.) | Fix DB solutions, search remainder | UNSAT (cross-block collinear) | ~1-2min |
+| Permutation Z3 | Search sigma ∈ S₃₇ with 2-cycle blocking | All 10,000 attempts collinear | ~1min |
+| 2-matching Z3 | Boolean orbit variables, incremental | 850 iterations, not converging | ~5min |
+| Small partitions (7+7+7+7+9, 6+6+6+6+6+7, etc.) | Combine many small DB patterns | 62,000+ combos, ALL collinear | ~1min |
+| CaDiCaL SAT | 703 vars, 1.17M clauses, direct encoding | Running 15min+, no result | ~15min |
+
+The difficulty: among 57.6M possible orbit triples, ~1.18M (2.04%) are collinear. Any 2-regular graph selects 7770 triples, with ~159 expected collinear. Finding a collinearity-free graph is exponentially rare—likely requiring a dedicated Heule-style SAT solver.
+
+**Code**: `analysis/n74_sat_solver.py`, `analysis/n74_permutation_v2.py`, `analysis/n74_2matching_solver.py`
+
 ---
 
 ## Side Exploration: Geometric Dominating Sets (MIN variant)
@@ -939,43 +967,9 @@ All higher-dimensional analysis scripts are in the [`analysis/`](analysis/) dire
 
 ---
 
-## Side Exploration 3: Structure of C₄ Solutions and the Row-Degree Theorem
+---
 
-We discovered a fundamental structural property of C₄ (90° rotational symmetric) solutions:
-
-**Theorem (Row-Degree Equivalence for C₄)**. For any C₄-symmetric 2n-point solution on an even n×n grid, let m = n/2 and represent the solution by its m C₄ orbits (i₁,j₁), …, (iₘ,jₘ) with iₖ, jₖ ∈ [0,m-1]. Define the degree of vertex k as
-
-    deg(k) = |{orbits where i=k}| + |{orbits where j=k}|.
-
-Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to deg(k) = 2 for all k ∈ [0,m-1].
-
-**Computational verification**: All 32,578 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100%.
-
-**Consequence**: A C₄ solution is exactly a 2-regular graph on m vertices. Each edge (i,j) in the graph corresponds to one C₄ orbit, and the 4 rotated copies of each orbit automatically guarantee correct row coverage. This reduces the C₄ solution search from geometry to pure graph theory.
-
-### Attempted n=74 C₄ Solution
-
-Applying this to n=74 (m=37), the problem reduces to finding a 2-regular graph on 37 vertices where no 3 of the resulting 148 points (4 per orbit) are collinear.
-
-| Approach | Method | Result | Time |
-|:---------|:-------|:-------|:----:|
-| Partition (fix 28+9) | Fix n=56 orbits, search 9 via Z3 | UNSAT (cross-block collinear) | ~2min |
-| Partition (fix 27+10) | Fix n=54 orbits, search 10 via Z3 | UNSAT | ~2min |
-| Partition (fix 18+12+7) | Fix DB solutions, search via Z3 | UNSAT | ~1min |
-| Permutation Z3 | Search sigma ∈ S₃₇ with 2-cycle blocking | All 10,000 iterations collinear | ~1min |
-| 2-matching Z3 | Boolean orbit variables, incremental | 850 iterations, not converging | ~5min |
-| CaDiCaL SAT | 703 vars, 1.17M clauses, direct encoding | Running 15min+, no result | ~15min |
-
-The fundamental difficulty: among C(703,3) ≈ 57.6M possible orbit triples, about 1.18M (2.04%) are collinear. Any 2-regular graph selects C(37,3) = 7770 triples, with an expected ~159 collinear triples. Finding a collinearity-free graph is exponentially rare.
-
-This suggests n=74 likely requires a dedicated SAT solver (Heule-style) rather than a sub-problem encoding.
-
-### Analysis Scripts
-
-All analysis scripts are in the [`analysis/`](analysis/) directory:
-- [`n74_sat_solver.py`](analysis/n74_sat_solver.py) — PySAT CaDiCaL encoding for n=74 C₄ search
-- [`n74_permutation_v2.py`](analysis/n74_permutation_v2.py) — Z3 permutation search (no 2-cycles)
-- [`n74_2matching_solver.py`](analysis/n74_2matching_solver.py) — Z3 2-matching incremental search
+## References
 
 1. **P. Erdős**, "On a problem of combinatorial geometry," *American Mathematical Monthly*, vol. 42, 1935, pp. 586–589. — The original formulation of the No-Three-In-Line problem.
 
