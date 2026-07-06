@@ -74,7 +74,7 @@ We present the \emph{forbid-accumulator} algorithm, an optimized backtracking se
 
 Our exhaustive search provides complete missing-center counts for $n=2\dots13$, and we extend the analysis to $n=30$ via the Flammenkamp database of $D_4$-inequivalent solutions. We characterize the even-$n$ threshold (first missing-center solutions appear at $n=12$) and analyze the odd-$n$ phase transition at $n=11$, revealing a three-factor interplay: grid parity modulo $4$, primality, and ring-pair collinearity density. The remarkable $n=15\to17$ freeze ($354\to357$ missing solutions) is explained by the interaction of compositeness and parity.
 
-The evidence strongly supports $D(n)=2n$ for all even $n$. The sole remaining gap $\le 72$ is $n=71$, for which we propose a search strategy targeting $180^\circ$ rotational symmetry.
+The evidence strongly supports $D(n)=2n$ for all even $n$. The sole remaining gap $\le 72$ is $n=71$, for which our analysis of the missing-center invariant provides structural context but no constructive solution.
 \end{abstract}
 
 % ============================================================
@@ -111,7 +111,7 @@ Points on a circle centered at $C$ are exactly those at a fixed distance from $C
 \item Complete missing-center counts for $n=2\dots13$ (full search) and $n=7\dots30$ ($D_4$-inequivalent).
 \item Characterization of the even-$n$ threshold at $n=12$ and the odd-$n$ phase transition at $n=11$.
 \item A unified conjectural model explaining missing-center abundance via parity, primality, and collinearity density.
-\item Evidence supporting $D(n)=2n$ for all even $n$, and a search strategy for the open case $n=71$.
+\item Evidence supporting $D(n)=2n$ for all even $n$, and structural context for the open case $n=71$.
 \end{enumerate}
 
 % ============================================================
@@ -447,21 +447,14 @@ $n$ & Missing-center? & Result & Time \\
 The Z3 solver independently confirms our $n=12$ and $n=14$ missing-center results, providing strong cross-validation across different algorithmic paradigms (SMT vs.\ backtracking).
 
 % ============================================================
-\section{Status of $D(n)=2n$ and the Open Case $n=71$}
-\label{sec:status}
+\section{Missing-Center Extinction and Structural Phase Transitions}
+\label{sec:extinction}
 
 \subsection{Even $n$}
 
-The evidence for $D(n)=2n$ on all even $n$ is compelling:
-\begin{enumerate}[nosep]
-\item C$_4$-symmetric solutions exist for every even $n\le 72$ (Flammenkamp database).
-\item The count of rot4 solutions grows exponentially ($\sim1.5\times$ per 2-step) with no slackening.
-\item The structural argument via C$_4$ orbit theory guarantees constructibility at any even $n$.
-\end{enumerate}
+C$_4$-symmetric solutions exist for every even $n\le 72$ (Flammenkamp database), with the count growing exponentially ($\sim1.5\times$ per 2-step). The structural argument via C$_4$ orbit theory strongly suggests such solutions exist at any even $n$, implying $D(n)=2n$ for all even $n$ is effectively established.
 
-We conclude that $D(n)=2n$ for all even $n$ is effectively established.
-
-\subsection{Odd $n$ and the $n=71$ Gap}
+\subsection{Missing-Center Extinction for Odd $n\ge 33$}
 
 The situation for odd $n$ is more nuanced. Heule's SAT solver~\cite{heule2026} established $D(65)=D(67)=D(69)=2n$ using rct4 (near-rot4) symmetry. However, $n=71$ remains unsolved --- the only gap $\le 72$.
 
@@ -584,10 +577,10 @@ A refined weighted least squares model incorporating $r_2$-based features achiev
 
 The dominant factor is the maximum number of $4k+1$ prime factors across all distance rings (coefficient $+5.01$). This makes sense: $4k+1$ primes generate representable distance values, creating more ring diversity and more opportunities to satisfy the $\le 2$ constraint while maintaining $2n$ total points. The dramatic $R^2$ improvement (from $0.620$ to $0.880$) confirms that number theory -- specifically the sum-of-two-squares structure of distance rings -- is the primary driver of missing-center abundance.
 
-Our analysis suggests that $n=71$ must be targeted via the \textbf{rct4} symmetry class. All known solutions for odd $n\ge 33$, including Heule's $n=65,67,69$, are rct4. The rct4 class reduces the search to selecting fundamental-domain orbits (a polynomial reduction in variable count) and is the only viable structural class for large odd-$n$ grids.
+Our analysis suggests that if $D(71)=2n$ exists, it would likely belong to the \textbf{rct4} symmetry class --- the only class known to support $2n$-point solutions for odd $n\ge 33$, as demonstrated by Heule's $n=65,67,69$ results. The rct4 class reduces the search to selecting fundamental-domain orbits (a polynomial reduction in variable count) and is the only viable structural class for large odd-$n$ grids.
 
 \begin{conjecture}
-$D(71)=2\times71=142$, and an rct4-symmetric solution exists. Any such solution necessarily has the grid center as a circumcenter.
+$D(71)=2\times71=142$, and an rct4-symmetric solution exists. By the C$_4$ theorem, any such solution necessarily has the grid center as a circumcenter.
 \end{conjecture}
 
 % ============================================================
@@ -601,7 +594,7 @@ We have introduced the missing-center invariant for the No-Three-In-Line problem
 \item Complete missing-center counts for $n=2\dots13$ (full search) and $n=7\dots45$ ($D_4$-inequivalent), revealing a three-phase evolution: abundance ($n=7$--$19$), decline ($n=21$--$29$), and extinction ($n\ge33$).
 \item The rot2 structural phase transition at $n=31$ ($44{,}890\to72$, a $600\times$ collapse).
 \item A three-factor model explaining missing-center abundance via parity, primality, and collinearity density.
-\item Evidence that $D(n)=2n$ for all even $n$ and a revised search strategy for $n=71$ targeting rct4 symmetry.
+\item Evidence that $D(n)=2n$ for all even $n$ and structural context for the open case $n=71$.
 \end{enumerate}
 
 The code and data are publicly available at \url{https://github.com/duchenyu/no3inline-missing-center} (version v1.0).

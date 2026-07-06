@@ -8,9 +8,9 @@ An optimized exhaustive search for **missing-center** solutions to the No-Three-
 
 ## The Problem
 
-Place **2n points** on an **n×n grid** such that no three are collinear. The No-Three-In-Line problem asks for the maximum number of points D(n) achievable. It is known that D(n) = 2n for all n ≤ 72 (with the sole exception of n = 71, where this remains open). The n=72 solution was found by Marijn Heule (CMU) on 2026-06-25 using a SAT solver, with C₄ (rot4) symmetry. n=71 is now the only unsolved grid size ≤ 72.
+Place **2n points** on an **n×n grid** such that no three are collinear. The No-Three-In-Line problem asks for the maximum number of points D(n) achievable. It is known that D(n) = 2n for all n ≤ 72 (with the sole exception of n = 71). The n=72 solution was found by Marijn Heule (CMU) on 2026-06-25 using a SAT solver.
 
-**New perspective**: For each solution achieving 2n points, check whether the grid center is a circumcenter of some triple of points. A "missing-center" solution (or **"center-free"** solution) has **no** triple whose circumcircle is centered at the grid center.
+**Our contribution is not about finding more solutions.** Instead, we ask a new question about the existing ones: for each known 2n-point solution, is the grid center ever a circumcenter of some triple of its points? A "missing-center" solution (or **"center-free"** solution) has **no** triple whose circumcircle is centered at the grid center.
 
 **Detection method**: Instead of computing circumcenters directly (which requires rational arithmetic), we use an equivalent integer criterion:
 
@@ -124,7 +124,7 @@ The critical threshold lies at ≈74 triples per available pair — a classic SA
 
 The rct4 solution count grows slowly (∼O(n) rather than exponential), and ring populations are always 4 or 8 — exactly like the C₄ theorem but for the D₄ group on odd-$n$ grids.
 
-**Implications for n=71**: The search should target **rct4** symmetry. All known solutions for odd n≥33 (and Heule's n=65,67,69) are rct4. These solutions inherently have the center as a circumcenter — there is no other structural option above the n=31 phase boundary.
+**Observation for n=71**: All known solutions for odd n≥33 (and Heule's n=65,67,69) are rct4. If D(71)=2n, the solution would likely be rct4 as well — which our C₄ theorem implies would necessarily have the center as a circumcenter. This is consistent with the extinction pattern: missing-center solutions die out before n=33 and never reappear at larger odd n.
 
 **Curious gap: n=11, 13, 15 have no known rct4 solutions.**  
 Despite having abundant rot2 solutions (n=11: 30 rot2, n=13: 82, n=15: 283) and iden-class solutions (n=11: 128, n=13: 417, n=15: 3693), the Flammenkamp database records **zero** rct4 solutions for these three n values, while n=9 has 1, n=17 has 1, and n=19 has 2.
@@ -537,7 +537,7 @@ Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkam
 
 4. **n=72 confirms all patterns**: At a scale 4× larger than any previously analyzed, n=72 exhibits the same 100% purity, 4-or-8 ring populations, and n/2 orbit count. The patterns are scale-invariant.
 
-**Why this matters for n=71:**
+**Context for n=71**: The n=72 solution achieved 2n points through C₄ symmetry, which reduces the SAT search from selecting individual points to selecting fundamental orbits. n=71, being odd, cannot exploit C₄ symmetry — the rotation center is a lattice point, breaking the clean orbit structure. This structural difference likely explains why SAT solvers succeed at even n (65, 67, 69, 70, 72) but fail at n=71.
 
 The n=72 solution achieved 2n points through C₄ symmetry, which reduces the SAT search from selecting individual points to selecting fundamental orbits. n=71, being odd, cannot exploit C₄ symmetry — the rotation center is a lattice point, breaking the clean orbit structure. This structural difference likely explains why SAT solvers succeed at even n (65, 67, 69, 70, 72) but fail at n=71.
 
