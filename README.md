@@ -4,7 +4,7 @@
 
 ![Overview](visualization/preview.png)
 
-An optimized exhaustive search for **missing-center** solutions to the No-Three-In-Line problem, featuring a novel **forbid-accumulator** algorithm (collinearity check in O(1) per placement; update step remains O(k) as it iterates over already-placed points).
+An exhaustive search and analysis of **missing-center** solutions to the No-Three-In-Line problem — configurations where the grid center is not the circumcenter of any triple.
 
 ## The Problem
 
@@ -321,9 +321,9 @@ Our primary algorithm imposes "exactly 2 points per row" as a search heuristic. 
 
 **Key finding**: The even‑n threshold (n=12) is **not** an artifact of the row constraint. Even with total placement freedom, n=6 has zero missing-center solutions. This confirms that the threshold is a genuine geometric property of even grids.
 
-## Algorithm: Forbid Accumulator (v2)
+## Implementation: Backtracking Search (v2)
 
-The key optimization turns the collinearity *check* from **O(k²) to O(1)** per placement. (The *update* step after each placement remains O(k) as it iterates over already-placed points to compute new blocking lines.)
+The search uses a precomputed bitmask (`forbid_accum`) that turns the collinearity *check* into **O(1)** per placement. (The *update* step after each placement remains O(k) as it iterates over already-placed points to compute new blocking lines.) This is a standard backtracking optimization used to compute the small-n exact counts (n ≤ 13) locally; all larger-n data comes from the Flammenkamp and mvr databases.
 
 ```
 For each future row k, maintain:

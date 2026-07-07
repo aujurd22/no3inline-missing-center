@@ -18,8 +18,6 @@
 \usepackage{fancyhdr}
 \usepackage{lastpage}
 \usepackage{natbib}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
 
 % ---------- theorem environments ----------
 \theoremstyle{plain}
@@ -70,7 +68,7 @@ A Computational and Structural Analysis}}
 \begin{abstract}
 The No-Three-In-Line problem asks for the maximum number of points that can be placed on an $n\times n$ grid with no three collinear. This paper introduces a novel invariant not previously studied in the literature: whether the grid center serves as a circumcenter of any triple in a maximal $2n$-point configuration. We call a solution \emph{missing-center} (or center-free) if no three points share the same squared Euclidean distance from the grid center, which we prove is equivalent to the center not being a circumcenter of any triple.
 
-We present the \emph{forbid-accumulator} algorithm, an optimized backtracking search that reduces collinearity checking from $O(k^2)$ to $O(1)$ per placement (the update step remains $O(k)$ per new point), achieving a $65\times$ speedup for $n=11$. We prove the C$_4$ theorem: for even $n$, any $2n$-point solution with $90^\circ$ rotational symmetry must have the grid center as a circumcenter (for odd $n$, no C$_4$-symmetric $2n$-point solution exists, so the statement is vacuously true). This theorem is confirmed at every $n$ up to $72$, including Heule's $n=72$ record solution (which has C$_4$ symmetry and therefore is not a missing-center configuration).
+We prove the C$_4$ theorem: for even $n$, any $2n$-point solution with $90^\circ$ rotational symmetry must have the grid center as a circumcenter (for odd $n$, no C$_4$-symmetric $2n$-point solution exists, so the statement is vacuously true). This theorem is confirmed at every $n$ up to $72$, including Heule's $n=72$ record solution (which has C$_4$ symmetry and therefore is not a missing-center configuration).
 
 Our exhaustive search provides complete missing-center counts for $n=2\dots13$, and we extend the analysis to $n=53$ via the Flammenkamp database of $D_4$-inequivalent solutions. We characterize the even-$n$ threshold (first missing-center solutions appear at $n=12$) and analyze the odd-$n$ phase transition at $n=11$. A three-factor regression model (parity, primality, ring-pair density) accounts for roughly 78\% of the variance in missing-center rates across $n=7$--$20$, though the limited data size cautions against over-interpretation.
 
@@ -108,7 +106,6 @@ Points on a circle centered at $C$ are exactly those at a fixed distance from $C
 
 \paragraph{Main contributions.}
 \begin{enumerate}[nosep]
-\item The \emph{forbid-accumulator} algorithm, reducing collinearity checking to $O(1)$ per placement.
 \item The C$_4$ theorem: $90^\circ$ rotational symmetry forces the center to be a circumcenter.
 \item Complete missing-center counts for $n=2\dots13$ (full search) and $D_4$-inequivalent analysis through $n=53$ (catalogued classes).
 \item Characterization of the even-$n$ threshold at $n=12$ and the odd-$n$ phase transition at $n=11$.
@@ -117,66 +114,7 @@ Points on a circle centered at $C$ are exactly those at a fixed distance from $C
 \end{enumerate}
 
 % ============================================================
-\section{The Forbid-Accumulator Algorithm}
-\label{sec:algorithm}
 
-Backtracking search for No-Three-In-Line solutions is computationally demanding even for moderate $n$. The naive approach checks $O(k^2)$ existing point pairs for collinearity with each candidate placement, leading to complexity that quickly becomes prohibitive.
-
-\subsection{Algorithm Description}
-
-Our key insight is to \emph{precompute} the blocking effect of every pair of already-placed points. For each pair of points $(r_a,c_a)$ and $(r_b,c_b)$ with $r_a<r_b$, we compute all future rows $r>r_b$ that would create a collinear triple:
-
-\begin{equation}
-\forall\, r > r_b:\quad \text{col}(r) = c_a + \frac{(c_b-c_a)(r-r_a)}{r_b-r_a}
-\end{equation}
-
-If $(\text{col}(r)-c_a)(r_b-r_a)$ is divisible by $(r-r_a)$, then the point $(r,\text{col}(r))$ is collinear with the two existing points and must be forbidden.
-
-\begin{algorithm}[H]
-\caption{Forbid-accumulator update}
-\begin{algorithmic}[1]
-\Procedure{UpdateBlock}{$(r_b,c_b)$, existing points}
-\For{each $(r_a,c_a)$ with $r_a < r_b$}
-  \State $\Delta r \gets r_b - r_a$
-  \State $\Delta c \gets c_b - c_a$
-  \For{$r \gets r_b+1$ to $n-1$}
-    \If{$\Delta c \cdot (r-r_a) \bmod \Delta r = 0$}
-      \State $c \gets c_a + \Delta c \cdot (r-r_a) / \Delta r$
-      \State $\texttt{forbid}[r] \gets \texttt{forbid}[r] \mid (1 \ll c)$
-    \EndIf
-  \EndFor
-\EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-The algorithm maintains an array $\texttt{forbid}[r]$ of bitmasks for each future row $r$, where bit $c$ is set if column $c$ in row $r$ would create a collinear triple with two points placed in earlier rows. When considering a new point at $(r,c)$, we simply check $\texttt{forbid}[r]$; if bit $c$ is set, the placement is rejected. This reduces the collinearity check from $O(k^2)$ to $O(1)$ per candidate placement.
-
-\begin{theorem}[Correctness]
-\label{thm:correctness}
-The forbid-accumulator algorithm maintains the invariant: after placing points in rows $0,\dots,r$, the bitmask $\texttt{forbid}[s]$ for any $s>r$ contains blocking columns for \emph{all} collinear pairs $(p_i,p_j)$ with $i<j\le r$.
-\end{theorem}
-
-\begin{proof}
-Every collinear triple has a unique pair with the two largest row indices. When both points of this pair are placed, their line equation is added to $\texttt{forbid}$ for all future rows. By the time the third point is considered, its column is already blocked. The invariant holds by induction on the row index.
-\end{proof}
-
-\subsection{Additional Optimizations}
-
-The base algorithm is augmented with several optimizations:
-
-\begin{enumerate}[nosep]
-\item \textbf{Distance ring pruning.} For missing-center search (mode~1), we track the number of points in each distance ring and prune branches where any ring would exceed 2 points.
-\item \textbf{Diagonal pre-check.} Two occupancy counters for $x+y$ and $x-y+N-1$ quickly reject placements that would exceed 2 points on any diagonal.
-\item \textbf{Mirror symmetry pruning.} Imposing $c_1+c_2 \le N-1$ on the first row halves the search space.
-\item \textbf{Multi-threading.} The first-row column pairs are distributed across 32 parallel workers.
-\end{enumerate}
-
-\subsection{Performance}
-
-The algorithm was implemented in C++17 and compiled with \texttt{g++ -O3 -march=native}. For $n=11$ mode~0, the runtime dropped from 9.2~minutes to 8.5~seconds --- a $65\times$ speedup. Note that the $O(1)$ refers to the \emph{check} step (deciding whether a candidate point is blocked); the \emph{update} step after placing a point still requires $O(k)$ time to compute blocking lines from all $k$ existing points, so the overall per-placement cost is $O(k)$ rather than $O(1)$. Cross-validation against OEIS A000755~\cite{oeis} for $n\le 13$ confirmed correctness.
-
-% ============================================================
 \section{The C$_4$ Theorem}
 \label{sec:c4}
 
@@ -211,7 +149,7 @@ This corollary is verified for all $n\le 30$ and confirmed at $n=72$ (Heule's re
 
 \subsection{Full Enumeration ($n=2$ to $n=13$)}
 
-Using the forbid-accumulator algorithm with 2-per-row constraint, we obtained complete counts:
+Using a local exhaustive backtracking search with the 2-per-row constraint, we obtained complete counts:
 
 \begin{table}[H]
 \centering
@@ -603,7 +541,6 @@ $D(71)=2\times71=142$, and an rct4-symmetric solution exists. By the C$_4$ theor
 
 We have introduced the missing-center invariant for the No-Three-In-Line problem and provided:
 \begin{enumerate}[nosep]
-\item A highly optimized forbid-accumulator algorithm ($O(k^2)\to O(1)$ per placement).
 \item A rigorous proof of the C$_4$ theorem (rot4 symmetry $\implies$ center is circumcenter).
 \item Complete missing-center counts for $n=2\dots13$ (full search) and $D_4$-inequivalent analysis through $n=53$ (catalogued classes), revealing a three-phase evolution: abundance ($n=7$--$19$), declining \emph{rate} ($n=21$--$29$), and disappearance in known classes ($n\ge33$).
 \item The rot2 structural phase transition at $n=31$ (44,828 $\to$ 0, a complete collapse).
