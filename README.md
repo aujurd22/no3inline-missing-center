@@ -1,10 +1,10 @@
 # No-Three-In-Line: Missing Center Analysis
 
-> 🎯 **Interactive visualization available**: [**`visualization/overview.html`**](visualization/overview.html) — an interactive HTML guide to the missing-center concept, C₄ theorem, symmetry classes, phase transitions, and key data. Open in any browser. (Screenshot below.)
+> 🎯 **Interactive visualization available**: [**`visualization/overview.html`**](visualization/overview.html) — an interactive HTML guide to the missing-center concept, C₄ theorem, symmetry classes, empirical transitions, and key data. Open in any browser. (Screenshot below.)
 
 ![Overview](visualization/preview.png)
 
-An optimized exhaustive search for **missing-center** solutions to the No-Three-In-Line problem, featuring a novel **forbid-accumulator** algorithm (O(k²) → O(1) collinearity check).
+An optimized exhaustive search for **missing-center** solutions to the No-Three-In-Line problem, featuring a novel **forbid-accumulator** algorithm (collinearity check in O(1) per placement; update step remains O(k) as it iterates over already-placed points).
 
 ## The Problem
 
@@ -99,7 +99,7 @@ $^\\dagger$ Mode 0 counts only 2‑per‑row solutions. The D₄‑inequival
 | 43 | 63 | 0 | 0.0% | rct4 |
 | 45 | 106 | 0 | 0.0% | rct4 |
 
-### Missing-Center Disappearance in Known Symmetry Classes at n≥33
+### Missing-Center Absence in Catalogued Symmetry Classes at n≥33
 
 The complete odd-$n$ spectrum (n=7→45) reveals three distinct evolutionary phases **within the set of D₄-inequivalent solutions catalogued in the Flammenkamp database**:
 
@@ -107,7 +107,7 @@ The complete odd-$n$ spectrum (n=7→45) reveals three distinct evolutionary pha
 
 **Phase 2 — Decline (n=21–29)**: rot2 becomes the dominant class. Missing-center rate oscillates at lower levels than Phase 1: 7.8% (n=21) → 4.5% (n=27) → 4.8% (n=29), with even-n entries dipping to ~1.6–1.9%. The catalogued total climbs again (2,426 at n=21 → 44,890 at n=29) due to rot2's exponential growth — note this is a *lower base* than n=19 (32,577): the iden class that dominates small-n totals is only tracked up to n=20 in Flammenkamp's database, so the apparent "explosion" starts after a sharp drop at the n=19→21 boundary.
 
-**Phase 3 — Extinction (n≥31)**: **rot2 vanishes at n=31** — a sharp SAT unsatisfiability threshold. The transition is driven by collinearity constraint density:
+**Phase 3 — Absence in Catalogued Classes (n≥31)**: **rot2 solutions vanish at n=31** — a sharp SAT unsatisfiability transition observed empirically. The transition correlates with collinearity constraint density:
 
 | n | rot2 solutions | Available pairs | Need | $\binom{2n}{3}$ per pair |
 |---|---|---|---|---|
@@ -116,7 +116,7 @@ The complete odd-$n$ spectrum (n=7→45) reveals three distinct evolutionary pha
 | **31** | **0** | 480 | 31 | **78.8** |
 | 33 | 0 | 544 | 33 | 84.1 |
 
-The critical threshold lies at ≈74 triples per available pair — a classic SAT phase transition. Only rct4 solutions survive at n≥31 in the database, and all known rct4 solutions have the center as circumcenter (by group-theoretic necessity: D₄ orbits force ≥4 points per distance ring). **Missing-center solutions are not found in any known symmetry class for odd n ≥ 33. However, iden-class (non-symmetric) solutions are only tracked up to n=20 in the database, so the possibility of iden-class missing-center solutions at larger n remains open.**
+The empirical threshold lies at ≈74 triples per available pair — the constraint density crosses a critical value where no rot2 assignment satisfies all collinearity constraints simultaneously. The exact mechanism remains an open combinatorial problem. Only rct4 solutions survive at n≥31 in the database, and all known rct4 solutions have the center as circumcenter (by group-theoretic necessity: D₄ orbits force ≥4 points per distance ring). **Missing-center solutions are not found in any known symmetry class for odd n ≥ 33. However, iden-class (non-symmetric) solutions are only tracked up to n=20 in the database, so the possibility of iden-class missing-center solutions at larger n remains open.**
 
 | n | 31 | 33 | 35 | 37 | 39 | 41 | 43 | 45 |
 |---|----|----|----|----|----|----|----|-----|
@@ -135,7 +135,7 @@ We conjecture this is a **structural gap** rather than a search artifact — the
 
 - **D₄ orbit analysis**: rct4 requires fewer distance rings than rot2 (n=17: 9 rings vs 15 for rot2). For n=11,13,15, the minimal achievable ring count exceeds the rct4 threshold.
 - **Number theory**: The 4k+3 prime factors in these n values restrict available d² values (via Fermat's sum-of-two-squares theorem), limiting ring selection flexibility.
-- **SAT phase transition analogy**: Like rot2's UNSAT threshold at n=31, rct4 may have a narrower "existence window" bounded by n=9 on the low end and n=17 on the high end, with n=11,13,15 falling in a gap.
+- **Empirical threshold analogy**: Analogous to rot2's UNSAT threshold at n=31, rct4 may have a narrower "existence window" bounded by n=9 on the low end and n=17 on the high end, with n=11,13,15 falling in a gap.
 
 This is a **conjecture** — no theoretical proof exists. The gap could potentially be filled by a dedicated rct4-targeted search.
 
@@ -145,7 +145,7 @@ The growth rate is ≈1.5× per 2-step increment, with no sign of slowing. This 
 
 **Key observations**:
 - **Even n**: n=8 and n=10 have **zero** missing-center solutions. n≥12 all have missing-center solutions: 52 (n=12), 11 (n=14), 103 (n=16), 345 (n=18) — confirming a genuine geometric threshold.
-- **Odd n**: Missing counts grow dramatically: 1 → 1 → 6 → 46 → 354 → 357 → 2,363, with a remarkable "freeze" at n=15→17 (354→357).
+- **Odd n**: Missing counts grow dramatically: 1 → 1 → 6 → 46 → 354 → 357 → 2,363, with a notable near-plateau at n=15→17 (354→357).
 - Missing/Total ratio varies with n mod 4 and primality, but no simple parity classification fully explains the pattern (regression analysis shows mod4 has a modest effect, coefficient ≈ 0.77, while primality dominates at ≈ 2.95).
 
 ### 2. Odd n Growth — n=11 Marks Ring-Pair Threshold >100
@@ -173,7 +173,7 @@ n=9: 105 ring pairs → manageable
 This increase in geometric diversity (from 105 to 190 pair interactions) enables missing-center solutions to grow from a handful (8 at n=9) to 36 at n=11 — a 4.5× jump.
 n=19: 1275 ring pairs → extremely dense
 
-The **n=15→17 freeze** (354→357, a 1.0× change) is particularly striking evidence that the missing-center count is not a simple function of n. It reveals an interplay between:
+The **n=15→17 near-plateau** (354→357, a 1.0× change) is a striking example that the missing-center count is not a simple function of n. The near-equality suggests a balancing effect between:
 
 1. **n mod 4 residue**: Has a modest effect (regression coefficient ≈ 0.77), but the pattern is not a clean 4k+3 vs 4k+1 split — primality (coefficient ≈ 2.95) is the stronger predictor
 2. **Prime vs composite**: Composite n (e.g., 15) can have anomalously high missing counts
@@ -240,7 +240,7 @@ For n=8, we solved this matrix equation explicitly and found a continuous family
 
 The exhaustive search finding zero missing-center solutions for n=8 and n=10 implies that **the collinearity constraint is the true barrier**. The extra rings at n=12 (19 vs. 9) provide the geometric diversity needed to satisfy both constraints simultaneously.
 
-**Conclusion**: The threshold at n=12 is a genuine **combinatorial phase transition** driven by the interaction between distance-ring capacity and the no-three-in-line constraint — not a pigeonhole effect, and not an artifact of the search heuristic.
+**Conclusion**: The threshold at n=12 is a genuine **combinatorial threshold** driven by the interaction between distance-ring capacity and the no-three-in-line constraint — not a pigeonhole effect, and not an artifact of the search heuristic.
 
 ### 4. Symmetry and Cycle Structure of Missing-Center Solutions
 
@@ -260,10 +260,12 @@ Every 2-per-row solution defines a 2‑regular bipartite graph between rows and 
 | 18 | 345 | **114× (18,) — 33%** | (18,) ≫ (2,16) > (3,15) |
 | 19 | 2,363 | **745× (19,) — 32%** | (19,) ≫ (2,17) > (3,16) |
 
-The pattern is universal across all n ≥ 12:
+The pattern is consistent across all catalogued n ≥ 12:
 1. **Single Hamiltonian cycle** `(n,)` — most common by far
 2. **Decomposition into 2‑cycle + (n−2)-cycle** — second most common
 3. **Decomposition into 3‑cycle + (n−3)-cycle** — third most common
+
+This holds for n=12–19 (D₄-inequivalent data) but has not been verified for larger n where iden-class solutions are untracked.
 
 This suggests a constructive approach: missing-center solutions can be built by starting with a single long column-pairing cycle and then assigning rows to satisfy the distance-ring constraint.
 
@@ -290,7 +292,7 @@ Our primary algorithm imposes "exactly 2 points per row" as a search heuristic. 
 
 ## Algorithm: Forbid Accumulator (v2)
 
-The key optimization turns the collinearity check from **O(k²) to O(1)** per placement.
+The key optimization turns the collinearity *check* from **O(k²) to O(1)** per placement. (The *update* step after each placement remains O(k) as it iterates over already-placed points to compute new blocking lines.)
 
 ```
 For each future row k, maintain:
@@ -522,7 +524,7 @@ Every single rot4 solution across all 27 entries — n=6 (3 solutions) through n
 
 ### C₄ Evolution Across Even n — From Theory to n=72
 
-Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkamp database](https://wwwhomes.uni-bielefeld.de/achim/no3in/) reveals a remarkably clean orbit-ring structure:
+Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkamp database](https://wwwhomes.uni-bielefeld.de/achim/no3in/) reveals a consistent orbit-ring structure (with the caveat that only 5 data points are available, so these patterns are observations rather than proven universals):
 
 | n | Orbits | Rings | R/O | Orbits = n/2? | Pure orbits | Ring pop. |
 |---|--------|-------|-----|---------------|-------------|-----------|
@@ -532,7 +534,7 @@ Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkam
 | 18 | 9 | 8 | 1.12 | ✓ | 100% | 4 or 8 |
 | **72** | **36** | **34** | **1.06** | ✓ | **100%** | **4 or 8** |
 
-**Universally observed patterns:**
+**Consistently observed patterns (from 5 data points):**
 
 1. **Orbits ≡ n/2** (theorem-grade): Every rot4 solution uses exactly n/2 C₄ orbits, each of size 4. This is the structural maximum: 2n points ÷ 4 points/orbit = n/2 orbits. No degenerate orbits (size 1 or 2) occur for even n.
 
@@ -540,7 +542,7 @@ Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkam
 
 3. **Ring sharing**: When orbits > rings (n=14, 18, 72), exactly two orbits share one ring, producing rings of 8 points. Ring population is always 4 or 8 — never 12 or higher. Each ring is either a single orbit (4 pts) or two coalesced orbits (8 pts).
 
-4. **n=72 confirms all patterns**: At a scale 4× larger than any previously analyzed, n=72 exhibits the same 100% purity, 4-or-8 ring populations, and n/2 orbit count. The patterns are scale-invariant.
+4. **n=72 confirms all patterns at a larger scale**: At n=72 (6× larger than n=12), the same structure appears: 100% pure orbit-to-ring mapping, 4-or-8 ring populations, and n/2 orbit count. This consistency across scales is notable, though the small sample size (5 data points) precludes a claim of proven scale invariance.
 
 **Context for n=71**: The n=72 solution achieved 2n points through C₄ symmetry, which reduces the SAT search from selecting individual points to selecting fundamental orbits. n=71, being odd, cannot exploit C₄ symmetry — its rotation center is a lattice point, breaking the clean orbit structure. This structural difference helps explain the uneven SAT record: Heule solved D(n)=2n for n=70 and n=72 (even, via C₄) and for n=65, 67, 69 (odd, via rct4/D₄ symmetry — *not* C₄), but n=71 remains unsolved.
 
@@ -618,9 +620,9 @@ We analyzed the precise conditions under which odd $n$ grids admit missing-cente
 
 **Key findings:**
 
-1. **Disappearance at $n\ge 33$ in known symmetry classes.** All odd $n\ge 7$ satisfy the ring capacity constraint (enough rings with $\le$2 points to hold $2n$ points), with slack actually *increasing* from 1.36× at $n=7$ to 5.21× at $n=45$. Within the catalogued symmetry classes:
+1. **Absence in catalogued symmetry classes at $n\ge 33$.** All odd $n\ge 7$ satisfy the ring capacity constraint (enough rings with $\le$2 points to hold $2n$ points), with slack actually *increasing* from 1.36× at $n=7$ to 5.21× at $n=45$. Within the catalogued symmetry classes:
 
-   - At $n=31$, the **rot2 symmetry class undergoes a SAT unsatisfiability transition** — zero solutions remain
+   - At $n=31$, **rot2 solutions become empirically unsatisfiable** — zero solutions remain
    - At $n\ge 33$, **only rct4 solutions survive in the database**
    - rct4 solutions inherently have $\ge 4$ points per distance ring ($D_4$ orbit structure) → center is always a circumcenter
    - Therefore missing-center solutions are not found in any tracked symmetry class for odd $n\ge 33$. **Caveat**: iden-class solutions are only tracked up to $n=20$.
@@ -645,7 +647,7 @@ We investigated the sharp SAT→UNSAT transition of the rot2 symmetry class at $
 
 **What does cause it:**
 
-The rot2 UNSAT is a **global combinatorial phase transition** — none of the individual constraints are problematic, but their **interaction** becomes unsatisfiable at a critical density threshold:
+The rot2 UNSAT is an **interaction-driven combinatorial threshold** — none of the individual constraints are problematic, but their **combined effect** becomes unsatisfiable at a critical density point:
 
 | $n$ | Available pairs | Constraints per variable | rot2 solvable? |
 |:---:|:--------------:|:----------------------:|:--------------:|
@@ -654,9 +656,9 @@ The rot2 UNSAT is a **global combinatorial phase transition** — none of the in
 | **31** | **480** | **78.9** | **❌ (0 solutions)** |
 | 33 | 544 | 84.2 | ❌ (0 solutions) |
 
-The transition occurs at **≈78.9 constraints per variable** — a threshold value, analogous to the random 3-SAT phase transition at 4.26 clauses/variable. A rigorous proof would require advanced SAT phase-transition machinery (differential equations method or second moment method), not a simple counting argument.
+The transition occurs at **≈78.9 constraints per variable** — a density value beyond which solvability breaks down. While the empirical threshold is sharp, proving it analytically requires tools beyond a simple counting argument (the constraint graph is far from random).
 
-**Conclusion**: The rot2 UNSAT at $n=31$ is a verified empirical fact with the character of a genuine SAT phase transition — akin to the random 3-SAT threshold at 4.26 clauses/variable or the $k$-coloring threshold. A compact mathematical proof remains an open challenge. To prove it would require either (a) UNSAT core extraction from a SAT solver, (b) the differential equation method for constraint satisfaction, or (c) a novel combinatorial invariant not yet identified.
+**Conclusion**: The rot2 UNSAT at $n=31$ is a verified empirical fact — a sharp unsatisfiability transition in a structured combinatorial problem, analogous in character to phase transitions observed in random constraint satisfaction problems. A compact mathematical proof remains an open challenge. To prove it would require either (a) UNSAT core extraction from a SAT solver, (b) a novel combinatorial invariant, or (c) a dedicated structural argument specific to the rot2 symmetry class.
 
 **Eliminated proof approaches** (all shown insufficient by our analysis):
 - ❌ Center-crossing line count (288 lines at $n=31$, only 31 needed)
@@ -667,7 +669,7 @@ The transition occurs at **≈78.9 constraints per variable** — a threshold va
 
 **Key theoretical contribution**: We proved that the collinearity constraint for rot2 on odd $n$ reduces to a **direction uniqueness condition**: no two selected pairs can share the same reduced direction from the center. This equivalence (proved via determinant of the matrix $[(i_1-m)(j_2-m)-(i_2-m)(j_1-m)]$) is itself a non-trivial result. The UNSAT threshold occurs because, at $n=31$, the intersection of the direction-uniqueness constraint with the degree constraints becomes globally unsatisfiable, even though each constraint individually remains easily satisfiable.
 
-**Code**: `analysis/direction_d_rot2_threshold.py` — line-capacity and constraint-density analysis; `analysis/direction_d_conflict_graph.py` — pairwise conflict graph and independence number estimation; `analysis/direction_d_deep_reason.py` — SAT phase transition characterization.
+**Code**: `analysis/direction_d_rot2_threshold.py` — line-capacity and constraint-density analysis; `analysis/direction_d_conflict_graph.py` — pairwise conflict graph and independence number estimation; `analysis/direction_d_deep_reason.py` — combinatorial threshold characterization.
 
 ### Direction 7: The Even n Threshold — Empirically Characterized
 
