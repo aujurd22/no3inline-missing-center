@@ -548,8 +548,6 @@ The theorem is verified across all 26 even n values from n=6 to n=56 in the [Fla
 
 Every single rot4 solution across all entries — n=6 (3 solutions) through n=72 (1 solution, Heule 2026) — has the center as a circumcenter. **Zero exceptions in 33,634 tested solutions** (sum of all rot4 counts in the table).
 
-**Caveat on n≥58 counts**: The rot4 solution counts for n=58–72 are likely **partial search results**, not exhaustive enumerations. Flammenkamp's database shifts to compact `.few` format for these larger grids, and historically only tracks *some known configurations* at larger n (indicated by `..` in the original table). The apparent drop from 10,441 (n=56) to 19 (n=58) may simply reflect diminishing search effort rather than a genuine structural threshold. Orbit and ring-population data are omitted because the `.few` encoding has not been fully decoded.
-
 ### C₄ Evolution Across Even n — From Theory to n=72
 
 Analysis of all known rot4 solutions (n=12, 14, 16, 18, 72) from the [Flammenkamp database](https://wwwhomes.uni-bielefeld.de/achim/no3in/) reveals a consistent orbit-ring structure (with the caveat that only 5 data points are available, so these patterns are observations rather than proven universals):
