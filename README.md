@@ -383,6 +383,8 @@ The exhaustive search finding zero missing-center solutions for n=8 and n=10 imp
 
 **Conclusion**: The threshold at n=12 is a genuine **combinatorial threshold** driven by the interaction between distance-ring capacity and the no-three-in-line constraint — not a pigeonhole effect, and not an artifact of the search heuristic.
 
+> **ⓘ Open problem**: A mathematical proof that **no missing-center solution exists for n≤10** remains elusive. The "inner ring avoidance" mechanism above is a plausible heuristic, not a theorem. Proving that for n≤10 every 2n configuration necessarily concentrates ≥3 points in at least one distance ring would turn the n=12 threshold into a rigorous result.
+
 ### 3.4 Symmetry and Cycle Structure of Missing-Center Solutions
 
 Analysis of all D₄‑inequivalent solutions (n = 7–19) reveals strong structural patterns in missing-center solutions.
@@ -690,9 +692,13 @@ The even-$n$ missing-center threshold is now confirmed across a far wider range 
 
 2. **Active region (n=12–30)**: Missing-center solutions appear and persist across the full range. The rate oscillates between 0.8% and 2.5%. The iden class (non-symmetric) contributes the majority of missing-center solutions up to n=20; beyond that, rot2 drives the count.
 
-3. **Extinction in catalogued classes (n≥32)**: Missing-center solutions vanish entirely from known catalogued solutions. This coincides with the disappearance of the rot2 and iden symmetry classes — only rot4 and dia2 survive. rot4 solutions always have the center as circumcenter (by the C₄ theorem), and dia2 solutions in the database also universally have the center as circumcenter, though a formal proof for dia2 is not yet established.
+3. **Disappearance in catalogue data (n≥32)**: Missing-center solutions vanish from the catalogued database. This coincides with the disappearance of the rot2 and iden symmetry classes — only rot4 and dia2 survive. rot4 solutions always have the center as circumcenter (by the C₄ theorem), and dia2 solutions in the database also universally have the center as circumcenter, though a formal proof for dia2 is not yet established.
 
-**Caveat**: The zero missing-center count for n≥32 applies only to catalogued symmetry classes in the Flammenkamp database. The iden class (largest source of missing-center solutions at small n) is not tracked beyond n=20, so the possibility of iden-class missing-center solutions at larger n remains open. The threshold is an **empirical finding** — it has not been proven mathematically.
+**⚠️ Caveat — a data-blindness artefact cannot be ruled out**: The zero missing-center count for n≥32 applies **only to the symmetry classes that happen to be tracked in the Flammenkamp database**. The iden class (non-symmetric) accounts for the majority of missing-center solutions at small n — yet it is **not tracked beyond n=20** in any public database. Similarly, the rot2 class (the second-largest contributor beyond n=20) disappears from the catalogue after n=31 due to its own UNSAT threshold (§3.10), not because we chose to stop tracking it. It is therefore **impossible to distinguish** between:
+- genuine geometric extinction of the missing-center property at larger n, and
+- a data-blindness artefact: missing-center solutions persist at n≥32 but only in symmetry classes (especially iden) that the catalogued data do not cover.
+
+This threshold is an **empirical finding** — it has not been proven mathematically.
 
 ### 3.12 Relaxing the Row Constraint
 
@@ -753,6 +759,8 @@ These failures are *algorithmic limitations, not a proof of non-existence* (2n s
 **The obstruction is higher‑order, not pairwise (EMPIRICAL).** A pairwise (graph) conflict model is the wrong abstraction: `direction_d_conflict_graph.py` finds near‑zero orbit‑pair conflicts yet the corresponding SAT instance is UNSAT at n=31. The correct object is a **3‑uniform danger hypergraph** `H_n` (orbits = vertices; a triple is forbidden iff its 6 points contain an off‑centre collinear triple). A solution of (★) is exactly an independent set of size `n` in `H_n`.
 
 **Danger is sparse and concentrated (EMPIRICAL, `danger_hypergraph.py`).** Forbidden triples are rare and *decrease* with `n` (1.16% → 0.80% → 0.48% of all orbit‑triples at n=12,16,20). The danger‑degree is dominated by low‑slope directions — the main diagonal `(1,1)` alone carries 743 → 2493 → 6209 of the danger at n=12,16,20. Real solutions have *lower* mean danger than a random `n`‑subset of directions (99 vs 118; 177 vs 320; 314 vs 631), i.e. they actively steer away from dangerous directions. Every sampled solution is a verified independent set in `H_n`.
+
+> **ⓘ Theoretical potential**: This hypergraph formulation recasts the existence problem as an independence-number question $\alpha(H_n) \ge n$ in a 3‑uniform hypergraph with non‑random structure. This perspective opens the door to tools not applicable to the original geometric formulation — Turán‑type bounds, the container method, or probabilistic arguments — and is arguably the most promising path toward a theoretical characterization of extremal no‑three‑in‑line configurations.
 
 **Direction availability is not the bottleneck (EMPIRICAL).** "Forbidden directions" (used by zero sampled solutions) collapse to 0% once the sample is large (n=44: 0%, n=56: 0%); the high % at n=60,64,68,72 is a `.few`‑cache sampling artefact (only 1–32 solutions stored), not a structural limit.
 
