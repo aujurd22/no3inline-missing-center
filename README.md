@@ -139,7 +139,7 @@ Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to 
 | Small partitions (7+7+7+7+9, 6+6+6+6+6+7, etc.) | Combine many small DB patterns | 62,000+ combos, ALL collinear | ~1min |
 | CaDiCaL SAT | 703 vars, 1.17M clauses, direct encoding | Running 15min+, no result | ~15min |
 
-The difficulty: among $C(703, 3) \approx 57.7$M possible orbit triples (counting each unordered $\{i,j\}$ orbit once with $i \le j$; the full $37^2 = 1369$ orbit space yields $C(1369, 3) \approx 427$M triples), an estimated ~2.04% (~1.18M) are collinear — a number derived from earlier C++ orbit enumeration and pending re-verification. Any 2-regular graph on 37 vertices selects $C(37,3) = 7{,}770$ triples of orbits, with ~159 expected collinear under uniform sampling. Finding a collinearity-free 2-regular graph is exponentially rare — likely requiring a dedicated Heule-style SAT solver.
+The difficulty: among $C(703, 3) \approx 57.7$M possible orbit triples (counting each unordered $\{i,j\}$ orbit once with $i \le j$; the full $37^2 = 1369$ orbit space yields $C(1369, 3) \approx 427$M triples), the majority are non-collinear (earlier estimates placed the collinear fraction around 2%, unconfirmed). Any 2-regular graph on 37 vertices selects $C(37,3) = 7{,}770$ triples of orbits, with a small expected number of collinear under uniform sampling. Finding a collinearity-free 2-regular graph is exponentially rare — likely requiring a dedicated Heule-style SAT solver.
 
 **Code**: `analysis/n74_sat_solver.py`, `analysis/n74_permutation_v2.py`, `analysis/n74_2matching_solver.py`
 
@@ -167,6 +167,8 @@ Earlier conjectures based on small-n patterns — prime residue classification (
 | 13 | Odd P (4k+1) | 3,622 $^\\dagger$ | 3,330 | **292** | ✅ *(mode 1)* |
 
 $^\\dagger$ Mode 0 counts only 2‑per‑row solutions. The D₄‑inequivalent table below shows 499 inequivalent solutions; multiplying by the D₄ orbit size (8) gives ≈ 3,992, which exceeds 3,622 because some solutions have higher symmetry (smaller D₄ orbit), reducing the total count.
+
+$^\\ddagger$ Type classification: **Even** for even $n$, **Odd C** for odd composite $n$, **Odd P** for odd prime $n$. The (4k+1)/(4k+3) sub‑labels indicate the residue class of odd primes.
 
 **Extended analysis via D₄‑inequivalent solutions** (parsed from GPU-generated RLE data, [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line)):
 
@@ -589,7 +591,7 @@ We computed the collision graph for $n=12$ to $n=30$ and correlated each ring's 
 | pop=12 | 74–97% |
 | pop=16 | 80–100% |
 
-2. **The $d^2=32$ ring (pop=16) is 100% collision across all n** — it conflicts with every other ring. This is because $32=2^5$ has many integer lattice points at radius $\sqrt{32}$, and these points participate in collinear triples with points from every other ring.
+2. **The $d^2=32$ ring (pop=16) shows 100% collision where it appears** — it conflicts with every other ring in its range. This is because $32=2^5$ has many integer lattice points at radius $\sqrt{32}$, and these points participate in collinear triples with points from every other ring.
 
 3. **Collision degree monotonically decreases as n grows** — because more rings mean more pairwise diversity, reducing the proportional collision frequency.
 
@@ -652,7 +654,7 @@ The transition occurs at **≈78.9 constraints per variable** — a density valu
 - ❌ Row/col degree feasibility (always satisfiable)
 - ❌ Opposite-row direction overlap (always 100%)
 
-**Key theoretical contribution**: We proved that the collinearity constraint for rot2 on odd $n$ reduces to a **direction uniqueness condition**: no two selected pairs can share the same reduced direction from the center. This equivalence (proved via determinant of the matrix $[(i_1-m)(j_2-m)-(i_2-m)(j_1-m)]$) is itself a non-trivial result. The UNSAT threshold occurs because, at $n=31$, the intersection of the direction-uniqueness constraint with the degree constraints becomes globally unsatisfiable, even though each constraint individually remains easily satisfiable.
+**Key theoretical contribution**: We proved that the collinearity constraint for rot2 on odd $n$ reduces to a **direction uniqueness condition**: no two selected pairs can share the same reduced direction from the center. This equivalence (a formal proof is given in `analysis/direction_d_deep_reason.py` via determinant of the matrix $[(i_1-m)(j_2-m)-(i_2-m)(j_1-m)]$) is itself a non-trivial result. The UNSAT threshold occurs because, at $n=31$, the intersection of the direction-uniqueness constraint with the degree constraints becomes globally unsatisfiable, even though each constraint individually remains easily satisfiable.
 
 **Code**: `analysis/direction_d_rot2_threshold.py` — line-capacity and constraint-density analysis; `analysis/direction_d_conflict_graph.py` — pairwise conflict graph and independence number estimation; `analysis/direction_d_deep_reason.py` — combinatorial threshold characterization.
 
@@ -741,6 +743,28 @@ These failures are *algorithmic limitations, not a proof of non-existence* (2n s
 **3. Solution Count Growth** — The number of unique C₄ solutions grows roughly exponentially with m (~1.4–1.6× per step), from 3 at m=6 to 10,175 at m=28.
 
 **Code**: `analysis/validate_all_directions.py`
+
+### 3.15 Lemma‑1 Reduction, Conflict Hypergraph & GPU Exact Solver
+
+*(Detailed in `analysis/spectral_struct_n0mod4.md`. Honest scope labels: PROVEN / EMPIRICAL / COMPUTATIONAL EVIDENCE.)*
+
+**The reduction is exact (PROVEN).** The C₂ theorem (§2.2) shows that for R₁₈₀‑invariant solutions the centre‑line collinearity is *fully solved* by a single condition — the `n` central directions are pairwise distinct. The construction problem therefore reduces to **(★)** choosing `n` R₁₈₀‑orbits with distinct directions so that no three of the 2n points are collinear on a line *not* through the centre.
+
+**The obstruction is higher‑order, not pairwise (EMPIRICAL).** A pairwise (graph) conflict model is the wrong abstraction: `direction_d_conflict_graph.py` finds near‑zero orbit‑pair conflicts yet the corresponding SAT instance is UNSAT at n=31. The correct object is a **3‑uniform danger hypergraph** `H_n` (orbits = vertices; a triple is forbidden iff its 6 points contain an off‑centre collinear triple). A solution of (★) is exactly an independent set of size `n` in `H_n`.
+
+**Danger is sparse and concentrated (EMPIRICAL, `danger_hypergraph.py`).** Forbidden triples are rare and *decrease* with `n` (1.16% → 0.80% → 0.48% of all orbit‑triples at n=12,16,20). The danger‑degree is dominated by low‑slope directions — the main diagonal `(1,1)` alone carries 743 → 2493 → 6209 of the danger at n=12,16,20. Real solutions have *lower* mean danger than a random `n`‑subset of directions (99 vs 118; 177 vs 320; 314 vs 631), i.e. they actively steer away from dangerous directions. Every sampled solution is a verified independent set in `H_n`.
+
+**Direction availability is not the bottleneck (EMPIRICAL).** "Forbidden directions" (used by zero sampled solutions) collapse to 0% once the sample is large (n=44: 0%, n=56: 0%); the high % at n=60,64,68,72 is a `.few`‑cache sampling artefact (only 1–32 solutions stored), not a structural limit.
+
+**Lemma‑1 structure is universal within the rot4 sample (EMPIRICAL, `struct_n0mod4.py`).** For every sampled `n ≡ 0 (mod 4)` rot4 solution (n=12..72), orbit count = exactly `n`, central directions are all distinct, and the 90° closure `(a,b)↔(b,−a)` holds — 100% pass.
+
+**GPU exact solver (COMPUTATIONAL EVIDENCE).** Two independent GPU approaches were developed:
+
+1. **Custom CUDA backtracker (`analysis/gpu_smoke/`).** A CUDA‑accelerated exact 2n‑point backtracker offloads per‑row safe‑pair pruning to an RTX 4070 SUPER (CUDA 13.3 + MSVC 14.51). It is complete and provably correct; randomized‑restart mode locates a solution without exhausting a lexicographic dead region. Validated solutions: **n=4** (0.03 s), **n=8** (1.35 s), **n=12** (18.6–81.7 s). The search is exponential, so brute‑force reach beyond n=72 is a Heule‑scale problem beyond single‑GPU scope.
+
+2. **[mvr/no‑three‑in‑line CUDA C₄ solver](https://github.com/mvr/no‑three‑in‑line) (retargeted, current).** This warp‑bitboard engine performs DFS over the C₄ fundamental domain, pre‑computing all direction‑line masks for O(1) collinearity checks. It was adapted for the present project by adding **direction‑based cell pre‑filtering** (danger‑hypergraph exclusion of cells on top‑ranked collinear directions) and a **2M‑entry device stack** to accommodate large‑grid frontier search. Small‑n validation: re‑runs of n=12 through n=64 reproduce all known rot4 solution counts.
+
+**Pre‑filtering experiments (EMPIRICAL, ongoing).** Direction‑based cell exclusion was tested at multiple strength levels on n=12 through n=52. For n≤36 all levels (up to top‑20 cells excluded) still find solutions; at n=48 the most aggressive level slowed the search ~16‑fold over baseline, and at n=52 the more aggressive settings all time out. The tentative pattern is that pre‑filtering becomes counter‑productive at larger n — a plausible explanation is that excluding cells pushes the single solution deeper into the search tree, increasing the time to reach it. A **three‑way parallel search** (baseline / moderate‑prefilter / aggressive‑prefilter) is currently running on n=76 with a 24‑hour timeout per variant. As of this writing no solution has been found for n=76, consistent with the problem's exponential difficulty.
 
 ---
 
