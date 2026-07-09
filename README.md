@@ -22,16 +22,16 @@ d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2
 
 If three points have the same \(d\) value, they lie on a circle centered at \(C\), making \(C\) their circumcenter. Conversely, if \(C\) is the circumcenter of three points, those points are equidistant from \(C\) and thus share the same \(d\) value. **The equivalence is exact** — no floating-point approximation is involved.
 
-This is a novel invariant not previously studied in the literature. As an example application: the n=72 solution found by Marijn Heule (CMU, 2026-06-25) has C₄ (90° rotational) symmetry. By our C₄ theorem (proved below), any C₄-symmetric 2n-point solution on an odd-n grid necessarily places the grid center as a circumcenter — so that particular solution is *not* a missing-center solution. But for even-n grids, no such automatic guarantee exists, and missing-center solutions do appear (see data below).
+This is a novel invariant not previously studied in the literature. As an example application: the n=72 solution found by Marijn Heule (CMU, 2026-06-25) has C₄ (90° rotational) symmetry. By our C₄ theorem (proved below), any C₄-symmetric 2n-point solution on an even-n grid necessarily places the grid center as a circumcenter — so that particular solution is *not* a missing-center solution. (For odd-n grids no C₄-symmetric solution exists at all; missing-center solutions do appear there in other symmetry classes, as the data below show.)
 
 ## 2. Proven Results
 
 This section collects every result that is **proven** (theorem or lemma with proof), as opposed to the computational observations gathered in §3.
 
-### 2.1 The C₄ Theorem — A Proven Result ✔
+### 2.1 Theorem: C₄ Symmetry Implies Non-Missing-Center ✔
 A solution has **C₄ symmetry** if it is invariant under 90° rotation about the grid center. We prove:
 
-> **Theorem 2.1 (C₄ Obstruction).** Any No-Three-In-Line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
+> **Theorem 2.1 (C₄ Symmetry Implies Non-Missing-Center).** Any No-Three-In-Line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
 
 **Proof**. Let the grid have coordinates \(0,\ldots,n-1\). The center is \(C = (\frac{n-1}{2}, \frac{n-1}{2})\). The 90° rotation is \(R(x,y) = (n-1-y, x)\).
 
@@ -48,7 +48,7 @@ d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2 = (2R(x)_x-(n-1))^2 + (2R(x)_y-(n-1))^2
 
 **Corollary**: Missing-center solutions cannot have C₄ symmetry.
 
-*Geometric illustration.* The theorem says the center is always a circumcenter, but where are the 4 points that certify it? They are simply the **innermost distance ring** — the 4 points of the solution closest to \(C\), which by construction sit at the same distance from \(C\) and thus lie on a circle centered at \(C\). In 9 of the first 15 even \(n\) (\(n=12\ldots40\)), these 4 points are literally the \(2\times2\) block straddling \(n/2\), i.e. \(\{\lfloor n/2\rfloor,\lceil n/2\rceil\}^2\) (e.g. for \(n=40\): \((19,19),(19,20),(20,19),(20,20)\)) — placed exactly "by \(n/2\)". The remaining 6 solutions (\(n=12,16,18,20,24,26\)) instead use a slightly larger inner diamond, but the role is identical. Either way, this tiny central cluster is the concrete geometric footprint of the theorem: it is the ring that makes \(C\) a circumcenter.
+*Geometric illustration.* The theorem says the center is always a circumcenter, but where are the 4 points that certify it? They form **a minimum-radius occupied orbit** — one of the distance rings actually used by the solution having the smallest radius; its 4 points sit at the same distance from \(C\) and thus lie on a circle centered at \(C\). In 9 of the first 15 even \(n\) (\(n=12\ldots40\)), these 4 points are literally the \(2\times2\) block straddling \(n/2\), i.e. \(\{\lfloor n/2\rfloor,\lceil n/2\rceil\}^2\) (e.g. for \(n=40\): \((19,19),(19,20),(20,19),(20,20)\)) — placed exactly "by \(n/2\)". The remaining 6 solutions (\(n=12,16,18,20,24,26\)) instead use a slightly larger inner diamond, but the role is identical. Either way, this tiny central cluster is the concrete geometric footprint of the theorem: it is the ring that makes \(C\) a circumcenter.
 
 *A structural refinement.* Decomposing a rot4 solution into its \(n/2\) C₄-orbits, each orbit is a square of 4 points centred at \(C\) (one point in each quadrant). Every such square contributes exactly two **diagonal directions through \(C\)** — the two directions joining opposite corners. We verified across all 15 even \(n\) from 12 to 40 that the \(n/2\) orbits yield **exactly \(n\) distinct diagonal directions, with no two orbits sharing one**. This is a *necessary and sufficient* condition for the solution to be free of collinear triples *along any line through \(C\)*: a line through \(C\) can contain at most the two opposite corners of a single orbit; if two orbits shared a diagonal direction, that line would hold 4 points and violate the no-three-in-line rule. Thus "all diagonal directions are distinct" is a hallmark of every rot4 solution and the direct generalization of the C₄ theorem — the theorem guarantees that \(C\) *is* a circumcenter, while the distinct-direction law explains *why* the orbit structure automatically avoids a 4-point line through it.
 
@@ -107,7 +107,7 @@ Consequence for the D(n)=2n problem: any R₁₈₀-invariant construction autom
 
 ### 2.3 Four-colouring Invariant (verified)
 
-Colour the `n × n` grid by parity class `(r mod 2, c mod 2)` into 4 classes. For any line of reduced direction `(a, b)` (with `gcd(a, b) = 1`), the colour `(r mod 2, c mod 2)` advances by `(a mod 2, b mod 2) ∈ {(1,1), (1,0), (0,1)}` at each step, so **the line meets at most 2 of the 4 classes**. Consequently every no-three-in-line set is a 2-colour set on each line — a necessary structural property. (This is distinct from, and does not replace, the trivial row-based upper bound `D(n) ≤ 2n`.) For the R₁₈₀-invariant classes above (rot2, rot4, dia2, rct4), the 4 parity classes are themselves permuted by the symmetry, giving an additional exact balance constraint on any 2n solution in those classes.
+Colour the `n × n` grid by parity class `(r mod 2, c mod 2)` into 4 classes. For any line of reduced direction `(a, b)` (with `gcd(a, b) = 1`), the colour `(r mod 2, c mod 2)` advances by `(a mod 2, b mod 2) ∈ {(1,1), (1,0), (0,1)}` at each step, so **the line meets at most 2 of the 4 classes**. Consequently any individual lattice line intersects at most two parity classes — a necessary (but not sufficient) structural property of no-three-in-line sets. (This is distinct from, and does not replace, the trivial row-based upper bound `D(n) ≤ 2n`.) For the R₁₈₀-invariant classes above (rot2, rot4, dia2, rct4), the 4 parity classes are themselves permuted by the symmetry, giving an additional exact balance constraint on any 2n solution in those classes.
 
 ### 2.4 Orbit-Ring Invariance (proved for C₄)
 
@@ -133,7 +133,7 @@ Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to 
 
 **Computational verification**: All 33,534 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100% — matching exactly the rot4 counts per n in the table above (sum = 33,534 for n=12..56).
 
-**Consequence**: A C₄ solution is exactly a 2-regular graph on m vertices. Each edge (i,j) in the graph corresponds to one C₄ orbit, and the 4 rotated copies of each orbit automatically guarantee correct row coverage. This reduces the C₄ solution search from geometry to pure graph theory.
+**Consequence**: Under the row/column saturation constraint (each row and column of the n×n grid must contain exactly 2 points), a C₄ solution corresponds to a 2-regular graph on m vertices. Each edge (i,j) in the graph corresponds to one C₄ orbit, and the 4 rotated copies of each orbit automatically guarantee correct row coverage. This reduces the C₄ solution search from geometry to pure graph theory.
 
 **Attempted n=74 C₄ solution**: Applying this to n=74 (m=37), the problem reduces to finding a 2-regular graph on 37 vertices where no 3 of the resulting 148 points are collinear. Multiple approaches were tested:
 
@@ -350,7 +350,7 @@ n=19: 1275 ring pairs → extremely dense
 
 The **n=15→17 near-plateau** (354→357, a 1.0× change) is a striking example that the missing-center count is not a simple function of n. The near-equality suggests a balancing effect between:
 
-1. **n mod 4 residue**: Has a modest effect (regression coefficient ≈ 0.77), but the pattern is not a clean 4k+3 vs 4k+1 split — primality (coefficient ≈ 2.95) is the stronger predictor
+1. **n mod 4 residue**: Has a modest effect (regression coefficient ≈ 0.77), but the pattern is not a clean 4k+3 vs 4k+1 split — primality (coefficient ≈ 2.95) is the stronger descriptive correlate
 2. **Prime vs composite**: Composite n (e.g., 15) can have anomalously high missing counts
 3. **Sum-of-two-squares structure**: Rings with populations divisible by 8 (off-axis orbits) change the combinatorial landscape
 
@@ -382,9 +382,9 @@ The number of distance rings grows with n: for an n×n grid, the squared distanc
 
 A plausible explanation for the n=12 threshold is the following (still conjectural):
 
-To construct a missing-center solution, we must **avoid putting ≥3 points into any single distance ring**. This is hardest for the **innermost rings** — those with fewer grid points — because they have limited capacity.
+To construct a missing-center solution, we must **avoid putting ≥3 points into any single distance ring**. This is hardest for the **minimum-radius rings** — those with fewer grid points — because they have limited capacity.
 
-For example, in a 12×12 grid, the innermost rings and their capacities are:
+For example, in a 12×12 grid, the minimum-radius rings and their capacities are:
 
 | Ring d | Grid points | Max allowed | Constraint |
 |--------|------------|-------------|------------|
@@ -488,7 +488,7 @@ The full n=72 coordinate list is available in `analysis/n72_rot4_coords.txt`, an
 
 The **C₄ orbit selection problem** asks: for which even $n=2m$ does a rot4 solution exist?  This reduces to choosing $m$ orbits from the $m\times m$ orbit grid $\\{0,\dots,m-1\\}^2$ such that the original $n\times n$ grid has exactly 2 points per row/column and no three are collinear.
 
-**Key insight**: The row/column constraints turn orbit selection into a **2-regular graph** on $m$ vertices:
+**Key insight**: The row/column saturation constraint (2 points per row/column) turns orbit selection into a **2-regular graph on $m$ vertices**:
 
 - Each orbit $O(i,j)$ covers rows $\\{i,\\,j,\\,n-1-i,\\,n-1-j\\}$
 - Each vertex $r$ (representing opposite-row-pair $\\{r,n-1-r\\}$) must have degree exactly 2
@@ -572,12 +572,12 @@ Using corrected D₄-inequivalent counts (verified against Flammenkamp RLE datab
 
 | Factor | Coefficient | Interpretation |
 |--------|:-----------:|:--------------|
-| mod4 | **+0.77** | Modest direct effect — parity alone insufficient to explain variance |
+| mod4 | **+0.77** | Modest association — parity alone is a weak descriptive feature |
 | is_prime | **+2.95** | Prime n have systematically ~3% higher missing-center rates |
 | log(ring pairs) | **+0.44** | Small positive — counterintuitive (more constraints → slightly *more* missing), likely proxies for n |
-| **R²** | **0.834** | Three factors explain 83% of variance (vs 62% with buggy data) |
+| **R²** | **0.834** | Three factors correlate with 83% of variance (descriptive, not causal; vs 62% with buggy data) |
 
-**Key finding**: With corrected data, the dominant predictor is primality (prime n ≈ 3% higher missing rates). The previously reported strong negative log(ring-pairs) effect (−2.29) was an artifact of incorrect missing-center detection in the reconstruction file. The log(ring-pairs) coefficient is now small and positive — ring-pair density has minimal direct explanatory power, and its sign is likely an artifact of collinearity with n (larger grids have both more ring pairs and more missing solutions in absolute terms). The moderate R² (0.834, 14 data points with 4 parameters → adj. R² ≈ 0.78) suggests additional structural factors not captured by these three features alone.
+**Key finding**: With corrected data, the strongest descriptive correlate is primality (prime n ≈ 3% higher missing rates). The previously reported strong negative log(ring-pairs) effect (−2.29) was an artifact of incorrect missing-center detection in the reconstruction file. The log(ring-pairs) coefficient is now small and positive — ring-pair density has minimal additional descriptive contribution, and its sign is likely an artifact of collinearity with n (larger grids have both more ring pairs and more missing solutions in absolute terms). The moderate R² (0.834, 14 data points with 4 parameters → adj. R² ≈ 0.78) indicates further structural factors not captured by these three features alone; the model should be treated as descriptive rather than predictive.
 
 #### Refined Model: Sum-of-Two-Squares Theory
 
@@ -601,11 +601,11 @@ A refined weighted least squares model incorporating $r_2$-based features achiev
 | rings (total) | **+0.12** | More rings → slightly higher missing rate (counterintuitive, may proxy for n) |
 | r₂=0 count | **−0.23** | More impossible rings (r₂(d²)=0) reduce missing-center rate |
 | max 4k+1 factors | **−0.64** | More representable distances → *lower* missing rate (flips sign vs old model) |
-| **$R^2$** | **0.897** | Raw R² (Adjusted $R^2 \approx 0.87$) — number-theoretic features explain most variance |
+| **$R^2$** | **0.897** | Raw R² (Adjusted $R^2 \approx 0.87$) — number-theoretic features correlate with most of the variance (descriptive, not causal) |
 
 **⚠️ Caveat**: This model is fitted on 14 data points (n=7—20) with 4 features, carrying a significant risk of overfitting despite the adjusted R². The "max 4k+1 factors" coefficient flipped sign (from +5.01 to −0.64) with corrected data — the earlier claim that "more representable distances drive missing-center abundance" does not survive data correction. With all features having small magnitudes (≤0.64), no single number-theoretic factor dominates. This is an **exploratory model** based on small-n data; its predictive power for larger n is untested. Cross-validation on rot2 data for n=21—29 would be valuable future work.
 
-**Revised assessment**: With corrected data, the ring count (a proxy for grid size n) and primality remain the most reliable predictors. The $r_2$-based number-theoretic features add modest explanatory power but lack the dominant role previously claimed. The relationship between $4k+1$ prime factor structure and missing-center rates is more nuanced than simple abundance — larger n have both more missing solutions (absolute count) and more 4k+1 factors, creating spurious correlations that small-sample regressions cannot reliably disentangle.
+**Revised assessment**: With corrected data, the ring count (a proxy for grid size n) and primality remain the most reliable descriptive correlates. The $r_2$-based number-theoretic features provide modest descriptive value but lack the dominant role previously claimed. The relationship between $4k+1$ prime factor structure and missing-center rates is more nuanced than simple abundance — larger n have both more missing solutions (absolute count) and more 4k+1 factors, creating spurious correlations that small-sample regressions cannot reliably disentangle.
 
 **Code**: `analysis/d4_reconstruct.py` (reconstruction), `analysis/sum_of_two_squares.py` (number theory),
 `analysis/three_factor_model.txt` (results)
@@ -726,9 +726,9 @@ The even-$n$ missing-center threshold is now confirmed across a far wider range 
 
 2. **Active region (n=12–30)**: Missing-center solutions appear and persist across the full range. The rate oscillates between 0.8% and 2.5%. The iden class (non-symmetric) contributes the majority of missing-center solutions up to n=20 — and, as partial data confirm, at least through n=21 (17 missing-center among 142 known iden solutions; exhaustive count is presumably much higher). Beyond n=21, rot2 drives the observed count until its own UNSAT threshold at n=31.
 
-3. **Disappearance in catalogue data (n≥32)**: Missing-center solutions vanish from the catalogued database. This coincides with the disappearance of the rot2 and iden symmetry classes — only rot4 and dia2 survive. rot4 solutions always have the center as circumcenter (by the C₄ theorem), and dia2 solutions in the database also universally have the center as circumcenter, though a formal proof for dia2 is not yet established.
+3. **Absence in catalogue data (n≥32)**: No missing-center solutions are known in the currently catalogued symmetry classes for n≥32. This coincides with the rot2 and iden symmetry classes no longer being exhaustively catalogued — only rot4 and dia2 survive. rot4 solutions always have the center as circumcenter (by the C₄ theorem), and dia2 solutions in the database also universally have the center as circumcenter, though a formal proof for dia2 is not yet established.
 
-**⚠️ Caveat — evidence points toward a data-blindness artefact**: The zero missing-center count for n≥32 applies **only to the symmetry classes that happen to be tracked in the Flammenkamp database**. The iden class (non-symmetric) accounts for the majority of missing-center solutions at small n — yet it is **not tracked exhaustively beyond n=20** in any public database. Crucially, **partial iden data do exist at n=21**: Flammenkamp's catalogue contains 142 iden-class solutions for n=21 (a fragment compared to the 117,347 known at n=20), and **17 of those 142 are missing-center**. This proves that iden-class missing-center solutions persist beyond n=20 — the "disappearance" at n≥32 is far more likely a data-blindness artefact than a genuine geometric extinction. Similarly, the rot2 class (the second-largest contributor beyond n=20) disappears from the catalogue after n=31 due to its own UNSAT threshold (§3.10), not because we chose to stop tracking it. Notably, a partial rot2 solution exists at n=33 (`n33_rot2.few` in the Flammenkamp catalogue), suggesting that rot2 is not universally UNSAT beyond n=31 but that the specific value n=31 has special properties. A definitive answer would require exhaustive iden enumeration for n≥21, which remains an open computational challenge.
+**⚠️ Caveat — evidence points toward a data-blindness artefact**: The zero missing-center count for n≥32 applies **only to the symmetry classes that happen to be tracked in the Flammenkamp database**. The iden class (non-symmetric) accounts for the majority of missing-center solutions at small n — yet it is **not tracked exhaustively beyond n=20** in any public database. Crucially, **partial iden data do exist at n=21**: Flammenkamp's catalogue contains 142 iden-class solutions for n=21 (a fragment compared to the 117,347 known at n=20), and **17 of those 142 are missing-center**. This proves that iden-class missing-center solutions persist beyond n=20 — the apparent absence at n≥32 is far more likely a data-blindness artefact than a genuine geometric extinction. Similarly, the rot2 class (the second-largest contributor beyond n=20) disappears from the catalogue after n=31 due to its own UNSAT threshold (§3.10), not because we chose to stop tracking it. Notably, a partial rot2 solution exists at n=33 (`n33_rot2.few` in the Flammenkamp catalogue), suggesting that rot2 is not universally UNSAT beyond n=31 but that the specific value n=31 has special properties. A definitive answer would require exhaustive iden enumeration for n≥21, which remains an open computational challenge.
 
 This threshold is an **empirical finding** — it has not been proven mathematically.
 
@@ -812,7 +812,7 @@ These failures are *algorithmic limitations, not a proof of non-existence* (2n s
 
 The following open problems arise directly from our analysis:
 
-**1. Cycle Universality Conjecture.** For the C₄ orbit selection problem (§3.6), the full $m$-cycle and the $(1,m-1)$ cycle pattern are valid for all $m \ge 10$ (verified $m=10..28$), with isolated exceptions at $m=6$ and $m=9$. Do these two patterns in fact generate valid C₄ solutions for **every** $m \ge 10$? A constructive proof would establish $D(2m)=2m$ for all sufficiently large even $n$ — the long-standing open direction of the No-Three-In-Line problem.
+**1. Cycle Universality Conjecture.** For the C₄ orbit selection problem (§3.6), the full $m$-cycle and the $(1,m-1)$ cycle pattern are valid for all $m \ge 10$ (verified $m=10..28$), with isolated exceptions at $m=6$ and $m=9$. Do these two patterns in fact generate valid C₄ solutions for **every** $m \ge 10$? A constructive proof would provide a framework for attacking $D(2m)=2m$; it would not by itself resolve the geometric collinearity obstacles that make the construction non-trivial.
 
 **2. The rot2 UNSAT at $n=31$.** The sharp SAT→UNSAT transition (44,828 solutions at $n=29$, zero at $n=31$) lacks a mathematical proof. Our analysis eliminated the natural candidate explanations (direction pool size, pairwise conflicts, center-row constraints), and identified the C₂ direction-uniqueness condition as the operative constraint, but the precise obstruction at $n=31$ remains open. Notably, $n=33$ has one known rot2 solution, confirming the obstruction is specific to $n=31$ rather than a general threshold.
 
@@ -837,7 +837,7 @@ We extended the No-Three-In-Line problem to higher dimensions (3D and beyond), b
 
 Our higher-dimensional findings:
 
-### 1. The Diagonal Construction (3D Missing-Spherecenter)
+### 1. Evidence for a Missing-Spherecenter Phenomenon (3D Diagonal Construction)
 
 We discovered that the diagonal of the Por-Wood construction:
 \[
@@ -851,7 +851,7 @@ Proof: For three distinct points (xᵢ, xᵢ, 2xᵢ² mod p) with i=1,2,3, the d
 **(ii) Missing-spherecenter** (no 4 points share the same squared distance from the cube center).  
 Proof: The squared distance d²(x) = 2(2x-(p-1))² + (2(2x² mod p)-(p-1))² satisfies d²(x) = d²(p-x) by symmetry. The claim that d²(x₁) = d²(x₂) with x₁ ≠ ±x₂ (mod p) has no solutions for p ≡ 3 (mod 4) is supported by computational verification up to p ≤ 97 (max multiplicity ≤ 2 for p ≡ 3 mod 4, ≤ 3 for all p ≤ 97). A complete algebraic proof of the missing-center property remains open.
 
-This gives a clean 3D analogue of the 2D Erdős parabola, with a complete algebraic proof of no-collinearity and strong computational evidence for the missing-center property.
+This gives a clean 3D analogue of the 2D Erdős parabola, with a complete algebraic proof of no-collinearity and computational evidence (up to p ≤ 97) for the missing-spherecenter property.
 
 ### 2. Conjecture: Higher-Dimensional Moment Curves Are Missing-Center
 
