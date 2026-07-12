@@ -368,11 +368,13 @@ The iden false-positive rate decays with m, matching the random baseline. This c
 
 The Intercept–Sidon law (Th-56) is a **linear** constraint on the pairing variables \((a,b)\): it limits the occupancy of each linear combination \(p a \pm q b\). However, the C₄ lift's full NTIL condition requires avoiding **cross-quadrant collinearity** — three lifted points from three different C₄ orbits and three different quadrants forming a line. The algebraic form of this condition is:
 
-> **Theorem (Quadratic Gap).** The cross-quadrant collinearity determinant for rotation pattern (0,1,2) expands to:
+> **Theorem (Quadratic Gap) — PROVED (R7, 2026-07-12).** The cross-quadrant collinearity determinant for rotation pattern (0,1,2) expands to:
 > \[
 > \det = (\beta_2+\alpha_1-1)(\beta_3+\beta_1+m-2) - (\alpha_3+\alpha_1+m-2)(\beta_1-\alpha_2)
 > \]
 > where \(\alpha_i = (a_i+1)/2,\ \beta_i = (b_i+1)/2\). This contains **product terms** \(\alpha_i\beta_j\), \(\alpha_i\alpha_j\), \(\beta_i\beta_j\) — making it a genuine **quadratic** condition. **Any finite set of linear Sidon-type constraints is insufficient** to capture it.
+>
+> **Rigorous computational-algebra proof (R7).** The 64 rotation triples split into **16 distinct equivalence classes** of collinearity determinants. A sympy `factor_list` computation (`analysis/prove_quadratic_gap.py`) confirms **all 16 are genuinely irreducible quadratics** over ℚ(m) — the collinearity condition is intrinsically 2nd-order, not merely "contains a product". A geometric argument then proves the gap: an irreducible degree-2 hypersurface \(V(Q_k)\) cannot be covered by a finite union of degree-1 hyperplanes (else it would equal one, forcing deg 2 = deg 1 — contradiction), so **no finite linear Sidon filter can force cross-quadrant non-collinearity**. This is certified by an explicit integer witness at m=6: cells \((1,1),(2,3),(4,4)\) are collinear under rotation triple \((0,0,3)\) while all 15 pairwise linear Sidon forms are non-zero. Full statement: `analysis/results/quadratic_gap_theorem.md`.
 
 **Empirical evidence** (`analysis/characterize_x.py`):
 
@@ -408,6 +410,21 @@ This explains why 55+ search methods (Z3, CP-SAT, SA, DFS, etc.) all failed for 
 - At m=36 the system is "critical": every pair is exactly determined. At m=37, the new pair adds 560 new forbidden lines but only 73 new grid positions per existing pair. Whether the over-determined system has a solution is the open question.
 
 **Document**: `analysis/results/quadratic_complete_determination.md`
+
+### 2.13 Structural Invariants & the m=37 Satisfiability Window
+
+Two independent scaling analyses locate m=37 **inside** the satisfiable regime rather than at a phase-transition cliff. Full enumeration covers m=3–28 (Flammenkamp `.mvr` + plain); m=29–36 are `.few` samples. Script: `analysis/structural_invariants_scaling.py`.
+
+**Structural invariants (pairing-graph source/sink ratio, cycle structure).**
+- **Source ratio is constant ≈ 0.26.** Over the full-enumeration band m=7–28 the ratio of source-vertices (odd numbers appearing as `a` twice) to m is stable at mean **0.2647**, σ < 0.005 — an intrinsic property of rot4 solutions, not an artifact. Extrapolated to m=37: ≈ 10 sources, 10 sinks, 17 balanced.
+- **Multi-cycle is the norm.** Single-Hamilton-cycle solutions form only 0.17–0.39 of solutions in m=6–28; the m=36 single-36-cycle is a `.few`-sampling singleton, not a trend. Construction of m=37 should target **multi-cycle pairings** (2–3 cycles), not a single Hamiltonian cycle.
+- **Longest cycle scales ≈ 0.79·m** (m=20→15.8, m=28→22.0).
+
+**Quadratic constraint density (`analysis/measure_forbidden_lines.py`).** Lines-per-position ratio grows monotonically but extremely gently: m=5 → 3.8×, m=28 → 7.2×, m=36 → **7.34×**, m=37 (extrapolated) → **7.36×** (+0.3%). The density does **not** cross any steep threshold at m=37.
+
+**Conclusion.** On two independent axes — structural topology and algebraic constraint density — the m=36→37 transition is continuous, with no phase-transition signature. This is *indirect* evidence (not a proof) that m=37 likely sits in the same satisfiability window as m=36. Full analysis: `analysis/results/m37_satisfiability_window.md` and `analysis/results/structural_scaling_2026-07-12.md`.
+
+> Caveat: m=29–36 are `.few` samples (19→1 solutions) with high statistical noise; the conclusion rests mainly on the m=3–28 full enumeration. Continuity does not guarantee existence — the system is 0-dimensional (Complete-Determination Principle) and may be empty at any m.
 
 ## 3. Empirical Findings
 
