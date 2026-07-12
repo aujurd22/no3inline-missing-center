@@ -400,7 +400,14 @@ For m ≥ 5, **zero random Sidon-8 pairings survive C₄ lift**. Yet valid solut
 
 This explains why 55+ search methods (Z3, CP-SAT, SA, DFS, etc.) all failed for m=37 — they search within the linear Sidon space, where the quadratic constraint density is already prohibitive.
 
-**Documents**: `analysis/results/X_quadratic_gap.md`, `analysis/results/pairing_cycle_summary.md`
+**★★★ The Quadratic Determination Principle** (`analysis/measure_forbidden_lines.py`). For every known valid rot4 solution (m=5..36), the 16 quadratic forms have a remarkable property: **each pair is uniquely determined by the other m−1 pairs**. Specifically:
+
+- For any valid solution, fix all pairs except one. The forbidden (α,β) positions for the free pair (from all C(m−1,2) × 16 quadratic forms) cover **exactly m²−1 out of m² grid positions** — leaving precisely one safe position, the pair's actual location.
+- This means the 16 quadratic forms define a **zero-dimensional system of equations**: solutions are isolated points in a high-dimensional space, with no continuous degrees of freedom.
+- The existence of a rot4 solution for a given m is therefore equivalent to the solvability of a polynomial system over ℤ, not a combinatorial search problem.
+- At m=36 the system is "critical": every pair is exactly determined. At m=37, the new pair adds 560 new forbidden lines but only 73 new grid positions per existing pair. Whether the over-determined system has a solution is the open question.
+
+**Document**: `analysis/results/quadratic_complete_determination.md`
 
 ## 3. Empirical Findings
 
