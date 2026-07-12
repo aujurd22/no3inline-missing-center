@@ -46,8 +46,10 @@
 ## ❓ Conjectures / Open problems
 
 - **m=37 rot4 existence** — the frontier.  ⇔ satisfiability of the R8 quadratic
-  CSP (140,304 constraints over 1,369 binary vars).  Solver lives in the
-  correct space but cannot complete within budget.  **OPEN.**
+  CSP.  Exact CP-SAT re-encoding: **1,264,378** per-line at-most-2 constraints
+  over 1,369 binary vars (`analysis/results/cpsat_encoding.md`).  OR-Tools
+  attack launched (background task `fkB7gu`, 1800 s budget) — result pending.
+  **OPEN.**
 - **Guy–Kelly D(n)=2n** infinite family — holds for *some* n≤72, not all.
 - **C4 necessity** ⇔ no collinearity 2-factor (Th-39 direction).
 - **α lower bound ~1.5n** (Hall 1975) for general NTIL.
@@ -84,6 +86,6 @@ symmetry G ≤ D₄
    → R7 gap: linear insufficient (cross-quadrant collinearity is quadratic)
    → Layer 2 GEOMETRIC rigidity (R8, THEOREM): (X)∧(S) quadratic CSP ⇔ NTIL
    → R6: Layer-2 system is 0-dimensional (over-determined)
-   → m=37 existence = Layer-2 CSP satisfiability  [OPEN]
+   → m=37 existence = Layer-2 CP-SAT (1.26M per-line constraints)  [OPEN, attack running]
 ```
 See `two_layer_rigidity.md` for the full synthesis.

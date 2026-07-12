@@ -101,6 +101,9 @@ m×m quadrant, *not* a permutation matrix (rows/cols may repeat — verified on
 the full known-solution corpus).  The constraint count for m=37 is **140,304**
 quadratic inequalities over 1,369 binary selection variables
 (`r8_minimal_csp.md`); the system is overwhelmingly over-determined.
+Equivalently, as an *exact* CP-SAT instance it expands to **1,264,378**
+per-line weighted at-most-2 constraints over the 1,369 position-selection bits
+(`cpsat_encoding.md`); the m=37 attack now runs there.
 
 **Role:** Layer 2 is the *exact* characterisation.  FDR is a linear feature
 implied by `(X)∧(S)` and redundant for R8's equivalence.  Layer 2 is where the
@@ -166,8 +169,14 @@ hard foundation: codegree is exactly `n−2`, so all `2n` configurations lie in
 2. **m=37.**  Entirely a Layer-2 question (quadratic CSP satisfiability).
    Structural scalings (`m37_satisfiability_window.md`) give indirect evidence
    *for* existence (no phase transition at m=36→37, stable source-ratio ~0.26,
-   flat constraint density); the bounded solver (`constraint_prop_solver.py`)
-   lives in the correct space but cannot complete within budget.  **OPEN.**
+   flat constraint density).  The correct-space greedy solver
+   (`constraint_prop_solver.py`, Stage M) cannot complete (dies at depth 25 ≪ 37)
+   — exactly what the 0-dimensional global-rigidity picture (R6) predicts.  The
+   prescribed next step is a **clause-learning CP-SAT attack in the exact
+   per-line at-most-2 space** (`cpsat_encoding.md`, `cpsat_m37.py`): validated
+   sound (m=3..15 discovery → full `(X)+(S)` check passes) and reachable
+   (m=36 instance admits its cached solution).  OR-Tools attack on m=37 launched
+   (background, 1800 s).  **OPEN.**
 3. **Extremal-config taxonomy.**  Beyond symmetric (Layer-1/2) families, the
    abandoned SE conjecture leaves a larger question: how many *structure types*
    do extremal configurations have (symmetric / asymmetric / sporadic)?  This is
