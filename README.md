@@ -6,6 +6,8 @@
 
 An investigation of the **symmetry-induced rigidity** of extremal No-Three-In-Line configurations — how rotation and reflection symmetries force a precise hierarchy of collinearity-excluding algebraic constraints, from linear Sidon laws on the fundamental domain (FDR, §2.10) through irreducible quadratic constraints (the quadratic gap, R7, §2.12) to a complete quadratic characterization of C₄-symmetric solutions (R8, §2.14) — and what this implies for the open existence question at n=74 (m=37, §2.13).
 
+This work originates from the classical **No-Three-In-Line** problem (§The Problem); its extremal 2n-point solutions serve as the laboratory in which a broader theory of *symmetry-induced rigidity* is developed.
+
 ## The Problem
 Place **2n points** on an **n×n grid** such that no three are collinear. The No-Three-In-Line problem asks for the maximum number of points D(n) achievable. 2n-point solutions have been found for all n ≤ 52 (classical result), and for n = 65, 67, 69, 70, 72 via SAT solvers (Heule, 2026). n = 71 is the only n ≤ 72 with no known 2n-point solution — D(71) remains unresolved.
 
