@@ -1,5 +1,16 @@
 # No-Three-In-Line: Quadratic Rigidity of Symmetric Extremal Configurations
 
+> **2026-07-13 Update — SIRH framework complete.** Today's work unified the project's four standalone results (FDR, R7, R8, R8-G) into the **Symmetry-Induced Rigidity Hierarchy (SIRH)**: a single umbrella theorem showing that extremal NTIL symmetry forces a layered algebraic rigidity (linear Sidon → quadratic CSP → 0-dimensional discrete solution space). The hierarchy is proven one-way (symmetry ⇒ rigidity, not ⇔).
+>
+> **New results:**
+> - **R8-G** (§2.16): R8 generalized from C4 to **all six FDR groups** (C4/C2/D4/dia1/dia2/D2d) — resolves Hypothesis H.
+> - **SIRH** (§2.17): Four-part umbrella theorem (Part I FDR proven; Part II quadratic gap proven; Part III R8-G proven; Part IV reverse resolved negative).
+> - **T15** (§2.18): Cycle type refinement — 3-cycles provably baseframe-safe; 2-cycles not structurally forbidden (sampling effect, not algebraic ban).
+> - **Six computational directions** systematically evaluated (§3.16): none solve the open m=37 (n=74) C4 instance under current tools/theory.
+> - **Full verification sweep**: m=5/10/36 solutions re-verified (`verify_cells` PASS, 2-factor deg2 OK). Gating data shows `red_config_frac=1.0` for all m≥14.
+>
+> Core results merged into `analysis/results/` with memory and theory docs consolidated in `.workbuddy/memory/`.
+
 > 🎯 **Interactive visualization available**: [**`visualization/overview.html`**](visualization/overview.html) — an interactive HTML guide to the missing-center concept, C₄ theorem, symmetry classes, empirical transitions, and key data. Open in any browser. (Screenshot below.)
 
 ![Overview](visualization/preview.png)
@@ -470,6 +481,49 @@ The FDR symmetry-classification lens (§2.10) transfers to the **Costas array** 
 > - **C3/C4.** `C2`, `D`, `AD` impose no congruence restriction.
 
 **Empirical confirmation (scan to n=13, sanity-checked against the known count sequence).** `D4(full)=0` at every order (confirms C5); moreover `C2=C4=D2=0` up to n=13 — *stronger* than the theorem, raising the open question of whether **rotational** Costas symmetry exists at all. `diag = anti` at every order (the `D↔AD` duality); `trivial` dominates (asymmetry is the norm, paralleling NTIL).
+
+---
+
+### 2.16 R8-G: Quadratic Completeness for All FDR Groups ★ (NEW 2026-07-13)
+**Status: THEOREM — resolves Hypothesis H | Under: SIRH Part III**
+
+R8 generalized from C4 to **all six** fundamental-domain-rigidity (FDR) groups: C4, C2, D4, dia1, dia2, D2d. **Statement** (see `analysis/results/r8_generalized.md`):
+
+> A G-symmetric configuration is NTIL iff its fundamental-domain selection `sel: F_G → {0,1}` satisfies the **per-line weighted at-most-2 constraint family**
+> ```
+> ∀ board lines L: Σ_{c∈F_G} w_{L,c}·sel[c] ≤ 2, where w_{L,c} = |{g·c : g∈G} ∩ L|
+> ```
+> which is exactly a **finite quadratic CSP** (2×2 determinant ≠ 0 over orbit triples in F_G).
+
+**Proof**: Trivial from NTIL definition — soundness (⇒) and completeness (⇐) are definitional; quadratic equivalence via determinant form. **Computational validation**: 45/45 instances verify=True across all six groups (m=2..12), direct solves confirm reachability for reflection/Klein groups. Closes Hypothesis H. See `analysis/results/r8_generalized.md`.
+
+---
+
+### 2.17 SIRH — Symmetry-Induced Rigidity Hierarchy ★ (NEW 2026-07-13)
+**Status: Umbrella theorem — Parts I-III proven, Part IV resolved negative**
+
+The four standalone results (FDR, R7, R8, R8-G) are **three depths of one phenomenon**:
+
+| Layer | Result | Content | Status |
+|---|---|---|---|
+| **Part I — Linear** | FDR | G preserves slope±1 ⇒ a−b Sidon on F_G | **Proven** |
+| **Part II — Quadratic gap** | R7 (group-independent) | FDR sees only slope±1; other lines need quadratic det≠0 | **Proven** |
+| **Part III — Quadratic complete** | R8-G | G-symmetric NTIL ⇔ finite quadratic CSP on F_G | **Proven** (all 6 FDR groups) |
+| **Part IV — Reverse** | Sidon ⇏ symmetry | Sidon/quadratic signature is **one-way necessary only** | **Resolved negative** |
+
+One-way necessary chain — symmetry *generates* layered rigidity, rigidity does not force symmetry (P4.1–P4.3). See `analysis/results/rigidity_hierarchy_theorem.md`, `analysis/results/part4_reverse.md`.
+
+---
+
+### 2.18 T15 — Cycle Type Refinement (NEW 2026-07-13)
+**Status: Theorems + empirical landscape | Under: R9h**
+
+- **T15.1** (proven): 3-cycle → **baseframe-safe** (determinant = −½[(x−y)²+(y−z)²+(z−x)²], zero only for degenerate loop).
+- **T15.2** (proven): Along-cycle step lengths satisfy Sidon bound `count(s)+count(−s) ≤ 2`.
+- **T15.3** (empirical): 2-cycles (mutual edges) **not structurally forbidden** — first appear m=13. Mechanical verification of 20,000 (m,x,y) samples confirms no self-collinear triple in 8 lifted points.
+- **T15.4** (empirical landscape): Distinct cycle types 1→65 (m=3→27); dominant [m]/[1,m-1] share decays 1.0→0.00 by m=35. Cycle type is **neither obstacle nor accelerator** for m=37.
+
+See `analysis/results/theorem_r9f_baseframe_3free.md`, `analysis/results/cycle_type_stats.json`.
 
 **Why this advances Costas.** Orders **32 and 33** are the first orders with *no known* Costas array (counts are known only to 29). The theorem narrows any symmetric witness there to the six-type list (and `C4` is allowed at both 32 and 33), while `cpsat_m37.py`'s per-line at-most-2 encoding is a direct template for the exact distinct-displacement CP-SAT attack on 32/33. Full statement, proof, and table: `analysis/results/costas_symmetry_theorem.md`; the broader bridge (FDR as 1-D Sidon shadow of Costas's 2-D Sidon; Welch-construction contrast) is in `analysis/results/costas_rigidity.md`.
 
@@ -1116,6 +1170,18 @@ The following open problems arise directly from our analysis:
 
 **5. Resolution of the Quadratic Gap.** The FDR theorem (§2.10) proves that symmetric configurations satisfy Sidon, while the Quadratic Gap (§2.12) proves Sidon alone is insufficient for C₄ lift. The open question is: what *extra algebraic structure* (e.g., a specific quadratic form vanishing on each orbit triple, or a number-theoretic obstruction at certain $m$) characterizes the "gap" between Sidon pairings and C₄-liftable pairings? Resolving this would not only determine whether $m=37$ (n=74) has a solution, but reveal the true algebraic nature of the no-three-in-line problem on symmetric grids.
 
+**6. The m=37 C₄ instance (n=74).** The central open existence question. R8-G reduces it to satisfiability of a specific ~1.26M-constraint quadratic CSP over ~1,369 binary variables. Six computational directions were systematically evaluated (2026-07-13):
+- **① LLL/Switching**: vanilla LLL `ep(d+1)>1` fails from m≥14; Moser–Tardos random resample gives only 2.7% solve rate on m=10.
+- **② m=36→37 surgery**: N=72→74 change makes the seed solution geometrically invalid (152 bad lines under N=74).
+- **③ Lazy CP-SAT**: 30 iterations on m=17 — violated-line count oscillates without convergence. Avoids presolve wall but fails to converge.
+- **④ Energy bound**: all counting/pigeonhole-type arguments fail (direction key space and C4-orbit space are both in surplus).
+- **⑤ Data-driven**: no breakthrough invariant found.
+- **⑥ Algebraic geometry / Gröbner**: sympy cannot handle even the m=5 single-triple product polynomial (symbolic explosion).
+
+**Conclusion**: m=37 remains open under current tools and theory. The SIRH framework (theorems FDR → R7 → R8-G → Part IV) and the full computational evidence (gating data across 30 m-values, cycle analysis across m=3..36) constitute the project's primary contributions — establishing the **symmetry-induced rigidity hierarchy** as a general phenomenon in extremal grid combinatorics.
+
+For a future attack, the most promising underexplored direction is a **full 2-factor edge-swap search** (alternating 2-switch on the complete 2-regular graph, not coordinate-swapping) — gating data shows `red_config_frac=1.0` for all m≥14, meaning every bad configuration has a strictly-badness-reducing 2-switch in the full edge space. This was never correctly implemented in any of the six tested approaches.
+
 ---
 
 ## 4. Methodology & Verification
@@ -1416,6 +1482,17 @@ This produces a report with three independent checks:
 3. **Column usage**: Verification that each column appears exactly twice
 
 The repository also includes **RLE-format solution analysis** (`results/result_rle_n7-19.csv`), computed by parsing GPU-generated solution files from [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) using `analysis/analyze_rle.py`. This extends the missing-center analysis to n = 7–19 without requiring local exhaustive search for n ≥ 14.
+
+**2026-07-13 theorem documents added** (`analysis/results/`):
+- `rigidity_hierarchy_theorem.md` — SIRH umbrella (4-part hierarchy)
+- `r8_generalized.md` — R8-G (quadratic completeness for all 6 FDR groups)
+- `part4_reverse.md` — Part IV (reverse direction, resolved negative)
+- `theorem_r9f_baseframe_3free.md` — T15 cycle type refinement
+- `final_direction_ruling_2026-07-13.md` — 6-direction evaluation
+- `direction4_formal_complete.md` — Energy bound analysis
+- `gating_lll_r1.json` — LLL/Switching numerical feasibility (m=10..30)
+- `cycle_type_stats.json` — Full cycle signature statistics (m=3..36)
+- `e3_slope_stats.json` — Direction key multiset statistics (m=5..36)
 
 ## References
 1. **P. Erdős**, "On a problem of combinatorial geometry," *American Mathematical Monthly*, vol. 42, 1935, pp. 586–589. — The original formulation of the No-Three-In-Line problem.

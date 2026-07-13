@@ -1,0 +1,359 @@
+{
+ "n_ms": 16,
+ "ms": [
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  36
+ ],
+ "data": {
+  "5": {
+   "m": 5,
+   "n_pts": 20,
+   "total_pairs_expected": 190,
+   "distinct_keys_used": 190,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 190,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 190,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 190
+   },
+   "o_dist": {
+    "2": 190
+   }
+  },
+  "6": {
+   "m": 6,
+   "n_pts": 24,
+   "total_pairs_expected": 276,
+   "distinct_keys_used": 276,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 276,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 276,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 276
+   },
+   "o_dist": {
+    "2": 276
+   }
+  },
+  "7": {
+   "m": 7,
+   "n_pts": 28,
+   "total_pairs_expected": 378,
+   "distinct_keys_used": 378,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 378,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 378,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 378
+   },
+   "o_dist": {
+    "2": 378
+   }
+  },
+  "8": {
+   "m": 8,
+   "n_pts": 32,
+   "total_pairs_expected": 496,
+   "distinct_keys_used": 496,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 496,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 496,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 496
+   },
+   "o_dist": {
+    "2": 496
+   }
+  },
+  "9": {
+   "m": 9,
+   "n_pts": 36,
+   "total_pairs_expected": 630,
+   "distinct_keys_used": 630,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 630,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 630,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 630
+   },
+   "o_dist": {
+    "2": 630
+   }
+  },
+  "10": {
+   "m": 10,
+   "n_pts": 40,
+   "total_pairs_expected": 780,
+   "distinct_keys_used": 780,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 780,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 780,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 780
+   },
+   "o_dist": {
+    "2": 780
+   }
+  },
+  "11": {
+   "m": 11,
+   "n_pts": 44,
+   "total_pairs_expected": 946,
+   "distinct_keys_used": 946,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 946,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 946,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 946
+   },
+   "o_dist": {
+    "2": 946
+   }
+  },
+  "12": {
+   "m": 12,
+   "n_pts": 48,
+   "total_pairs_expected": 1128,
+   "distinct_keys_used": 1128,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 1128,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 1128,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 1128
+   },
+   "o_dist": {
+    "2": 1128
+   }
+  },
+  "13": {
+   "m": 13,
+   "n_pts": 52,
+   "total_pairs_expected": 1326,
+   "distinct_keys_used": 1326,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 1326,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 1326,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 1326
+   },
+   "o_dist": {
+    "2": 1326
+   }
+  },
+  "14": {
+   "m": 14,
+   "n_pts": 56,
+   "total_pairs_expected": 1540,
+   "distinct_keys_used": 1540,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 1540,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 1540,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 1540
+   },
+   "o_dist": {
+    "2": 1540
+   }
+  },
+  "15": {
+   "m": 15,
+   "n_pts": 60,
+   "total_pairs_expected": 1770,
+   "distinct_keys_used": 1770,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 1770,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 1770,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 1770
+   },
+   "o_dist": {
+    "2": 1770
+   }
+  },
+  "16": {
+   "m": 16,
+   "n_pts": 64,
+   "total_pairs_expected": 2016,
+   "distinct_keys_used": 2016,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 2016,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 2016,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 2016
+   },
+   "o_dist": {
+    "2": 2016
+   }
+  },
+  "17": {
+   "m": 17,
+   "n_pts": 68,
+   "total_pairs_expected": 2278,
+   "distinct_keys_used": 2278,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 2278,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 2278,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 2278
+   },
+   "o_dist": {
+    "2": 2278
+   }
+  },
+  "18": {
+   "m": 18,
+   "n_pts": 72,
+   "total_pairs_expected": 2556,
+   "distinct_keys_used": 2556,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 2556,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 2556,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 2556
+   },
+   "o_dist": {
+    "2": 2556
+   }
+  },
+  "19": {
+   "m": 19,
+   "n_pts": 76,
+   "total_pairs_expected": 2850,
+   "distinct_keys_used": 2850,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 2850,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 2850,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 2850
+   },
+   "o_dist": {
+    "2": 2850
+   }
+  },
+  "36": {
+   "m": 36,
+   "n_pts": 144,
+   "total_pairs_expected": 10296,
+   "distinct_keys_used": 10296,
+   "pairs_ratio": 1.0,
+   "max_pairs_per_key": 1,
+   "max_pts_per_line": 2,
+   "critical_lines_2pts": 10296,
+   "lines_with_1pt": 0,
+   "lines_with_2pt": 10296,
+   "lines_with_3pt": 0,
+   "lines_with_4pt": 0,
+   "lines_with_ge3": 0,
+   "key_count_dist": {
+    "1": 10296
+   },
+   "o_dist": {
+    "2": 10296
+   }
+  }
+ }
+}

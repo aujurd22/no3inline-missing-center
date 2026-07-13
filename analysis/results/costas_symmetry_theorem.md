@@ -1,8 +1,10 @@
 # Costas arrays and the D₄ symmetry lattice — a complete classification
 
 **Date:** 2026-07-13 (after midnight)
-**Status:** Theorem proved (analytic).  Empirical confirmation **pending** the
-bounded scan `costas_symmetry_scan.py` (results appended in §7 when ready).
+**Status:** Theorems **proved and rigorously verified** (analytic proof + edge-case
+stress test + two independent computational confirmations: scan to n=13, C4 CP-SAT
+sweep to n=32, C2 enumeration to n=10).  The D₄ symmetry classification is now
+**complete** (capstone Theorem C, §10).
 **Lens source:** the FDR symmetry-classification methodology
 (`analysis/results/fdr_theorem.md`, Corollary D) transferred from NTIL to Costas.
 
@@ -199,16 +201,14 @@ as a sanity check (**PASS**).
 - **`trivial` dominates** — asymmetry is the overwhelming majority, exactly as
   for NTIL (most rot4 solutions are mixed-orientation, not permutation-symmetric).
 
-> **Empirical observation / open question.**  Up to n=13, the rotational types
-> `C2`, `C4`, and the Klein-four `D2` **never appear**, even though `C4` is
-> *a priori* allowed at `n ≡ 0,1 (mod 4)` (orders 4,5,8,9,12,13 all satisfy this
-> yet yield `C4 = 0`).  This suggests the stronger possibility — **rotational
-> Costas symmetry may be impossible (or vanishingly rare)** — but n=13 is far too
-> small to settle it.  The literature (OEIS A001441 counts Costas arrays
-> *up to dihedral equivalence*; Rickard–Gow 2009 study symmetry of the
-> finite-field constructions) treats symmetry as a live axis; our scan is the
-> first to tally the *full D₄ subgroup type* at every order.  Settling
-> "do C2/C4/D2 Costas arrays exist?" is a clean open problem raised by this lens.
+> **Empirical observation.**  Up to n=13, the rotational types `C2`, `C4`, and
+> the Klein-four `D2` **never appear**, even though `C4` is *a priori* allowed at
+> `n ≡ 0,1 (mod 4)`.  This is **now a theorem, not a conjecture**: Theorem R (§9)
+> proves no rotational (`C2`/`C4`) Costas symmetry exists for `n ≥ 3`, and C6 (§8)
+> proves `C4` is empty for all `n > 1`; the independent CP-SAT sweeps and C2
+> enumeration corroborate this through n=32 and n=10 respectively.  The scan is
+> the first to tally the *full D₄ subgroup type* at every order, and its
+> `C2=C4=D2=0` column is the empirical footprint of Theorem R.
 
 > **Context on the open orders.**  Costas-array counts are known only up to
 > **order 29** (Beard et al. 2004/2007; Rickard et al. 2006; Drakakis et al.
@@ -219,7 +219,172 @@ as a sanity check (**PASS**).
 
 ---
 
-## 8. Files
+## 8. Theorem C6 — C4-rotational Costas arrays do **not** exist (n>1)
+
+> **Theorem C6.** No Costas array of order `n > 1` is invariant under `C4`
+> (90° rotation).  Equivalently, the cyclic symmetry type `<C4>` never occurs;
+> among the six admissible types of Theorem C5 the rotational type `C4` is
+> **empty for every order**.  (Types containing `C4` — i.e. full `D4` — are
+> already ruled out by C5/C1; C6 rules out `<C4>` itself.)
+
+*Proof (parallelogram / equal-displacement argument).*  Work in centred
+coordinates; the dots of a C4-symmetric array are a disjoint union of C4-orbits.
+For `n` even every orbit has size 4; for `n` odd the centre is a fixed point (a
+single dot) and all other orbits have size 4.  Take any non-trivial 4-orbit
+`{p, rp, −p, −rp}` where `r` is 90° rotation (`r² = −I`).  These four points are
+the vertices of a **square**, hence a **parallelogram**.  In particular the two
+ordered pairs `(p, rp)` and `(−rp, −p)` have the *same* displacement vector:
+>
+> > `rp − p  =  (−p) − (−rp)`.
+>
+> They are **distinct** ordered pairs (for `p ≠ 0`, `p ≠ −rp` since `r` has no
+> non-zero fixed vector), so the Costas condition — all ordered displacement
+> vectors distinct — is violated.  Every C4-symmetric array of order `>1`
+> contains at least one such 4-orbit (n even: all of them; n odd: every
+> non-centre orbit), therefore **no C4-symmetric Costas array exists**.  ∎
+
+*Connection to the LQ unification theorem.*  A Costas array is exactly a dot-set
+with **no parallelogram** among its points (equivalently, no two equal
+displacement vectors) — a **linear** condition (Theorem LQ, §2 of
+`sidon_costas_unification.md`).  The most rotationally symmetric configuration,
+a C4 4-cycle, *is literally a parallelogram (a square)*; so maximal rotational
+symmetry self-collides with the defining linear condition.  This is the sharpest
+possible illustration of Theorem LQ: the linear Costas condition is rigid enough
+to forbid its own most symmetric realization.
+
+*Corollaries.*
+- The empirical observation "C4 = 0 through n = 16" (§7, and the independent
+  CP-SAT sweep `cpsat_costas_symmetric.py`) is now a **theorem**, not a
+  coincidence.  The dedicated CP-SAT sweep (linear CSP per R8-C) is expected to
+  return UNSAT at every order — it is corroborating, not decisive.
+- Theorem C5 sharpens: the symmetry types that *actually occur* are a subset of
+  `{id, C2, D, AD, D2}`; the rotational type `C4` is empty for all orders.  (C2
+  and D2 remain **open** — the parallelogram argument requires a 4-cycle and
+  does not apply to 2-cycles `{p, −p}`.)
+
+### 8.1 Rigorous verification of C6 — stress test + computational corroboration
+
+Per proof rigor, we stress-test every edge case of the parallelogram argument:
+
+1. **n = 1** (single dot). C4-symmetric trivially; Costas holds *vacuously*
+   (no two distinct ordered pairs exist to compare). This is the stated exception
+   `n > 1`; consistent. ✓
+2. **Centre in the set (n odd).** The centre is a 1-orbit, not a 4-orbit, and
+   contributes no collision. But `n > 1` forces at least one non-centre 4-orbit
+   (`n = 1 + 4k`, `k ≥ 1`), so the collision is still forced. ✓
+3. **p on a coordinate axis** (e.g. `p = (a,0)`, `a ≠ 0`). Its 4-orbit is
+   `{(a,0),(0,a),(−a,0),(0,−a)}` — a diamond (a square rotated 45°), *still a
+   parallelogram*.  Pairs `(p,rp)` and `(−rp,−p)`: displacements
+   `(0−a, a−0) = (−a,a)` and `(−a−0, 0−(−a)) = (−a,a)` — equal. ✓ collision holds.
+4. **Could `rp − p = 0`?** Only if `rp = p`, i.e. `p = 0` (origin), which is
+   excluded from 4-orbits. The repeated displacement is non-zero, but Costas
+   forbids *any* repeat. ✓
+5. **Could the two ordered pairs coincide?** `(p,rp) = (−rp,−p)` would require
+   `p = −rp` and `rp = −p`, collapsing the orbit to size 2 — impossible for a
+   4-orbit. So they are distinct ordered pairs. ✓
+
+**Computational corroboration (two independent checks):**
+- Dedicated CP-SAT sweep `cpsat_costas_symmetric.py --sweep 1 9` (Theorem R8-C,
+  linear CSP over the fundamental quadrant) returned **INFEASIBLE** at
+  `m = 1..8` → orders `n = 4,8,12,16,20,24,28,32`.  Independently confirms no
+  C4-symmetric Costas exists through order 32.
+- Earlier full-enumeration scan `costas_symmetry_scan.py` found `C4 = 0`
+  through `n = 13`.
+
+→ **C6 is rigorously verified**: analytic proof + edge-case stress test + two
+independent computational confirmations.  Status: **THEOREM**, not conjecture.
+
+---
+
+## 9. Theorem R — the complete rotational classification (C2 *and* C4 impossible for n ≥ 3)
+
+> **Theorem R.** A Costas array of order `n` with a non-trivial rotational
+> symmetry (`C2` or `C4`) satisfies `n ≤ 2`.  Equivalently, the only
+> rotationally-symmetric Costas arrays are (i) the trivial order-1 array, and
+> (ii) the two order-2 arrays (both of type `D2 = {id, C2, D, AD}`).  For every
+> `n ≥ 3`, **no** Costas array admits `C2` or `C4` symmetry.
+
+*Proof.*  The C4 case is Theorem C6.  For `C2` (180° rotation, `r² = −I`): orbits
+are either the 1-orbit `{0}` (the centre, only when `n` is odd) or 2-orbits
+`{p, −p}`.
+
+- **Two or more distinct 2-orbits.** Let `{p,−p}` and `{q,−q}` be distinct
+  (so `q ≠ ±p`).  The ordered pairs `(p, q)` and `(−q, −p)` are both pairs of
+  points of the set, with
+  > `q − p  =  (−p) − (−q)`,
+  an equal displacement.  They are distinct ordered pairs (`p ≠ −q` since the
+  orbits differ).  Hence collision → not Costas.  So a C2-symmetric Costas array
+  has **at most one** 2-orbit.
+- **Exactly one 2-orbit + the centre (n = 3).** `S = {0, p, −p}`.  The pairs
+  `(0, p)` and `(−p, 0)` both have displacement `p` (and `(0,−p)`,`(p,0)` both
+  have `−p`) → collision.  Not Costas.
+- **Exactly one 2-orbit, no centre (n = 2).** `S = {p, −p}`.  Displacements
+  `(p,−p) → −2p` and `(−p, p) → 2p` are distinct ⇒ Costas.  Indeed the two
+  order-2 Costas arrays are exactly the two such sets: `{(0,0),(1,1)}` and
+  `{(0,1),(1,0)}` (in centred coords `{(±0.5,±0.5)}` and `{(∓0.5,±0.5)}`).
+  Both also carry a diagonal reflection, so they are type `D2`.
+- **No 2-orbits (only the centre, n = 1).** Trivial; vacuously Costas.
+
+Hence C2-symmetric Costas ⇒ `n ≤ 2`.  Combined with C6, any non-trivial
+rotational symmetry forces `n ≤ 2`.  ∎
+
+*Stress test.*
+- **n = 2**: verified Costas and C2-symmetric (in fact D2) — exactly the 2 known
+  order-2 arrays (matches `C(2) = 2`). ✓
+- **n = 3**: the only C2-symmetric sets are `{0,p,−p}`; shown to collide (scan:
+  `C2 = 0` at `n = 3`). ✓
+- **n = 4**: two 2-orbits → collision (scan: `C2 = 0`). ✓
+- **Pure C2** (`{id, C2}`, no reflection): at `n = 2` the two arrays are `D2`
+  (they also have a diagonal reflection), so *not* pure C2; for `n ≥ 3` pure C2
+  is impossible by the above.  **Conclusion: pure-C2 Costas arrays do not exist at
+  any order** — type 2 of Theorem C5 is empty.
+
+**Computational corroboration:** `costas_c2_corroborate.py` enumerates all
+C2-symmetric permutations (constraint `π(n−1−i) = n−1−π(i)`) and tests Costas for
+`n = 2,4,6,8,10`.  Result: **`n = 2 → 2` solutions; `n = 4,6,8,10 → 0`.**
+Independent confirmation of Theorem R through `n = 10`.
+
+> **Status of C2/D2 in Theorem C5 — resolved by R.**  The earlier "open" status
+> is now closed:
+> - Type 2 (`C2 = {id, C2}`): **empty at all orders** (pure C2 never occurs).
+> - Type 6 (`D2 = {id, C2, D, AD}`): occurs **only for n = 2**.
+> - Type 3 (`C4`): **empty for all n > 1** (C6).
+
+---
+
+## 10. Theorem C — the complete D₄ symmetry classification (capstone)
+
+Combining C1–C6 and R, the admissible symmetry types are now fully determined.
+
+> **Theorem C (capstone).** Let `A` be a Costas array of order `n`. Its symmetry
+> group `G ≤ D₄` satisfies:
+> - **n = 1:** `G = D₄` (trivial array, all symmetries vacuously).
+> - **n = 2:** `G = D2 = {id, C2, D, AD}` (both order-2 arrays).
+> - **n ≥ 3:** `G ∈ {id, D, AD}`.  In particular `G` contains **no non-trivial
+>   rotation** and **no midline reflection** (`H`, `V`).
+>
+> The symmetry types that *occur* are exactly: trivial (`id`, generic),
+> diagonal-involution (`D`, from order 5), anti-diagonal-involution (`AD`, from
+> order 5), and `D2` (n = 2 only).  The types that *never occur* are: `C4`
+> (all `n > 1`), pure `C2` (all `n`), `D2` (`n ≠ 2`), and any subgroup containing
+> `H` or `V` (all `n > 1`, including full `D4`).
+
+This closes the D₄ symmetry classification completely: the only non-trivial
+symmetries a Costas array can exhibit are the two *diagonal* (transpose /
+reverse-transpose) involutions, and only for `n ≥ 5`; everything else — all
+rotations, all axis reflections — is impossible beyond the degenerate `n ≤ 2`
+cases.
+
+*Connection to FDR.*  FDR classified which `D₄` subgroups *force* Sidon rigidity
+for NTIL; Theorem C classifies which `D₄` subgroups *can occur* for Costas.  The
+two together are a complete map of the same lattice from opposite sides, and the
+**ort1 boundary** of FDR (orthogonal reflection breaks the slope±1 law) reappears
+in Costas as the **H/V boundary** (axis reflection breaks the permutation
+structure) — the rotation/diagonal types survive on both sides.
+
+---
+
+## 11. Files
 
 - `analysis/results/costas_symmetry_theorem.md` — this theorem.
 - `analysis/costas_symmetry_scan.py` — the empirical classifier (six-type tally).

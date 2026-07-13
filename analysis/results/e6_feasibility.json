@@ -1,0 +1,13 @@
+[
+ {
+  "phase": "Phase 0: domain constraints only",
+  "m": 5,
+  "domain": "GF(7)",
+  "n_var": 5,
+  "n_con": 5,
+  "time_s": 0.0,
+  "gbasis_len": 0,
+  "gbasis_terms": 0,
+  "status": "ERROR: invalid literal for int() with base 10: '(7)'"
+ }
+]
