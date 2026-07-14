@@ -15,16 +15,29 @@
 
 ![Overview](visualization/preview.png)
 
-An investigation of the **symmetry-induced rigidity** of extremal No-Three-In-Line configurations — how rotation and reflection symmetries force a precise hierarchy of collinearity-excluding algebraic constraints, from linear Sidon laws on the fundamental domain (FDR, §2.10) through irreducible quadratic constraints (the quadratic gap, R7, §2.12) to a complete quadratic characterization of C₄-symmetric solutions (R8, §2.14) — and what this implies for the open existence question at n=74 (m=37, §2.13).
+An investigation of the **symmetry-induced rigidity** of extremal no-three-in-line configurations.
 
-This work originates from the classical **No-Three-In-Line** problem (§The Problem); its extremal 2n-point solutions serve as the laboratory in which a broader theory of *symmetry-induced rigidity* is developed.
+How do rotation and reflection symmetries force a precise hierarchy of collinearity-excluding algebraic constraints? The hierarchy runs from linear Sidon laws on the fundamental domain (FDR, §2.10), through irreducible quadratic constraints (the quadratic gap, R7, §2.12), to a complete quadratic characterization of C₄-symmetric solutions (R8, §2.14).
+
+This has direct consequences for the open existence question at n=74 (m=37, §2.13).
+
+This work originates from the classical **no-three-in-line** problem (§The Problem); its extremal 2n-point solutions serve as the laboratory in which a broader theory of *symmetry-induced rigidity* is developed.
 
 ## The Problem
-Place **2n points** on an **n×n grid** such that no three are collinear. The No-Three-In-Line problem asks for the maximum number of points D(n) achievable. 2n-point solutions have been found for all n ≤ 52 (classical result), and for n = 65, 67, 69, 70, 72 via SAT solvers (Heule, 2026). n = 71 is the only n ≤ 72 with no known 2n-point solution — D(71) remains unresolved.
+Place **2n points** on an **n×n grid** such that no three are collinear. The no-three-in-line problem asks for the maximum number of points D(n) achievable. 2n-point solutions have been found for all n ≤ 52 (classical result), and for n = 65, 67, 69, 70, 72 via SAT solvers (Heule, 2026). n = 71 is the only n ≤ 72 with no known 2n-point solution — D(71) remains unresolved.
 
 > **Prior work.** The classical NTIL problem originates with Dudeney (1917). Flammenkamp (1992–2026) established the symmetry classification (rot4, rot2, iden, dia1, dia2, ort1, ort2, rct4, full) and computed extensive solution counts. Prellberg (2026, arXiv:2602.07751) extended D(n)=2n to n≤60 using CP-SAT with a symmetry-reduced model on the fundamental domain H_n. Heule (2026) pushed to n=72 via SAT, finding the first n=70 (rot4) and n=72 (rot4) solutions. The H_n fundamental domain and rotational symmetry reduction used in §2.2–2.4 follow Prellberg's formulation. Our contribution is *not* about finding more solutions; we uncover the *algebraic rigidity* that symmetry imposes, proving structural theorems (SIRH, FDR, R8-G, T15) that go beyond the computational record.
 
-**Our contribution.** Rather than searching for new solutions, we uncover the *algebraic rigidity* that symmetry imposes on extremal configurations. The project began with a concrete question — for each known 2n-point solution, is the grid center ever a circumcenter of some triple? — whose answer (the C₄ theorem, §2.1: C₄-symmetric solutions *never* miss the center) turned out to be the first rung of a ladder. Symmetry forces collinearity-excluding structure of increasing algebraic depth: linear Sidon laws on the fundamental domain (FDR, §2.10), irreducible quadratic constraints beyond any Sidon filter (the quadratic gap, R7, §2.12), and finally a *complete quadratic characterization* of all C₄-symmetric NTIL solutions (R8, §2.14). The central open problem is whether a C₄-symmetric 2n-point solution exists at **n=74 (m=37)** (§2.13). The missing-center question is the historical entry point, not the destination.
+**Our contribution.** Rather than searching for new solutions, we uncover the *algebraic rigidity* that symmetry imposes on extremal configurations.
+
+The project began with a concrete question: for each known 2n-point solution, is the grid center ever a circumcenter of some triple? The answer — the C₄ theorem (§2.1) shows that C₄-symmetric solutions *never* miss the center — turned out to be the first rung of a ladder.
+
+Symmetry forces collinearity-excluding structure of increasing algebraic depth:
+- linear Sidon laws on the fundamental domain (FDR, §2.10);
+- irreducible quadratic constraints beyond any Sidon filter (the quadratic gap, R7, §2.12);
+- a *complete quadratic characterization* of all C₄-symmetric NTIL solutions (R8, §2.14).
+
+The central open problem is whether a C₄-symmetric 2n-point solution exists at **n=74 (m=37)** (§2.13). The missing-center question is the historical entry point, not the destination.
 
 **Detection method**: Instead of computing circumcenters directly (which requires rational arithmetic), we use an equivalent integer criterion:
 
@@ -37,7 +50,7 @@ d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2
 
 If three points have the same \(d\) value, they lie on a circle centered at \(C\), making \(C\) their circumcenter. Conversely, if \(C\) is the circumcenter of three points, those points are equidistant from \(C\) and thus share the same \(d\) value. **The equivalence is exact** — no floating-point approximation is involved.
 
-This is a novel invariant not previously studied in the literature. As an example application: the n=72 solution found by Marijn Heule (CMU, 2026-06-25) has C₄ (90° rotational) symmetry. By our C₄ theorem (proved below), any C₄-symmetric 2n-point solution on an even-n grid necessarily places the grid center as a circumcenter — so that particular solution is *not* a missing-center solution. (For odd-n grids no C₄-symmetric solution exists at all; missing-center solutions do appear there in other symmetry classes, as the data below show.)
+This is a novel invariant not previously studied in the literature. As an example application: the n=72 solution found by Marijn Heule (CMU, 2026-06-25) has C₄ (90° rotational) symmetry. By our C₄ theorem (proved below), any C₄-symmetric 2n-point solution on an even-n grid necessarily has the grid center as a circumcenter — so that particular solution is *not* a missing-center solution. (For odd-n grids no C₄-symmetric solution exists at all; missing-center solutions do appear there in other symmetry classes, as the data below show.)
 
 ## 2. Proven Results
 
@@ -59,7 +72,7 @@ This section collects every result that is **proven** (theorem or lemma with pro
 ### 2.1 Theorem: C₄ Symmetry Implies Non-Missing-Center ✔ *(historical origin of the project)*
 A solution has **C₄ symmetry** if it is invariant under 90° rotation about the grid center. We prove:
 
-> **Theorem 2.1 (C₄ Symmetry Implies Non-Missing-Center).** Any No-Three-In-Line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
+> **Theorem 2.1 (C₄ Symmetry Implies Non-Missing-Center).** Any no-three-in-line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
 
 **Proof**. Let the grid have coordinates \(0,\ldots,n-1\). The center is \(C = (\frac{n-1}{2}, \frac{n-1}{2})\). The 90° rotation is \(R(x,y) = (n-1-y, x)\).
 
@@ -78,7 +91,11 @@ d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2 = (2R(x)_x-(n-1))^2 + (2R(x)_y-(n-1))^2
 
 *Geometric illustration.* The theorem says the center is always a circumcenter, but where are the 4 points that certify it? They form **a minimum-radius occupied orbit** — one of the distance rings actually used by the solution having the smallest radius; its 4 points sit at the same distance from \(C\) and thus lie on a circle centered at \(C\). In 9 of the first 15 even \(n\) (\(n=12\ldots40\)), these 4 points are literally the \(2\times2\) block straddling \(n/2\), i.e. \(\{\lfloor n/2\rfloor,\lceil n/2\rceil\}^2\) (e.g. for \(n=40\): \((19,19),(19,20),(20,19),(20,20)\)) — placed exactly "by \(n/2\)". The remaining 6 solutions (\(n=12,16,18,20,24,26\)) instead use a slightly larger inner diamond, but the role is identical. Either way, this tiny central cluster is the concrete geometric footprint of the theorem: it is the ring that makes \(C\) a circumcenter.
 
-*A structural refinement.* Decomposing a rot4 solution into its \(n/2\) C₄-orbits, each orbit is a square of 4 points centred at \(C\) (one point in each quadrant). Every such square contributes exactly two **diagonal directions through \(C\)** — the two directions joining opposite corners. We verified across all 15 even \(n\) from 12 to 40 that the \(n/2\) orbits yield **exactly \(n\) distinct diagonal directions, with no two orbits sharing one**. This is a *necessary and sufficient* condition for the solution to be free of collinear triples *along any line through \(C\)*: a line through \(C\) can contain at most the two opposite corners of a single orbit; if two orbits shared a diagonal direction, that line would hold 4 points and violate the no-three-in-line rule. Thus "all diagonal directions are distinct" is a hallmark of every rot4 solution and the direct generalization of the C₄ theorem — the theorem guarantees that \(C\) *is* a circumcenter, while the distinct-direction law explains *why* the orbit structure automatically avoids a 4-point line through it.
+*A structural refinement.* Decomposing a rot4 solution into its \(n/2\) C₄-orbits, each orbit is a square of 4 points centred at \(C\) (one point in each quadrant). Every such square contributes exactly two **diagonal directions through \(C\)** — the two directions joining opposite corners.
+
+We verified across all 15 even \(n\) from 12 to 40 that the \(n/2\) orbits yield **exactly \(n\) distinct diagonal directions, with no two orbits sharing one**. This is a *necessary and sufficient* condition for the solution to be free of collinear triples *along any line through \(C\)*: a line through \(C\) can contain at most the two opposite corners of a single orbit. If two orbits shared a diagonal direction, that line would hold 4 points and violate the no-three-in-line rule.
+
+Thus "all diagonal directions are distinct" is a hallmark of every rot4 solution and the direct generalization of the C₄ theorem. The theorem guarantees that \(C\) *is* a circumcenter, while the distinct-direction law explains *why* the orbit structure automatically avoids a 4-point line through it.
 
 The theorem is verified across all 34 even n values from n=6 to n=72 in the Flammenkamp database (n=6–56 from the standard database, n=58–72 from newer rot4.few files; including Heule's n=70 and n=72 solutions):
 
@@ -121,7 +138,7 @@ The theorem is verified across all 34 even n values from n=6 to n=72 in the Flam
 
 ^ Most common value; the actual solutions include both pop=4 and pop=8 configurations.
 
-Every single rot4 solution across all entries — n=6 (3 solutions) through n=72 (1 solution, Heule 2026) — has the center as a circumcenter. **Zero exceptions in 33,534 tested solutions** (sum of all rot4 counts in the table).
+Every single rot4 solution across all entries — n=6 (3 solutions) through n=72 (1 solution, Heule 2026) — has the center as a circumcenter. **Zero exceptions in 33,634 tested solutions** (sum of all rot4 counts in the table).
 
 ### 2.2 C₂ Theorem (180° rotational symmetry)
 
@@ -129,7 +146,13 @@ A broader symmetry invariant, proved in `analysis/lemmas_c2_ring.md` and verifie
 
 > **Theorem 2.3 (C₂ Direction Theorem).** Let *S* be a 2n-point no-three-in-line solution on an even n×n grid that is invariant under the half-turn R₁₈₀ about the grid centre C. Then *S* decomposes into n R₁₈₀-orbits {p, R₁₈₀(p)}; each orbit defines a line through C; and these n central lines are pairwise distinct (two orbits on one central line would put 4 points on that line, violating no-three-in-line).
 
-The hypothesis "R₁₈₀-invariant" holds exactly for the symmetry classes whose group contains the half-turn: **rot2** (C₂), **rot4** (C₄, since R₁₈₀ = R₉₀²), and **dia2** (V₄ = {id, R₁₈₀, d₁, d₂}, with R₁₈₀ = d₁∘d₂), and **rct4** (V₄ = {id, R₁₈₀, two perpendicular axis reflections}; verified R₁₈₀-invariant on all 326 catalogued rct4 solutions, though not R₉₀-invariant). Classes iden, dia1 (single diagonal reflection only), and ort1/ort2 do **not** contain R₁₈₀ and lie outside the theorem's scope.
+The hypothesis "R₁₈₀-invariant" holds exactly for the symmetry classes whose group contains the half-turn:
+- **rot2** (C₂);
+- **rot4** (C₄, since R₁₈₀ = R₉₀²);
+- **dia2** (V₄ = {id, R₁₈₀, d₁, d₂}, where R₁₈₀ = d₁∘d₂);
+- **rct4** (V₄ = {id, R₁₈₀, two perpendicular axis reflections}; verified R₁₈₀-invariant on all 326 catalogued rct4 solutions, though not R₉₀-invariant).
+
+Classes iden, dia1 (single diagonal reflection only), and ort1/ort2 do **not** contain R₁₈₀ and lie outside the theorem's scope.
 
 Consequence for the D(n)=2n problem: any R₁₈₀-invariant construction automatically eliminates all collinearity *through the centre*; the remaining obstacle is collinearity on lines not through C. This reframes the existence question (the genuinely open lower bound D(n) ≥ 2n) as a constrained-combinatorics problem rather than a pigeonhole upper bound.
 
@@ -245,7 +268,7 @@ Flammenkamp cache witnesses. For ort1 a backtracking search (validated
 against the cache) found **no** missing-centre example for \(n\le 16\)
 (exhaustive) and \(n=18\) (heavy); whether any exists is **open** (see
 `analysis/hypergraph_framework.md`). The excluded classes are confirmed at
-**0 / 0** missing-centre across all 21 999 rot4/rct4/full/dia2/ort2 solutions
+**0 / 0** missing-centre across all 21,999 rot4/rct4/full/dia2/ort2 solutions
 in the cache.
 
 ### 2.7 Further rot4 Structural Theorems (2026-07-11)
@@ -486,11 +509,22 @@ The FDR symmetry-classification lens (§2.10) transfers to the **Costas array** 
 
 > **Theorem R (rotational Costas impossible for n ≥ 3 — PROVED 2026-07-13).** A Costas array with non-trivial rotational symmetry (`C2` or `C4`) satisfies `n ≤ 2`. For **every `n ≥ 3`**, no Costas array admits `C2` or `C4` symmetry. *Proof.* C4 case is C6. For C2 (180°): two or more distinct 2-orbits `{p,−p}`, `{q,−q}` give ordered pairs `(p,q)` and `(−q,−p)` with equal displacement `q−p` ⇒ collision; a single 2-orbit + centre (`n=3`, `S={0,p,−p}`) gives `(0,p)`,`(−p,0)` both displacement `p` ⇒ collision; only `n=2` (`{(0,0),(1,1)}`, `{(0,1),(1,0)}`, both type `D2`) survives. ∎
 
-> **Theorem C (complete D₄ classification — capstone, PROVED 2026-07-13).** For a Costas array `A` of order `n`: `n=1 ⇒ G=D₄`; `n=2 ⇒ G=D2={id,C2,D,AD}`; **`n ≥ 3 ⇒ G ∈ {id, D, AD}`**. The *only* non-trivial symmetries a Costas array can exhibit are the two diagonal involutions (`D` from n=5, `AD` from n=5); every rotation and every axis reflection is impossible beyond the degenerate `n ≤ 2` cases. Combining C1–C6 and R, the symmetry types that *occur* are exactly `id`, `D`, `AD` (n≥5), `D2` (n=2); the types that *never occur* are `C4` (all n>1), pure `C2` (all n), `D2` (n≠2), and any subgroup containing `H` or `V` (all n>1, including full `D4`).
+> **Theorem C (complete D₄ classification — capstone, PROVED 2026-07-13).** For a Costas array `A` of order `n`:
+> - `n=1 ⇒ G=D₄`;
+> - `n=2 ⇒ G=D2={id,C2,D,AD}`;
+> - **`n ≥ 3 ⇒ G ∈ {id, D, AD}`**.
+>
+> The *only* non-trivial symmetries a Costas array can exhibit are the two diagonal involutions (`D` from n=5, `AD` from n=5); every rotation and every axis reflection is impossible beyond the degenerate `n ≤ 2` cases.
+>
+> Combining C1–C6 and R, the symmetry types that *occur* are exactly `id`, `D`, `AD` (n≥5) and `D2` (n=2). The types that *never occur* are `C4` (all n>1), pure `C2` (all n), `D2` (n≠2), and any subgroup containing `H` or `V` (all n>1, including full `D4`).
 
-**Empirical confirmation (scan to n=13 + independent CP-SAT / C2 sweeps).** `D4(full)=0` at every order (confirms C5); `C2=C4=D2=0` up to n=13 — this column is now the **theorem** (C6/R), no longer an open question. `diag = anti` at every order (the `D↔AD` duality); `trivial` dominates (asymmetry is the norm, paralleling NTIL). Independent corroboration: dedicated CP-SAT sweep **INFEASIBLE** at n=4,8,12,16,20,24,28,32; C2 enumeration gives **2 solutions at n=2, 0 at n=4,6,8,10**.
+**Empirical confirmation (scan to n=13 + independent CP-SAT / C2 sweeps).** `D4(full)=0` at every order (confirms C5); `C2=C4=D2=0` up to n=13 — these are now **theorems** (C6/R), no longer open questions. `diag = anti` at every order (the `D↔AD` duality); `trivial` dominates (asymmetry is the norm, paralleling NTIL).
+
+Independent corroboration: dedicated CP-SAT sweep **INFEASIBLE** at n=4,8,12,16,20,24,28,32; C2 enumeration gives **2 solutions at n=2, 0 at n=4,6,8,10**.
 
 **Prior work / honesty.** The individual classical facts are not ours: the parallelogram characterization of Costas arrays is classical; `H`/`V` impossibility is the trivial permutation-collapse observation; full-D₄ impossibility follows. Transpose-symmetric (`D`/`AD`) Costas arrays are studied in Drakakis–Gow–Rickard, *On the symmetry of Welch- and Golomb-constructed Costas arrays* (Discrete Math. 308(11), 2008). **Our genuine contributions** are: (i) the complete admissible-D₄-subgroup enumeration (Theorem C), (ii) the rotational impossibility packaged as Theorems R and C6 with rigorous edge-case stress tests, and (iii) the **FDR-transfer framing** unifying this with the NTIL rigidity program — all confirmed by the first full six-type D₄ tally at every order. Full proof, stress test, and table: `analysis/results/costas_symmetry_theorem.md`.
+
+**Why this advances Costas.** Orders **32 and 33** are the first orders with *no known* Costas array (counts are known only to 29). The classification above narrows any symmetric witness there to the six-type list (and `C4` is allowed at both 32 and 33), while `cpsat_m37.py`'s per-line at-most-2 encoding is a direct template for the exact distinct-displacement CP-SAT attack on 32/33. Full statement, proof, and table: `analysis/results/costas_symmetry_theorem.md`; the broader bridge (FDR as 1-D Sidon shadow of Costas's 2-D Sidon; Welch-construction contrast) is in `analysis/results/costas_rigidity.md`.
 
 ---
 
@@ -523,12 +557,16 @@ The four standalone results (FDR, R7, R8, R8-G) are **three depths of one phenom
 
 **Formal statement (the four-part theorem).** Let `C` be a `2n`-point NTIL extremal configuration, `G = Stab(C) ≤ D₄`, `F_G ⊂ C` its natural fundamental domain (one representative per `G`-orbit).
 
-- **Part I — Linear layer (FDR, proven).** If `G` preserves the slope±1 line family (equivalently `G` contains no orthogonal reflection `g₄,g₅`), then on `F_G` the values `a−b = −2(x−y)` satisfy the Sidon bound `count(d)+count(−d) ≤ 2` for every `d = x−y`. *Necessary only* — verified 100% for rot4/rot2/rct4/full/dia2/dia1 and 0% for ort1/iden (the exact slope±1-preserving boundary, Corollary D).
-- **Part II — Quadratic gap (R7, proven, group-independent).** Cross-orbit collinearity is a 2×2 determinant = 0, an irreducible *quadratic* condition. Because the a−b Sidon law depends only on `x−y`, no finite family of linear Sidon conditions can forbid 3-in-line on a non-slope±1 line. Strict *insufficiency* is constructively witnessed for C4 (Sidon-8 pairings → 0% C4-lift survival) and for rot2 (random half-board Sidon sets → contain a 3-in-line after the 180° lift, every tested order n∈{8,10,12,14,16}).
+- **Part I — Linear layer (FDR, proven).** If `G` preserves the slope±1 line family (equivalently `G` contains no orthogonal reflection `g₄,g₅`), then on `F_G` the values `a−b = −2(x−y)` satisfy the Sidon bound `count(d)+count(−d) ≤ 2` for every `d = x−y`. *Necessary only* — verified 100% for rot4/rot2/rct4/full/dia2/dia1 and 0% for ort1/iden (the exact slope±1-preserving boundary, §2.10).
+- **Part II — Quadratic gap (R7, proven, group-independent).** Cross-orbit collinearity is a 2×2 determinant = 0, an irreducible *quadratic* condition. Because the a−b Sidon law depends only on `x−y`, no finite family of linear Sidon conditions can forbid a no-three-in-line triple on a non-slope±1 line.
+
+Strict *insufficiency* is constructively witnessed:
+  - for C4 (Sidon-8 pairings → 0% C4-lift survival);
+  - for rot2 (random half-board Sidon sets contain a no-three-in-line triple after the 180° lift, at every tested order n∈{8,10,12,14,16}).
 - **Part III — Quadratic completeness (R8-G, proven, all six FDR groups).** A `G`-symmetric configuration is NTIL **iff** its fundamental-domain selection `sel: F_G → {0,1}` satisfies the per-line weighted at-most-2 CSP `∀L: Σ_{c∈F_G} w_{L,c}·sel[c] ≤ 2` (`w_{L,c} = |{g·c : g∈G} ∩ L|`), which is exactly a finite quadratic CSP (det≠0 over orbit triples in `F_G`). Closes **Hypothesis H** (45/45 computational validation across all six groups, m=2..12). The `m=37` existence question is precisely this C4 instance.
 - **Part IV — Reverse (resolved negative).** FDR is *structure → property* (symmetry ⇒ Sidon). The converse *property → structure* fails: (P4.1) asymmetric `iden` configs *do* satisfy the Sidon signature (~2.8% of random m-subsets at m=16); (P4.2) Sidon carriers are super-exponentially dominated by asymmetric configs (≳ `0.46·0.78^m·C(m²,m)` vs ≪1 C₄-NTIL domain for m≥30); (P4.3) the quadratic signature lives on `F_G` and forgetting lift symmetry is irreversible. **SIRH is a strict one-way necessary hierarchy**, not an equivalence.
 
-Verification (Math skill rigor check, 2026-07-14): the a−b = −2(x−y) identity, the T15.3-cycle determinant identity `det = −½[(x−y)²+(y−z)²+(z−x)²]` (zero iff degenerate), the C6 parallelogram displacement argument, and the R8-G per-line⇔NTIL equivalence were each confirmed by symbolic derivation and numerical spot-checks (`analysis/results/verify_readme_theorems.py`, `analysis/results/verify_readme_theorems.json`).
+Verification (Math skill rigor check, 2026-07-14): the a−b = −2(x−y) identity, the T15.2 (3-cycle) determinant identity `det = −½[(x−y)²+(y−z)²+(z−x)²]` (zero iff degenerate), the C6 parallelogram displacement argument, and the R8-G per-line⇔NTIL equivalence were each confirmed by symbolic derivation and numerical spot-checks (`analysis/results/verify_readme_theorems.py`, `analysis/results/verify_readme_theorems.json`).
 
 One-way necessary chain — symmetry *generates* layered rigidity, rigidity does not force symmetry. See `analysis/results/rigidity_hierarchy_theorem.md`, `analysis/results/part4_reverse.md`.
 
@@ -537,14 +575,12 @@ One-way necessary chain — symmetry *generates* layered rigidity, rigidity does
 ### 2.18 T15 — Cycle Type Refinement (NEW 2026-07-13)
 **Status: Theorems + empirical landscape | Under: R9h**
 
-- **T15.1** (proven): 3-cycle → **baseframe-safe** (determinant = −½[(x−y)²+(y−z)²+(z−x)²], zero only for degenerate loop).
-- **T15.2** (proven): Along-cycle step lengths satisfy Sidon bound `count(s)+count(−s) ≤ 2`.
-- **T15.3** (empirical): 2-cycles (mutual edges) **not structurally forbidden** — first appear m=13. Mechanical verification of 20,000 (m,x,y) samples confirms no self-collinear triple in 8 lifted points.
-- **T15.4** (empirical landscape): Distinct cycle types 1→65 (m=3→27); dominant [m]/[1,m-1] share decays 1.0→0.00 by m=35. Cycle type is **neither obstacle nor accelerator** for m=37.
+- **T15.2** (proven): 3-cycle → **baseframe-safe** (determinant = −½[(x−y)²+(y−z)²+(z−x)²], zero only for degenerate loop).
+- **T15.4** (proven): Along-cycle step lengths satisfy Sidon bound `count(s)+count(−s) ≤ 2`.
+- **T15.5** (empirical): 2-cycles (mutual edges) **not structurally forbidden** — first appear m=13. Mechanical verification of 20,000 (m,x,y) samples confirms no self-collinear triple in 8 lifted points.
+- **T15.5** (empirical landscape): Distinct cycle types 1→65 (m=3→27); dominant [m]/[1,m-1] share decays 1.0→0.00 by m=35. Cycle type is **neither obstacle nor accelerator** for m=37.
 
 See `analysis/results/theorem_r9f_baseframe_3free.md`, `analysis/results/cycle_type_stats.json`.
-
-**Why this advances Costas.** Orders **32 and 33** are the first orders with *no known* Costas array (counts are known only to 29). The theorem narrows any symmetric witness there to the six-type list (and `C4` is allowed at both 32 and 33), while `cpsat_m37.py`'s per-line at-most-2 encoding is a direct template for the exact distinct-displacement CP-SAT attack on 32/33. Full statement, proof, and table: `analysis/results/costas_symmetry_theorem.md`; the broader bridge (FDR as 1-D Sidon shadow of Costas's 2-D Sidon; Welch-construction contrast) is in `analysis/results/costas_rigidity.md`.
 
 ## 3. Empirical Findings
 
@@ -763,7 +799,9 @@ For example, in a 12×12 grid, the minimum-radius rings and their capacities are
 | d=26 | 8 points | ≤2 | Must drop ≥6 points |
 | ... | ... | ... | ... |
 
-**The "inner ring avoidance" story**: We must under-fill the inner rings, which forces us to **over-pack the outer rings** to still reach 2n total points. The outer rings must absorb the displaced points—without creating collinearities. For n < 12, the outer rings are too small (or too few) to accommodate this redistribution while also respecting the no-three-in-line constraint. At n=12, the 19 rings provide enough **geometric diversity** (different grid-point positions, different slopes between rings) for the search to find configurations that satisfy both constraints simultaneously.
+**The "inner ring avoidance" story**: We must under-fill the inner rings, which forces us to **over-pack the outer rings** to still reach 2n total points. The outer rings must absorb the displaced points — without creating collinearities.
+
+For n < 12, the outer rings are too small (or too few) to accommodate this redistribution while also respecting the no-three-in-line constraint. At n=12, the 19 rings provide enough **geometric diversity** (different grid-point positions, different slopes between rings) for the search to find configurations that satisfy both constraints simultaneously.
 
 <p align="center">
   <img src="solution_12_0.svg" alt="n=12 missing-center solution: 24 points colored by distance ring" width="80%">
@@ -1163,7 +1201,7 @@ These failures are *algorithmic limitations, not a proof of non-existence* (2n s
 
 **Direction availability is not the bottleneck (EMPIRICAL).** "Forbidden directions" (used by zero sampled solutions) collapse to 0% once the sample is large (n=44: 0%, n=56: 0%); the high % at n=60,64,68,72 is a `.few`‑cache sampling artefact (only 1–32 solutions stored), not a structural limit.
 
-**The n≡0(mod4) structural property is universal within the rot4 sample (EMPIRICAL, `struct_n0mod4.py`).** For every sampled `n ≡ 0 (mod 4)` rot4 solution (n=12..72), orbit count = exactly `n`, central directions are all distinct, and the 90° closure `(a,b)↔(b,−a)` holds — 100% pass.
+**The n ≡ 0 (mod 4) structural property is universal within the rot4 sample (EMPIRICAL, `struct_n0mod4.py`).** For every sampled `n ≡ 0 (mod 4)` rot4 solution (n=12..72), orbit count = exactly `n`, central directions are all distinct, and the 90° closure `(a,b)↔(b,−a)` holds — 100% pass.
 
 **GPU exact solver (COMPUTATIONAL EVIDENCE).** Two independent GPU approaches were developed:
 
@@ -1221,7 +1259,7 @@ For a future attack, the most promising underexplored direction is a **full 2-fa
 **Unconstrained search (`d4_relaxed.cpp`).** A cell-by-cell backtrack with no 2-per-row rule, used to confirm that the even-n threshold is geometric, not a search artefact (§3.12).
 
 ## 5. Higher-Dimensional Generalizations
-We extended the No-Three-In-Line problem to higher dimensions (3D and beyond), building on the foundational work of Pór and Wood (2004).
+We extended the no-three-in-line problem to higher dimensions (3D and beyond), building on the foundational work of Pór and Wood (2004).
 
 **Background**: The 3D problem asks for the maximum number of points in an n×n×n grid with no three collinear. Pór and Wood proved this is Θ(n²) by constructing Vp = {(x, y, x²+y² mod p)} for primes p ≡ 3 (mod 4), and showed the minimum bounding box volume for 3D drawings of Kn is Θ(n^{3/2}).
 
@@ -1285,7 +1323,7 @@ All higher-dimensional analysis scripts are in the [`analysis/`](analysis/) dire
 
 ## 6. Structural Theory Breakthroughs (2026-07-10)
 
-> This section documents a comprehensive structural theory of No-Three-In-Line 2n-point solutions, developed through systematic analysis of ~225,000 known solutions (Flammenkamp database + mvr CUDA extensions). The theory establishes deep connections between NTIL solutions and classical combinatorics (Motzkin paths, Catalan numbers).
+> This section documents a comprehensive structural theory of no-three-in-line 2n-point solutions, developed through systematic analysis of ~225,000 known solutions (Flammenkamp database + mvr CUDA extensions). The theory establishes deep connections between NTIL solutions and classical combinatorics (Motzkin paths, Catalan numbers).
 
 **Core documents** (in [`analysis/`](analysis/)):
 - [`theory_structural.md`](analysis/theory_structural.md) — Master theory document (28 theorems, 34 empirical laws)
@@ -1303,7 +1341,7 @@ Every 2n-point NTIL solution can be decomposed into two per-row functions: **π(
 
 **Theorem Th-10 (列非排列)**. Neither π nor σ is a permutation for n ≥ 6. Column 0 is always left-exclusive (L), column n-1 is always right-exclusive (R). The columns partition into L ∪ B ∪ R with |L| = |R|. *Verified: 211,386 solutions, zero counterexamples.*
 
-### 6.2  Motzkin Path Theorem (Th-17)
+### 6.2 Motzkin Path Theorem (Th-17)
 
 **The NTIL column-sharing signature (L→+1, B→0, R→-1) constitutes a valid Motzkin path** — starts at 0, ends at 0, never negative.
 
@@ -1318,7 +1356,7 @@ Every 2n-point NTIL solution can be decomposed into two per-row functions: **π(
 
 *Verified: 205,869 solutions, zero counterexamples.*
 
-### 6.3  Motzkin Height Identity (Th-19)
+### 6.3 Motzkin Height Identity (Th-19)
 
 **h(c) = count_π(≤c) − (c+1)**
 
@@ -1490,7 +1528,7 @@ python verify_solution.py solutions/sols_n12.csv
 ```
 
 This produces a report with three independent checks:
-1. **No-three-in-line**: O(k³) exhaustive point-triple area check
+1. **no-three-in-line**: O(k³) exhaustive point-triple area check
 2. **Center presence**: Distance ring distribution analysis (max ring count ≥ 3?)
 3. **Column usage**: Verification that each column appears exactly twice
 
