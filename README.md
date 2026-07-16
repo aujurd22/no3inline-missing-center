@@ -26,7 +26,7 @@ This work originates from the classical **no-three-in-line** problem (§The Prob
 ## The Problem
 Place **2n points** on an **n×n grid** such that no three are collinear. The no-three-in-line problem asks for the maximum number of points D(n) achievable. 2n-point solutions have been found for all n ≤ 52 (classical result), and for n = 65, 67, 69, 70, 72 via SAT solvers (Heule, 2026). n = 71 is the only n ≤ 72 with no known 2n-point solution — D(71) remains unresolved.
 
-> **Prior work.** The classical NTIL problem originates with Dudeney (1917). Flammenkamp (1992–2026) established the symmetry classification (rot4, rot2, iden, dia1, dia2, ort1, ort2, rct4, full) and computed extensive solution counts. Prellberg (2026, arXiv:2602.07751) extended D(n)=2n to n≤60 using CP-SAT with a symmetry-reduced model on the fundamental domain H_n. Heule (2026) pushed to n=72 via SAT, finding the first n=70 (rot4) and n=72 (rot4) solutions. The H_n fundamental domain and rotational symmetry reduction used in §2.2–2.4 follow Prellberg's formulation. Our contribution is *not* about finding more solutions; we uncover the *algebraic rigidity* that symmetry imposes, proving structural theorems (SIRH, FDR, R8-G, T15) that go beyond the computational record.
+> **Prior work.** The classical NTIL problem originates with Dudeney (1917). Flammenkamp (1992–2026) established the symmetry classification (rot4, rot2, iden, dia1, dia2, ort1, ort2, rct4, full) and computed extensive solution counts. Prellberg (2026, arXiv:2602.07751) extended D(n)=2n to n≤60 using CP-SAT with a symmetry-reduced model on the fundamental domain H_n. Heule (2026) pushed to n=72 via SAT, finding the first n=70 (rot4) and n=72 (rot4) solutions. Cooper–Hyatt (*Des. Codes Cryptogr.* 93, 3135–3142, 2025) studied collinear triples in permutation graphs, noting that 2n-point sets partition into two permutations. The H_n fundamental domain and rotational symmetry reduction used in §2.2–2.4 follow Prellberg's formulation. Our contribution is *not* about finding more solutions; we uncover the *algebraic rigidity* that symmetry imposes, proving structural theorems (SIRH, FDR, R8-G, T15) that go beyond the computational record.
 
 **Our contribution.** Rather than searching for new solutions, we uncover the *algebraic rigidity* that symmetry imposes on extremal configurations.
 
@@ -70,6 +70,9 @@ This section collects every result that is **proven** (theorem or lemma with pro
 > **Navigation:** every result is tagged Proven / Evidence / Conjecture / Revised in [`STATUS.md`](./STATUS.md); the two-layer rigidity synthesis (linear FDR → quadratic R8) is in `analysis/results/two_layer_rigidity.md`.
 
 ### 2.1 Theorem: C₄ Symmetry Implies Non-Missing-Center ✔ *(historical origin of the project)*
+
+> **Prior work note**: The C₄ orbit-size condition (even n required for rot4) is a known consequence of Flammenkamp's symmetry classification (1992). The specific observation below — that C₄ forces the grid center to be a circumcenter — is new to this project.
+
 A solution has **C₄ symmetry** if it is invariant under 90° rotation about the grid center. We prove:
 
 > **Theorem 2.1 (C₄ Symmetry Implies Non-Missing-Center).** Any no-three-in-line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
@@ -177,6 +180,8 @@ We discovered a fundamental structural property of C₄ (90° rotational symmetr
 Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to deg(k) = 2 for all k ∈ [0,m-1].
 
 **Proof**: Each orbit (i,j) contributes 4 points to rows {i, j, n-1-i, n-1-j} — one per row via each of the four C₄ rotations. For any row r ∈ [0, n-1], the two C₄ copies that land in row r are those with first coordinate = r (from orbit (r, *) or its rotation) or second coordinate = r (from orbit (*, r) or its rotation). Row r therefore contains exactly deg(r) points when r < m, and exactly deg(n-1-r) points when r ≥ m. Hence every row has 2 points ⇔ deg(k) = 2 for all k.
+
+**Prior work note**: The underlying 2-per-row/2-per-column constraint for 2n-point NTIL solutions, and the observation that such solutions partition into two permutations (the row-pair decomposition), are well-known in the literature (Flammenkamp 1992; Cooper–Hyatt, *Designs, Codes and Cryptography* 93, 3135–3142, 2025). Prellberg (2026, arXiv:2602.07751) uses an orbit-based CP-SAT encoding that implicitly exploits the same structure. The theorem above makes the *explicit graph-theoretic equivalence* (deg(k)=2 ⇔ 2-regular graph on m vertices) a formal statement — the C₄ orbit-to-row-degree mapping, while implicit in earlier work, is newly proven here.
 
 **Computational verification**: All 33,534 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100% — matching exactly the rot4 counts per n in the table above (sum = 33,534 for n=12..56).
 
@@ -305,6 +310,8 @@ The following theorems were proven during an exhaustive analysis of the C₄-sym
 
 **Open question**: Theorem 2.7e implies that for any pair of fixed cells (b,c), each form forbids at most a *line* of positions for cell a in the m×m grid. The number of such forbidden lines grows as 16·C(m,2), but for m ≥ 37 this exceeds m², making existence a delicate Diophantine problem. The CP-SAT solver for m=37 (n=74) shows oscillatory convergence (396–724 collinear triples after 19 iterations), suggesting extreme solution rarity at this scale.
 
+> **Supporting theorem — Mutual Edge Decomposition** (`analysis/results/mutual_edge_decomposition.md`): the geometric interaction of two C₄ orbits sharing a row/column (a mutual edge in the 2-regular graph) is fully characterized by the MB-1 and MB-2 lemmas (proven). This provides the algebraic foundation for why 2-cycle pairs (mutual edges) do not create self-collinear triples — complementing T15.5's empirical finding (§2.18).
+
 **Empirical observation — C₄ lift survival rate** (not a theorem; based on exhaustive enumeration for small m):
 | m | Candidate NTIL sets (satisfying Th-23/50/51) | Surviving C₄ lift | Survival rate |
 |---|---|---|---|
@@ -320,7 +327,7 @@ We model the no-three-in-line problem on a **danger hypergraph** \(H_n\):
 - **V** = \(n \times n\) grid points (\(n^2\) vertices)
 - **E** = all collinear triples (each line with \(k\) points contributes \(\binom{k}{3}\) edges)
 
-A 2n-point NTIL solution is exactly an independent set of size \(2n\) in \(H_n\). The container method (Saxton–Thomason, Balogh–Morris–Samotij) applies when the hypergraph is *smooth*: all codegrees are \(o(\Delta)\).
+A 2n-point NTIL solution is exactly an independent set of size \(2n\) in \(H_n\). The container method (Saxton–Thomason, *Invent. Math.* 201(3), 925–992, 2015; Balogh–Morris–Samotij, *J. Amer. Math. Soc.* 28(3), 669–709, 2015) applies when the hypergraph is *smooth*: all codegrees are \(o(\Delta)\).
 
 **Empirical measurements** (`analysis/academic_hn_params.py`):
 
@@ -477,6 +484,15 @@ Two independent scaling analyses locate m=37 **inside** the satisfiable regime r
 
 > Caveat: m=29–36 are `.few` samples (19→1 solutions) with high statistical noise; the conclusion rests mainly on the m=3–28 full enumeration. Continuity does not guarantee existence — the system is 0-dimensional (Complete-Determination Principle) and may be empty at any m.
 
+**SDP-based evidence (2026-07-16, `analysis/results/route3_sdp_report.md`).** The direction-signing subproblem (2-factor fixed → NAE assignment) was mapped to a MAX-CUT SDP (GW relaxation), yielding a *computational* lower bound on the minimum number of violated collinearity constraints for any given 2-factor:
+- **m=5**: SDP dual certifies ≥ 73 violations (all 73 solutions correctly flagged, 0 false positives)
+- **m=6**: SDP certifies ≥ 388 violations (100% recall on known solutions)
+- **m=37 (20 random 2-factors)**: all 20 have SDP lower bound ≥ **45.5** — each 2-factor inevitably produces ≥ 46 collinear triples regardless of how directions are assigned. This is a *sufficient* certification for each tested 2-factor: the 20 sampled configurations are individually unredeemable.
+- **Strengthening via triangle inequalities** (cut-polytope + triangle SDP): a specific 408-edge 2-factor is certified to need ≥ **16** violations (exact integer bound 16, no numerical rounding ambiguity). Another with 448 edges requires ≥ **17**.
+- **No universal inequality found**: regression of SDP lower bound vs 2-factor edge count yields R² = 0.595 — too weak for a general lower-bound formula. The SDP route certifies individual configurations but does not prove m=37 impossibility.
+
+**Key boundary**: the SDP evidence does **not** prove m=37 has no solution — it only shows the sampled 2-factors are all unredeemable, a necessary condition for a global impossibility argument that has not been established.
+
 ### 2.14 Quadratic Sidon Completeness — R8 ★ (capstone)
 
 The quadratic gap (R7, §2.12) shows that linear Sidon laws are insufficient. The strongest result of the project is a **complete quadratic characterization** of C₄-symmetric NTIL solutions.
@@ -522,7 +538,7 @@ The FDR symmetry-classification lens (§2.10) transfers to the **Costas array** 
 
 Independent corroboration: dedicated CP-SAT sweep **INFEASIBLE** at n=4,8,12,16,20,24,28,32; C2 enumeration gives **2 solutions at n=2, 0 at n=4,6,8,10**.
 
-**Prior work / honesty.** The individual classical facts are not ours: the parallelogram characterization of Costas arrays is classical; `H`/`V` impossibility is the trivial permutation-collapse observation; full-D₄ impossibility follows. Transpose-symmetric (`D`/`AD`) Costas arrays are studied in Drakakis–Gow–Rickard, *On the symmetry of Welch- and Golomb-constructed Costas arrays* (Discrete Math. 308(11), 2008). **Our genuine contributions** are: (i) the complete admissible-D₄-subgroup enumeration (Theorem C), (ii) the rotational impossibility packaged as Theorems R and C6 with rigorous edge-case stress tests, and (iii) the **FDR-transfer framing** unifying this with the NTIL rigidity program — all confirmed by the first full six-type D₄ tally at every order. Full proof, stress test, and table: `analysis/results/costas_symmetry_theorem.md`.
+**Prior work / honesty.** The individual classical facts are not ours: the parallelogram characterization of Costas arrays is classical; `H`/`V` impossibility is the trivial permutation-collapse observation; full-D₄ impossibility follows. Transpose-symmetric (`D`/`AD`) Costas arrays are studied in Drakakis–Gow–Rickard, *On the symmetry of Welch- and Golomb-constructed Costas arrays* (Discrete Math. 309(8), 2559–2563, 2009; also DOI 10.1016/j.disc.2008.04.004). **Our genuine contributions** are: (i) the complete admissible-D₄-subgroup enumeration (Theorem C), (ii) the rotational impossibility packaged as Theorems R and C6 with rigorous edge-case stress tests, and (iii) the **FDR-transfer framing** unifying this with the NTIL rigidity program — all confirmed by the first full six-type D₄ tally at every order. Full proof, stress test, and table: `analysis/results/costas_symmetry_theorem.md`.
 
 **Why this advances Costas.** Orders **32 and 33** are the first orders with *no known* Costas array (counts are known only to 29). The classification above narrows any symmetric witness there to the six-type list (and `C4` is allowed at both 32 and 33), while `cpsat_m37.py`'s per-line at-most-2 encoding is a direct template for the exact distinct-displacement CP-SAT attack on 32/33. Full statement, proof, and table: `analysis/results/costas_symmetry_theorem.md`; the broader bridge (FDR as 1-D Sidon shadow of Costas's 2-D Sidon; Welch-construction contrast) is in `analysis/results/costas_rigidity.md`.
 
@@ -539,7 +555,7 @@ R8 generalized from C4 to **all six** fundamental-domain-rigidity (FDR) groups: 
 > ```
 > which is exactly a **finite quadratic CSP** (2×2 determinant ≠ 0 over orbit triples in F_G).
 
-**Proof**: Trivial from NTIL definition — soundness (⇒) and completeness (⇐) are definitional; quadratic equivalence via determinant form. **Computational validation**: 45/45 instances verify=True across all six groups (m=2..12), direct solves confirm reachability for reflection/Klein groups. Closes Hypothesis H. See `analysis/results/r8_generalized.md`.
+**Proof**: Trivial from NTIL definition — soundness (⇒) and completeness (⇐) are definitional; quadratic equivalence via determinant form. An independent algebraic proof (`analysis/results/r8g_algebraic_proof.md`) derives the same result from polynomial algebra without computational case analysis, confirming the determinant → at-most-2 equivalence for all m. **Computational validation**: 45/45 instances verify=True across all six groups (m=2..12), direct solves confirm reachability for reflection/Klein groups. Closes Hypothesis H. See `analysis/results/r8_generalized.md`.
 
 ---
 
@@ -1199,7 +1215,7 @@ These failures are *algorithmic limitations, not a proof of non-existence* (2n s
 
 > **ⓘ Theoretical potential**: This hypergraph formulation recasts the existence problem as an independence-number question $\alpha(H_n) \ge n$ in a 3‑uniform hypergraph with non‑random structure. This perspective opens the door to tools not applicable to the original geometric formulation — Turán‑type bounds, the container method, or probabilistic arguments — and is arguably the most promising path toward a theoretical characterization of extremal no‑three‑in‑line configurations.
 
-**Exact conflict‑hypergraph parameters at m=37, and the conflict‑free‑matching verdict (COMPUTATIONAL, independently cross‑verified).** Building the full (X)/(S) conflict hypergraph over all $|V| = m^2 = 1{,}369$ fundamental cells (no 2‑factor restriction) gives, at m=37: $N(X) = 30{,}992{,}032$ ternary (collinear‑triple) hyperedges; per‑cell degree $\deg_3^{\max} = 92{,}488$, $\deg_3^{\text{avg}} = 67{,}915$; codegree (triples through a fixed cell **pair**) $\mathrm{co}_3^{\max} = 1{,}132$; binary (S)‑degree $\deg_2^{\max} = 288$. These were reproduced two independent ways: rebuilding the hypergraph from scratch with a *different* canonical‑line key (`verify_hardnumbers.py` — for m=5..9 every count matches `generate_constraints` exactly) and re‑running `codegree_m37.py`. Applying the conflict‑free hypergraph‑matching framework of Glock–Joos–Kim–Kühn–Osthus / Graves et al. (arXiv:2407.18144, arXiv:2205.05564) with host parameter $d = |V| = 1{,}369$: the low‑degree conditions **(C2)** hold with room to spare ($\deg_3 = 92{,}488 \ll 3d^2 = 5{,}622{,}483$; $\deg_2 = 288 \ll 3d = 4{,}107$), but the **codegree condition (C3)** — requiring $\mathrm{co}_3 \le d^{1-\varepsilon}$ — **fails**: $\mathrm{co}_3 = 1{,}132 > d^{0.95} = 954$, and the critical exponent $\varepsilon^{*} = 1 - \ln 1132/\ln 1369 \approx 0.0263$ is far too small for the theorem's auxiliary bounds to hold at this finite host degree. So this matching theorem — like symmetric LLL (§3.16 #6①) — does **not** apply as a black box at m=37; the obstruction is the near‑linear codegree. Full log: `analysis/results/verification_2026-07-14.md`.
+**Exact conflict‑hypergraph parameters at m=37, and the conflict‑free‑matching verdict (COMPUTATIONAL, independently cross‑verified).** Building the full (X)/(S) conflict hypergraph over all $|V| = m^2 = 1{,}369$ fundamental cells (no 2‑factor restriction) gives, at m=37: $N(X) = 30{,}992{,}032$ ternary (collinear‑triple) hyperedges; per‑cell degree $\deg_3^{\max} = 92{,}488$, $\deg_3^{\text{avg}} = 67{,}915$; codegree (triples through a fixed cell **pair**) $\mathrm{co}_3^{\max} = 1{,}132$; binary (S)‑degree $\deg_2^{\max} = 288$ (`analysis/results/conflict_hypergraph.md`, `analysis/results/codegree_tail_analysis.md`, `analysis/results/extreme_pair_structure.md`). These were reproduced two independent ways: rebuilding the hypergraph from scratch with a *different* canonical‑line key (`verify_hardnumbers.py` — for m=5..9 every count matches `generate_constraints` exactly) and re‑running `codegree_m37.py`. Applying the conflict‑free hypergraph‑matching framework of Glock–Joos–Kim–Kühn–Osthus / Graves et al. (arXiv:2407.18144, arXiv:2205.05564) with host parameter $d = |V| = 1{,}369$: the low‑degree conditions **(C2)** hold with room to spare ($\deg_3 = 92{,}488 \ll 3d^2 = 5{,}622{,}483$; $\deg_2 = 288 \ll 3d = 4{,}107$), but the **codegree condition (C3)** — requiring $\mathrm{co}_3 \le d^{1-\varepsilon}$ — **fails**: $\mathrm{co}_3 = 1{,}132 > d^{0.95} = 954$, and the critical exponent $\varepsilon^{*} = 1 - \ln 1132/\ln 1369 \approx 0.0263$ is far too small for the theorem's auxiliary bounds to hold at this finite host degree. So this matching theorem — like symmetric LLL (§3.16 #6①) — does **not** apply as a black box at m=37; the obstruction is the near‑linear codegree. Full log: `analysis/results/verification_2026-07-14.md`.
 
 > **Caveat on the "radial ring" heuristic.** A separate radial‑layer analysis (`research_M/O/P`) conjectured a "≤2 cells per distance ring" law and a "{4,8}‑only" ring occupancy; **rigorous full‑enumeration recheck (2026‑07‑14) refutes both for m≥13** — real solutions reach 3 cells per ring (occupancy 12). Only the weaker **"ring occupancy ≡ 0 (mod 4)"** (§2.3, proved) survives. The observed preference radius $\rho\approx0.57$ is a soft statistical mean, not a law.
 
@@ -1231,17 +1247,19 @@ The following open problems arise directly from our analysis:
 
 **5. Resolution of the Quadratic Gap.** The FDR theorem (§2.10) proves that symmetric configurations satisfy Sidon, while the Quadratic Gap (§2.12) proves Sidon alone is insufficient for C₄ lift. The open question is: what *extra algebraic structure* (e.g., a specific quadratic form vanishing on each orbit triple, or a number-theoretic obstruction at certain $m$) characterizes the "gap" between Sidon pairings and C₄-liftable pairings? Resolving this would not only determine whether $m=37$ (n=74) has a solution, but reveal the true algebraic nature of the no-three-in-line problem on symmetric grids.
 
-**6. The m=37 C₄ instance (n=74).** The central open existence question. R8-G reduces it to satisfiability of a specific ~1.26M-constraint quadratic CSP over ~1,369 binary variables. Six computational directions were systematically evaluated (2026-07-13):
-- **① LLL/Switching**: vanilla symmetric LLL `ep(d+1)>1` fails from m≥14, and at m=37 fails in *both* natural spaces — the bijection space gives `e·p·(d+1) ≈ 7.8×10²` and the stub‑matching space `≈ 8.9×10³` (probability factors `p₂=1/(73·71)=1.93×10⁻⁴`, `p₃=1/(73·71·69)=2.80×10⁻⁶` verified), both ≫ 1; Moser–Tardos random resample gives only 2.7% solve rate on m=10. (Conflict‑free hypergraph matching — the Glock/Graves alternative — also fails at m=37 on the codegree condition; see §3.15.)
+**6. The m=37 C₄ instance (n=74).** The central open existence question. R8-G reduces it to satisfiability of a specific ~1.26M-constraint quadratic CSP over ~1,369 binary variables. Six computational directions were systematically evaluated (2026-07-13), plus a seventh from 2026-07-16:
+- **① LLL/Switching**: vanilla symmetric LLL `ep(d+1)>1` fails from m≥14, and at m=37 fails in *both* natural spaces — the bijection space gives `e·p·(d+1) ≈ 7.8×10²` and the stub‑matching space `≈ 8.9×10³` (probability factors `p₂=1/(73·71)=1.93×10⁻⁴`, `p₃=1/(73·71·69)=2.80×10⁻⁶` verified), both ≫ 1; Moser–Tardos random resample gives only 2.7% solve rate on m=10. (Lemma 1b's m ≥ 8 counting proof (`analysis/results/lemma1b_proof.md`) remains sound, but does not bridge the gap.)
+  > **⚠️ Critical correction (2026-07-16 Math-skill audit)**: The **Switch-Graph Theorem (Theorem 1)** in `analysis/results/switch_graph_theorem.md` was claimed to prove m=37 has a solution, but Lemma 1a's proof is **incomplete for m=37**. The algebraic pigeonhole argument only works for **m ≥ 65**; for 14 ≤ m ≤ 64 (including m=37), the "proof" relies on gating random sampling (thousands of 2-factors vs a super-exponential space ≈ C(m²,m)) — insufficient as a mathematical proof. The document's own text admits "the existence proof fails for m ≤ 64". Therefore Theorem 1 is **not established** for m=37, and any document claiming it "resolves" m=37 is misleading. Lemma 1b (S-layer conflict, m ≥ 8 counting argument) remains sound.
 - **② m=36→37 surgery**: N=72→74 change makes the seed solution geometrically invalid (152 bad lines under N=74).
 - **③ Lazy CP-SAT**: 30 iterations on m=17 — violated-line count oscillates without convergence. Avoids presolve wall but fails to converge.
 - **④ Energy bound**: all counting/pigeonhole-type arguments fail (direction key space and C4-orbit space are both in surplus).
 - **⑤ Data-driven**: no breakthrough invariant found.
 - **⑥ Algebraic geometry / Gröbner**: sympy cannot handle even the m=5 single-triple product polynomial (symbolic explosion).
+- **⑦ SDP certification (2026-07-16, `analysis/results/route3_sdp_report.md`)**: The direction-signing subproblem (2-factor fixed → signed-NAE) is mapped to MAX-CUT SDP. **20 random m=37 2-factors** all yield SDP lower bound ≥ **45.5** (each individually unredeemable). A specific 408-edge 2-factor is certified to need ≥ **16** violations (exact integer bound via triangle-in-SDP). However, **no universal inequality was found** (R² = 0.595 for lower bound vs edge count), so the SDP certifies individual 2-factors but does not prove m=37 impossibility.
 
-**Conclusion**: m=37 remains open under current tools and theory. The SIRH framework (theorems FDR → R7 → R8-G → Part IV) and the full computational evidence (gating data across 30 m-values, cycle analysis across m=3..36) constitute the project's primary contributions — establishing the **symmetry-induced rigidity hierarchy** as a general phenomenon in extremal grid combinatorics.
+**Conclusion**: m=37 remains open under current tools and theory. The SIRH framework (theorems FDR → R7 → R8-G → Part IV) and the full computational evidence (gating data across 30 m-values, cycle analysis across m=3..36, SDP certification of 20 specific 2-factors) constitute the project's primary contributions — establishing the **symmetry-induced rigidity hierarchy** as a general phenomenon in extremal grid combinatorics.
 
-For a future attack, the most promising underexplored direction is a **full 2-factor edge-swap search** (alternating 2-switch on the complete 2-regular graph, not coordinate-swapping) — gating data shows `red_config_frac=1.0` for all m≥14, meaning every bad configuration has a strictly-badness-reducing 2-switch in the full edge space. This was never correctly implemented in any of the six tested approaches.
+**Most promising underexplored direction**: a **full 2-factor edge-swap search** (`csearch2` prototype, `analysis/results/conflict_hypergraph.md`). Three swap types (YSWAP/XSWAP/XYSWAP) on the complete 2-regular graph space — gating data shows `red_config_frac=1.0` for all m≥14, meaning every bad configuration has a strictly-badness-reducing 2-switch in the full edge space. At m=10 this achieves best=4 (vs csearch1's best=32, 8× improvement). The conflict hypergraph is very sparse: 97% of conflicts are (X)-type (ternary), and each cell per 2-factor participates in only 0.6–0.9 (X) conflicts, decreasing with m — supporting LLL/nibble-type arguments. This approach was **never correctly implemented** in the original six evaluated directions — all earlier edge-swap implementations were coordinate-swapping (constellation space), not graph-edge-swapping.
 
 ---
 
@@ -1261,6 +1279,12 @@ For a future attack, the most promising underexplored direction is a **full 2-fa
 **Independent verifier (`verify_solution.py`).** Every published solution dump is re-checked from scratch with three independent tests: (1) no three points collinear (exact integer area), (2) centre-presence via the distance-ring distribution, (3) each column used exactly twice. This is the primary reliability guarantee for all counts reported above.
 
 **Unconstrained search (`d4_relaxed.cpp`).** A cell-by-cell backtrack with no 2-per-row rule, used to confirm that the even-n threshold is geometric, not a search artefact (§3.12).
+
+**Independent Math-skill audit (2026-07-16, `analysis/results/AUDIT_nonREADME_2026-07-16.md`).** All 137 `.md` files in `analysis/` and `analysis/results/` not previously included in this README underwent a rigorous theorem/conjecture/open audit with hard-number verification. Key findings:
+- **~45 theorem-grade documents** confirmed sound (SIRH core, C₂ theorems, Costas classification, Burnside orbit counts, R9c/d/e theorem chain, mutual edge decomposition, etc.)
+- **2 severe overclaims**: `switch_graph_theorem.md` + `lemma1a_algebraic_proof.md` (Theorem 1 not proven for m=37 — see §3.16 #6), `alpha_breakthrough.md` ("Computational Proof" title)
+- **5 minor overclaims**: `container_analysis.md` §4.1, `hypergraph_theory.md` §2.1, `quadratic_complete_determination.md`, `part4_reverse.md` P4.2, `research_directions.md` §1 (withdrawn claims hidden in appendix)
+- **All findings incorporated into the open-problem statements above** — the audit corrected no substantive theorem errors in the README's §2 (proven results) but tightened the honesty calibration of several §3 claims.
 
 ## 5. Higher-Dimensional Generalizations
 We extended the no-three-in-line problem to higher dimensions (3D and beyond), building on the foundational work of Pór and Wood (2004).
@@ -1341,7 +1365,7 @@ All higher-dimensional analysis scripts are in the [`analysis/`](analysis/) dire
 
 ### 6.1 The (π,σ) Framework
 
-Every 2n-point NTIL solution can be decomposed into two per-row functions: **π(i)** = smaller column in row i, **σ(i)** = larger column. This gives the column-sharing **signature**: L (left-exclusive, column appears in π twice), B (balanced, once in each), R (right-exclusive, appears in σ twice).
+Every 2n-point NTIL solution can be decomposed into two per-row functions: **π(i)** = smaller column in row i, **σ(i)** = larger column. This gives the column-sharing **signature**: L (left-exclusive, column appears in π twice), B (balanced, once in each), R (right-exclusive, appears in σ twice). The decomposition of 2n-point sets into two permutations is noted in prior work (Cooper–Hyatt, *Designs, Codes and Cryptography* 93, 2025); the L/B/R signature taxonomy and the connection to Motzkin paths below are original.
 
 **Theorem Th-10 (列非排列)**. Neither π nor σ is a permutation for n ≥ 6. Column 0 is always left-exclusive (L), column n-1 is always right-exclusive (R). The columns partition into L ∪ B ∪ R with |L| = |R|. *Verified: 211,386 solutions, zero counterexamples.*
 
