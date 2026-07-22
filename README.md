@@ -1,2107 +1,541 @@
-# No-Three-In-Line: Symmetry Reductions, Exact Encodings, and the Open n=74 Case
+# No-Three-In-Line: Audited C4 Structure, a Verified `n=74` Solution, and the All-Even Question
 
-> **Research status (2026-07-21).** This repository is an AI-assisted computational
-> research notebook. It contains proved elementary lemmas, exact finite encodings,
-> machine-checked local certificates, conjectures, and superseded exploratory notes.
-> The labels in individual historical files are not by themselves proof status.
+> **Research status: 2026-07-22.** This is an AI-assisted computational
+> research notebook. It contains elementary proofs, exact finite encodings,
+> machine-checked local certificates, empirical laws, conjectures, and historical
+> failed approaches. Those categories are kept separate below.
 >
-> **Current headline:** the existence of a C₄-symmetric solution for `n=74`
-> (`m=37`) remains **OPEN**. The earlier large random-UNSAT sweep based on the old
-> custom DPLL implementation is **withdrawn** because that implementation contained
-> a false-UNSAT bug. The trusted computational baseline is
-> [`analysis/even_n_existence_tools/validate_solver_report.md`](analysis/even_n_existence_tools/validate_solver_report.md).
+> **Major update:** Thomas Prellberg found a quarter-turn-symmetric solution for
+> `n=74` on 2026-07-20. It was added to Achim Flammenkamp's database on
+> 2026-07-21 and independently verified in this repository on 2026-07-22.
+> Consequently, the former headline “`m=37` / `n=74` is open” is obsolete.
 >
-> The most reliable contributions currently are the C₄ orbit/centre observations,
-> the 2-regular pseudograph reduction, exact finite collinearity encodings, and
-> explicitly bounded local certificates such as the corrected `k≤14` V=20 audit.
-> FDR, the “Symmetry Signature” argument, the container claim, and the SIRH umbrella
-> are retained below as **provisional research frameworks** pending repaired proofs.
+> The main theoretical question studied here is now: **does every even `n`
+> admit `2n` grid points with no three collinear?** The data through `n=74`
+> support this possibility, but the repository does not prove it.
 
-> 🎯 **Interactive visualization available**: [**`visualization/overview.html`**](visualization/overview.html) — an interactive HTML guide to the missing-center concept, C₄ theorem, symmetry classes, empirical transitions, and key data. Open in any browser. (Screenshot below.)
+[Interactive overview](visualization/overview.html) ·
+[verified `n=74` certificate](analysis/results/n74_rot4_prellberg_verified_2026-07-22.md) ·
+[latest joint audit](analysis/results/latest_joint_audit_2026-07-22.md)
 
-![Overview](visualization/preview.png)
+![Interactive overview preview](visualization/preview.png)
 
-An investigation of symmetry reductions and exact constraint formulations for
-extremal no-three-in-line configurations.
+## 1. Problem and current external record
 
-How can rotation and reflection symmetries reduce the collinearity constraints?
-The project studies linear necessary conditions on fundamental domains, determinant
-constraints for lifted point triples, and exact finite encodings of the remaining
-search problem. Several proposed hierarchy statements remain under proof audit.
-
-The main unresolved computational target is the C₄-symmetric existence question at
-`n=74` (`m=37`). Nothing in this repository currently proves either existence or
-non-existence.
-
-This work originates from the classical **no-three-in-line** problem (§The Problem); its extremal 2n-point solutions serve as the laboratory in which a broader theory of *symmetry-induced rigidity* is developed.
-
-## The Problem
-Place **2n points** on an **n×n grid** such that no three are collinear. The
-no-three-in-line problem asks for the maximum number of points `D(n)` achievable.
-As of 2026-07-21, 2n-point configurations are known for every `n≤70` and also for
-`n=72`; `n=71` is the only unresolved value at most 72. The recent extension combines
-CP-SAT work by Thomas Prellberg through `n=60` with later computational discoveries
-recorded by Achim Flammenkamp, including Marijn Heule's SAT solutions at
-`n=65,67,69,70,72`.
-<!-- Background and attribution -->
-
-> **Prior work.** The classical NTIL problem originates with Dudeney. Flammenkamp
-> established the symmetry classification used here and maintains the principal
-> database. Prellberg (2026, arXiv:2602.07751) extended `D(n)=2n` through `n=60`
-> using CP-SAT and symmetry reduction. Heule later found the `n=70` and `n=72`
-> rot4 solutions with SAT. Cooper–Hyatt studied collinear triples in permutation
-> graphs. This repository builds experimental reductions and encodings on top of
-> that literature; claims of novelty should be read narrowly and are not claims of
-> peer review.
-<!-- Repository scope -->
-
-**Repository contribution.** The project collects symmetry reductions, exact
-encodings, verified local certificates, and failed approaches in one reproducible
-research record.
-
-The project began with a concrete question: for each known 2n-point solution, is the grid center ever a circumcenter of some triple? The answer — the C₄ theorem (§2.1) shows that C₄-symmetric solutions *never* miss the center — turned out to be the first rung of a ladder.
-
-The working programme has three levels:
-- inexpensive linear necessary filters on a fundamental domain;
-- quadratic determinant constraints for lifted triples;
-- exact finite line-capacity encodings for computation.
-
-The first level is still under proof audit; the last level is an exact formulation,
-not a solution of the existence problem.
-
-The central open problem is whether a C₄-symmetric 2n-point solution exists at **n=74 (m=37)** (§2.13). The missing-center question is the historical entry point, not the destination.
-
-**Detection method**: Instead of computing circumcenters directly (which requires rational arithmetic), we use an equivalent integer criterion:
-
-> Grid center is a circumcenter of some triple ⇔ three grid points share the same squared Euclidean distance from the center
-
-The squared distance from grid center \(C\) to point \((x,y)\) is:
-\[
-d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2
-\]
-
-If three points have the same \(d\) value, they lie on a circle centered at \(C\), making \(C\) their circumcenter. Conversely, if \(C\) is the circumcenter of three points, those points are equidistant from \(C\) and thus share the same \(d\) value. **The equivalence is exact** — no floating-point approximation is involved.
-
-As an example application, the n=72 solution found by Marijn Heule
-(2026-06-25) has C₄ symmetry. Any complete C₄ orbit consists of four points
-equidistant from the grid centre, so that solution cannot be missing-centre.
-No literature-priority claim is made here.
-
-## 2. Results, Exact Formulations, and Provisional Frameworks
-
-This section mixes elementary proofs, exact encodings, computational checks, and
-provisional frameworks. Each item must be judged by its local status note; an old
-heading containing “theorem” is not sufficient evidence that the proof is closed.
-
-> **Main-axis spine.** The results below form a single narrative about *symmetry-induced rigidity*. Read §2 in this order:
-> 1. **Origin — missing center (§2.1).** C₄-symmetric solutions never miss the grid center (the center is always a circumcenter). This negative observation is the historical entry point, not the destination.
-> 2. **Reduction to graph theory (§2.2–§2.4).** C₄ solutions decompose into C₄-orbits ↔ a 2-regular graph on m=n/2 vertices; every row/column constraint becomes a degree-2 condition.
-> 3. **Candidate linear layer — FDR (§2.10, proof incomplete).** The rot4
-> `count(d)+count(-d)≤2` condition is useful, but the published general proof has a
-> quantifier gap and the group boundary requires reformulation.
-> 4. **Candidate statistical signature (§2.11).** Empirical separation is retained;
-> the current asymptotic proof is incomplete.
-> 5. **Quadratic gap (§2.12, scope-limited).** Determinant constraints are genuinely
-> quadratic. The claim about “no finite linear filter” applies only after specifying
-> a uniform family and ambient domain; the tested Sidon families are insufficient.
-> 6. **Exact C₄ encoding — R8 (§2.14).** Partitioning lifted triples by source orbit
-> gives an exact finite encoding. This is an exact formulation, not an existence proof.
-> 7. **The m=37 window (§2.13).** Smooth extrapolation from smaller instances is
-> descriptive only and gives no reliable probability tilt toward SAT or UNSAT.
->
-> Supporting results (low-slope parity §2.5, distance-ring hypergraph §2.6, further rot4 theorems §2.7, container method §2.8, structural invariants §2.13) shore up this spine. The missing-center question that started the project is recorded in §3 as empirical background.
->
-> **Navigation:** [`STATUS.md`](./STATUS.md) is a historical navigation map and is
-> itself pending refresh. For current m=37 solver validity, prefer the dated
-> validation and retraction notes linked at the top of this README.
-
-### 2.1 Theorem: C₄ Symmetry Implies Non-Missing-Center ✔ *(historical origin of the project)*
-
-> **Prior work note**: The C₄ orbit-size condition (even n required for rot4) is a known consequence of Flammenkamp's symmetry classification (1992). The specific observation below — that C₄ forces the grid center to be a circumcenter — is new to this project.
-
-A solution has **C₄ symmetry** if it is invariant under 90° rotation about the grid center. We prove:
-
-> **Theorem 2.1 (C₄ Symmetry Implies Non-Missing-Center).** Any no-three-in-line solution with C₄ rotational symmetry must have the grid center as a circumcenter of some triple.
-
-**Proof**. Let the grid have coordinates \(0,\ldots,n-1\). The center is \(C = (\frac{n-1}{2}, \frac{n-1}{2})\). The 90° rotation is \(R(x,y) = (n-1-y, x)\).
-
-*Lemma 1*: The squared Euclidean distance from \(C\) is invariant under \(R\):
-\[
-d(x,y) = (2x-(n-1))^2 + (2y-(n-1))^2 = (2R(x)_x-(n-1))^2 + (2R(x)_y-(n-1))^2
-\]
-
-*Lemma 2*: The orbits of \(C_4\) on the grid partition into sets of size 4 for even \(n\), and one fixed point (the center) plus 4-orbits for odd \(n\).
-
-*Case 1: \(n\) even* (\(n=2m\)). Then \(2n = 4m\). Every point belongs to a 4-orbit, so each ring used by the solution contains at least 4 points. Since \(4 \ge 3\), the center is a circumcenter.
-
-*Case 2: \(n\) odd* (\(n=2m+1\)). Then \(2n = 4m+2 \equiv 2 \pmod{4}\). But C₄ orbits can only produce \(4k\) or \(4k+1\) points. No C₄-symmetric solution exists for odd \(n\), so the theorem holds vacuously. ∎
-
-**Corollary**: Missing-center solutions cannot have C₄ symmetry.
-
-*Geometric illustration.* The theorem says the center is always a circumcenter, but where are the 4 points that certify it? They form **a minimum-radius occupied orbit** — one of the distance rings actually used by the solution having the smallest radius; its 4 points sit at the same distance from \(C\) and thus lie on a circle centered at \(C\). In 9 of the first 15 even \(n\) (\(n=12\ldots40\)), these 4 points are literally the \(2\times2\) block straddling \(n/2\), i.e. \(\{\lfloor n/2\rfloor,\lceil n/2\rceil\}^2\) (e.g. for \(n=40\): \((19,19),(19,20),(20,19),(20,20)\)) — placed exactly "by \(n/2\)". The remaining 6 solutions (\(n=12,16,18,20,24,26\)) instead use a slightly larger inner diamond, but the role is identical. Either way, this tiny central cluster is the concrete geometric footprint of the theorem: it is the ring that makes \(C\) a circumcenter.
-
-*A structural refinement.* Decomposing a rot4 solution into its \(n/2\) C₄-orbits, each orbit is a square of 4 points centred at \(C\) (one point in each quadrant). Every such square contributes exactly two **diagonal directions through \(C\)** — the two directions joining opposite corners.
-
-We verified across all 15 even \(n\) from 12 to 40 that the \(n/2\) orbits yield **exactly \(n\) distinct diagonal directions, with no two orbits sharing one**. This is a *necessary and sufficient* condition for the solution to be free of collinear triples *along any line through \(C\)*: a line through \(C\) can contain at most the two opposite corners of a single orbit. If two orbits shared a diagonal direction, that line would hold 4 points and violate the no-three-in-line rule.
-
-Thus "all diagonal directions are distinct" is a hallmark of every rot4 solution and the direct generalization of the C₄ theorem. The theorem guarantees that \(C\) *is* a circumcenter, while the distinct-direction law explains *why* the orbit structure automatically avoids a 4-point line through it.
-
-The theorem is verified across all 34 even n values from n=6 to n=72 in the Flammenkamp database (n=6–56 from the standard database, n=58–72 from newer rot4.few files; including Heule's n=70 and n=72 solutions):
-
-| n | rot4 solutions | C₄ pass rate | Orbits | Orbit size | Max ring pop | Center circumcenter? |
-|---|:-------------:|:------------:|:------:|:----------:|:------------:|:--------------------:|
-| 6 | 3 | 100% | 3 | 4 | 4 | ✅ |
-| 8 | 4 | 100% | 4 | 4 | 4 | ✅ |
-| 10 | 6 | 100% | 5 | 4 | 4 | ✅ |
-| 12 | 4 | 100% | 6 | 4 | 4 | ✅ |
-| 14 | 13 | 100% | 7 | 4 | 8 | ✅ |
-| 16 | 13 | 100% | 8 | 4 | 4 | ✅ |
-| 18 | 7 | 100% | 9 | 4 | 8 | ✅ |
-| 20 | 16 | 100% | 10 | 4 | 8 | ✅ |
-| 22 | 8 | 100% | 11 | 4 | 8 | ✅ |
-| 24 | 23 | 100% | 12 | 4 | 8 | ✅ |
-| 26 | 36 | 100% | 13 | 4 | 8 | ✅ |
-| 28 | 58 | 100% | 14 | 4 | 8 | ✅ |
-| 30 | 92 | 100% | 15 | 4 | 4 | ✅ |
-| 32 | 101 | 100% | 16 | 4 | 8 | ✅ |
-| 34 | 172 | 100% | 17 | 4 | 8 | ✅ |
-| 36 | 281 | 100% | 18 | 4 | 4 | ✅ |
-| 38 | 337 | 100% | 19 | 4 | 8 | ✅ |
-| 40 | 541 | 100% | 20 | 4 | 4 | ✅ |
-| 42 | 746 | 100% | 21 | 4 | 8 | ✅ |
-| 44 | 1,016 | 100% | 22 | 4 | 4 | ✅ |
-| 46 | 1,366 | 100% | 23 | 4 | 4 | ✅ |
-| 48 | 2,124 | 100% | 24 | 4 | 8 | ✅ |
-| 50 | 3,381 | 100% | 25 | 4 | 8 | ✅ |
-| 52 | 5,062 | 100% | 26 | 4 | 4 | ✅ |
-| 54 | 7,696 | 100% | 27 | 4 | 8 | ✅ |
-| 56 | 10,441 | 100% | 28 | 4 | 4 | ✅ |
-| 58 | 19 | 100% | 29 | 4 | 4^ | ✅ |
-| 60 | 32 | 100% | 30 | 4 | 8^ | ✅ |
-| 62 | 5 | 100% | 31 | 4 | 8^ | ✅ |
-| 64 | 25 | 100% | 32 | 4 | 8^ | ✅ |
-| 66 | 2 | 100% | 33 | 4 | 4 | ✅ |
-| 68 | 2 | 100% | 34 | 4 | 4 | ✅ |
-| 70 | 1 | 100% | 35 | 4 | 4 | ✅ |
-| **72** | **1** | **100%** | **36** | **4** | **8** | **✅** |
-
-^ Most common value; the actual solutions include both pop=4 and pop=8 configurations.
-
-Every single rot4 solution across all entries — n=6 (3 solutions) through n=72 (1 solution, Heule 2026) — has the center as a circumcenter. **Zero exceptions in 33,634 tested solutions** (sum of all rot4 counts in the table).
-
-### 2.2 C₂ Theorem (180° rotational symmetry)
-
-A broader symmetry invariant, proved in `analysis/lemmas_c2_ring.md` and verified on 3,732 sampled solutions:
-
-> **Theorem 2.3 (C₂ Direction Theorem).** Let *S* be a 2n-point no-three-in-line solution on an even n×n grid that is invariant under the half-turn R₁₈₀ about the grid centre C. Then *S* decomposes into n R₁₈₀-orbits {p, R₁₈₀(p)}; each orbit defines a line through C; and these n central lines are pairwise distinct (two orbits on one central line would put 4 points on that line, violating no-three-in-line).
-
-The hypothesis "R₁₈₀-invariant" holds exactly for the symmetry classes whose group contains the half-turn:
-- **rot2** (C₂);
-- **rot4** (C₄, since R₁₈₀ = R₉₀²);
-- **dia2** (V₄ = {id, R₁₈₀, d₁, d₂}, where R₁₈₀ = d₁∘d₂);
-- **rct4** (V₄ = {id, R₁₈₀, two perpendicular axis reflections}; verified R₁₈₀-invariant on all 326 catalogued rct4 solutions, though not R₉₀-invariant).
-
-Classes iden, dia1 (single diagonal reflection only), and ort1/ort2 do **not** contain R₁₈₀ and lie outside the theorem's scope.
-
-Consequence for the D(n)=2n problem: any R₁₈₀-invariant construction automatically eliminates all collinearity *through the centre*; the remaining obstacle is collinearity on lines not through C. This reframes the existence question (the genuinely open lower bound D(n) ≥ 2n) as a constrained-combinatorics problem rather than a pigeonhole upper bound.
-
-### 2.3 Orbit-Ring Invariance (proved for C₄)
-
-Every C₄-orbit of the grid is a square of 4 vertices, all equidistant from the centre. Hence every distance ring used by a C₄ solution is a union of complete orbits, and its population is a multiple of 4. This is a **direct geometric consequence** of the C₄ orbit structure:
-
-> **Theorem (Orbit-Ring Invariance).** For any C₄-symmetric solution on an even $n\times n$ grid, each C₄ orbit of 4 points maps entirely to a single distance ring. No orbit splits across multiple rings.
-
-> **Corollary (Ring Population Bound).** Every distance ring in a C₄ solution has population $\equiv 0 \pmod{4}$.
-
-Empirically the observed populations are 4, 8, 12, or 16 (across all 21,601 rot4 solutions for n=12–72). Whether populations >16 (i.e. more than 4 coalesced orbits per ring) are possible for larger $n$ remains an open question. (The "multiple of 4" law is specific to even-n rot4; rct4 orbits can have size 2, so it does not extend to rct4.)
-
-### 2.4 Structure of C₄ Solutions and the Row-Degree Theorem
-
-We discovered a fundamental structural property of C₄ (90° rotational symmetric) solutions:
-
-> **Theorem 2.2 (Row-Degree Equivalence for C₄).** For any C₄-symmetric 2n-point solution on an even n×n grid, let m = n/2 and represent the solution by its m C₄ orbits (i₁,j₁), …, (iₘ,jₘ) with iₖ, jₖ ∈ [0,m-1]. Define the degree of vertex k as
-
-    deg(k) = |{orbits where i=k}| + |{orbits where j=k}|.
-
-Then the row constraint (each row 0..n-1 has exactly 2 points) is equivalent to deg(k) = 2 for all k ∈ [0,m-1].
-
-**Proof**: Each orbit (i,j) contributes 4 points to rows {i, j, n-1-i, n-1-j} — one per row via each of the four C₄ rotations. For any row r ∈ [0, n-1], the two C₄ copies that land in row r are those with first coordinate = r (from orbit (r, *) or its rotation) or second coordinate = r (from orbit (*, r) or its rotation). Row r therefore contains exactly deg(r) points when r < m, and exactly deg(n-1-r) points when r ≥ m. Hence every row has 2 points ⇔ deg(k) = 2 for all k.
-
-**Prior work note**: The underlying 2-per-row/2-per-column constraint for 2n-point NTIL solutions, and the observation that such solutions partition into two permutations (the row-pair decomposition), are well-known in the literature (Flammenkamp 1992; Cooper–Hyatt, *Designs, Codes and Cryptography* 93, 3135–3142, 2025). Prellberg (2026, arXiv:2602.07751) uses an orbit-based CP-SAT encoding that implicitly exploits the same structure. The theorem above makes the *explicit graph-theoretic equivalence* (deg(k)=2 ⇔ 2-regular graph on m vertices) a formal statement — the C₄ orbit-to-row-degree mapping, while implicit in earlier work, is newly proven here.
-
-**Computational verification**: All 33,534 unique C₄ solutions in Flammenkamp's database (n=12..56) satisfy this theorem at 100% — matching exactly the rot4 counts per n in the table above (sum = 33,534 for n=12..56).
-
-**Consequence**: Under the row/column saturation constraint (each row and column of the n×n grid must contain exactly 2 points), a C₄ solution corresponds to a 2-regular graph on m vertices. Each edge (i,j) in the graph corresponds to one C₄ orbit, and the 4 rotated copies of each orbit automatically guarantee correct row coverage. This reduces the C₄ solution search from geometry to pure graph theory.
-
-**Attempted n=74 C₄ solution**: Applying this to n=74 (m=37), the problem reduces to finding a 2-regular graph on 37 vertices where no 3 of the resulting 148 points are collinear. Multiple approaches were tested:
-
-| Approach | Method | Result | Time |
-|:---------|:-------|:-------|:----:|
-| Partition (28+9, 27+10, 18+12+7, etc.) | Fix DB solutions, search remainder | UNSAT (cross-block collinear) | ~1-2min |
-| Permutation Z3 | Search sigma ∈ S₃₇ with 2-cycle blocking | All 10,000 attempts collinear | ~1min |
-| 2-matching Z3 | Boolean orbit variables, incremental | 850 iterations, not converging | ~5min |
-| Small partitions (7+7+7+7+9, 6+6+6+6+6+7, etc.) | Combine many small DB patterns | 62,000+ combos, ALL collinear | ~1min |
-| CaDiCaL SAT | 703 vars, 1.17M clauses, direct encoding | Running 15min+, no result | ~15min |
-
-The difficulty: among $C(703, 3) \approx 57.7$M possible orbit triples (counting each unordered $\{i,j\}$ orbit once with $i \le j$; the full $37^2 = 1369$ orbit space yields $C(1369, 3) \approx 427$M triples), the majority are non-collinear (earlier estimates placed the collinear fraction around 2%, unconfirmed). Any 2-regular graph on 37 vertices selects $C(37,3) = 7{,}770$ triples of orbits, with a small expected number of collinear under uniform sampling. Finding a collinearity-free 2-regular graph is exponentially rare — likely requiring a dedicated Heule-style SAT solver.
-
-**Code**: `analysis/n74_sat_solver.py`, `analysis/n74_permutation_v2.py`, `analysis/n74_2matching_solver.py`
-
-### 2.5 Low-Slope Parity Theorem (auxiliary direction model)
-
-This theorem lives in the auxiliary **direction model** \(H_n^{\text{dir}}\) used by the hypergraph framework, not in the raw grid. In that model each grid point \(P=(r,c)\) carries a *centre-direction*
-\[
-\operatorname{dir}(P)=\operatorname{reduced}\bigl(2r-(n-1),\,2c-(n-1)\bigr)
-\]
-(reduce by \(\gcd\), normalise to a half-plane), and we declare a point *low-slope* when its direction lies in
-\[
-\mathrm{LOW}=\{(1,0),(0,1),(2,1),(1,2),(2,-1),(1,-2),(3,2),(2,3),(3,-2),(2,-3)\}.
-\]
-A *low-slope configuration* is three low-slope points that are collinear off-centre with their joining direction also in LOW. The sub-hypergraph \(H_n^{\text{dir}}[L]\) records these.
-
-> **Theorem 2.6 (Low-Slope Parity).**
-> Let \(n\) be even. Then **no** grid point of the \(n\times n\) grid has its centre-direction in LOW, so \(H_n^{\text{dir}}[L]\) is *trivially empty* for every even \(n\).
-> Conversely, for every **odd** \(n\ge 5\), \(H_n^{\text{dir}}[L]\) is **non-empty**; an explicit witness is the vertical-line triple
-> \[
-> (m{+}2,m{-}1),\;(m{+}2,m),\;(m{+}2,m{+}1)\qquad\text{with }n=2m{+}1.
-> \]
-
-**Proof (even \(n\) — parity).** Write \(n=2m\). For any cell \((r,c)\) the numerator \((2r-(2m-1),\,2c-(2m-1))\) has both coordinates **odd**. Reducing by the \(\gcd\) leaves both coordinates odd (the \(\gcd\) of two odd numbers is odd), so the reduced direction \((a,b)\) satisfies: \(a,b\) both odd. But every direction in LOW has at least one even coordinate — \((1,0),(0,1)\) have a zero; \((2,\pm1),(1,\pm2),(3,\pm2),(2,\pm3)\) are all odd–even. Hence no reduced direction can land in LOW, so the low-slope point set is empty and \(H_n^{\text{dir}}[L]\) is vacuous. ∎
-
-**Proof (odd \(n\ge 5\) — explicit).** Write \(n=2m+1\) with \(m\ge 2\). The centre is \((m,m)\). The three points have offsets \((2,-1),(2,0),(2,1)\), giving centre-directions \((2,-1),(1,0),(2,1)\in\mathrm{LOW}\); they are collinear on the vertical line \(x=m+2\) with joining direction \((0,1)\in\mathrm{LOW}\). For \(m\ge 2\) (\(n\ge 5\)) all three points lie in grid, are distinct, and are not on a through-centre line. ∎
-
-**Computational verification (exhaustive, not sampled).** `analysis/low_slope_threshold.py` enumerates every grid point/orbit for \(n=5\ldots 60\):
-all even \(n\in\{6,8,\ldots,60\}\) are EMPTY (low-slope point count = 0, confirmed independently by `count_low_pts`); all odd \(n\in\{5,7,\ldots,59\}\) are FOUND, with the first counterexample being exactly the vertical triple above. `count_low_pts` returns 0 for \(n=6,8,12,20,60\) and \(16,28,44,104,320\) for \(n=5,7,11,21,61\), matching the parity proof.
-
-*Scope note.* This is a clean structural theorem **of the auxiliary direction model**; it does not by itself settle the main \(D(n)=2n\) question. Its substantive lesson is a parity caution: the absence of low-slope collinearity is an *even-\(n\)-only* phenomenon (a parity coincidence), not a general asymptotic sparsity — odd \(n\) already admit rich low-slope collinearity from \(n=5\) upward. Any "sparse constraint" argument must therefore be qualified to even \(n\).
-
-### 2.6 Distance-Ring Hypergraph & the Symmetry-Exclusion Theorem ✔
-
-A *missing-centre* solution is one whose grid centre \(C\) is **not** the
-circumcentre of any triple (no distance ring about \(C\) carries \(\ge 3\)
-solution points). Model the problem on a hypergraph whose vertices are the
-\(n^2\) grid points:
-- **\(H_{\text{coll}}\)** — one hyperedge per collinear triple; a solution is
-  an independent set ⇔ it is NTIL;
-- **\(H_{\text{ring}}\)** — one hyperedge per triple of grid points on a
-  common distance ring about \(C\); a solution is an independent set ⇔ it is
-  missing-centre.
-
-Hence a missing-centre NTIL solution is exactly an independent set of
-\(H = H_{\text{coll}} \cup H_{\text{ring}}\).
-
-**Symmetry-Exclusion Theorem.** Let \(G_\sigma\) be the symmetry group of a
-Flammenkamp class \(\sigma\). Every generator of \(G_\sigma\) is an isometry
-fixing \(C\), so all points in an orbit share one ring. If every off-axis
-orbit has size \(\ge 3\), that ring carries \(\ge 3\) solution points and the
-solution is **not** missing-centre. Applying this:
-
-| class | markers | off-axis orbit | verdict |
-|-------|---------|----------------|---------|
-| full, rot4, rct4 | `* o c` | 4 / 8 | **excluded** |
-| dia2, ort2 | `x +` | 4 (both reflections) | **excluded** (NEW) |
-| rot2, dia1, ort1, iden | `: / - .` | 2 / 1 | compatible |
-
-> **Theorem.** *A missing-centre NTIL solution can belong only to*
-> **iden, rot2, dia1, ort1**. *The classes* **full, rot4, rct4, dia2, ort2**
-> *are impossible.*
-
-The rot4/rct4/full case is the C₄ theorem (§2.1) restated; the **dia2 / ort2**
-case is new — both diagonal (resp. both orthogonal) reflections send any
-off-diagonal point to a 4-cycle, and all four points sit on one ring about
-\(C\) (e.g. for dia2: \(|p-C|^2=|d_1p-C|^2=|d_2p-C|^2=|d_1d_2p-C|^2\)),
-so the ring holds 4 ≥ 3 points. A solution with no off-diagonal point would
-lie on the two diagonals (≤ 2 points each by NTIL) ⇒ \(|S|\le 4<2n\),
-impossible. ∎
-
-**Realisation.** iden (n=9), rot2 (n=11), dia1 (n=5) are realised by
-Flammenkamp cache witnesses. For ort1 a backtracking search (validated
-against the cache) found **no** missing-centre example for \(n\le 16\)
-(exhaustive) and \(n=18\) (heavy); whether any exists is **open** (see
-`analysis/hypergraph_framework.md`). The excluded classes are confirmed at
-**0 / 0** missing-centre across all 21,999 rot4/rct4/full/dia2/ort2 solutions
-in the cache.
-
-### 2.7 Further rot4 Structural Theorems (2026-07-11)
-
-The following theorems were proven during an exhaustive analysis of the C₄-symmetric (rot4) pseudograph model. They complete the structural skeleton of rot4 solutions and correct earlier misstatements.
-
-> **Theorem 2.7a (Diagonal Occupancy — Th-48).** In any rot4 solution, a grid point lies on either diagonal (main: x=y, or anti: x+y=n−1) **iff** it comes from a *loop* cell of G (a cell with x=y in Q1). Each loop contributes exactly 2 main-diagonal + 2 anti-diagonal points (a single C₄ orbit). Hence diagonal-point counts are forced to (0,0) or (2,2) — never anything else.
-> 
-> **Proof**. The C₄ lift of cell (x,y) ∈ [0,m-1]² produces points \(\{(x,y), (n{-}1{-}y,x), (n{-}1{-}x,n{-}1{-}y), (y,n{-}1{-}x)\}\). A lift point lies on the main diagonal (\(x'=y'\)) iff the originating cell satisfies x=y (a loop); it lies on the anti-diagonal (\(x'+y'=n-1\)) iff the originating cell again satisfies x=y. Each loop produces exactly two main-diagonal (k=0 and k=2) and two anti-diagonal (k=1 and k=3) points. Non-loop cells have x≠y; their four lifted points cannot land on either diagonal. ∎
->
-> **Computational verification**: 0 mismatches across 21,701 cached rot4 solutions; 1,218 solutions with (2,2) diagonal count, 1,243 with (0,0).
-
-> **Theorem 2.7b (Direction-Orbit Disjointness — Th-50).** In a rot4 solution, the m cells of G must have pairwise distinct C₄ direction-orbits. A direction-orbit is the set {(a,b), (−b,a), (−a,−b), (b,−a)} where (a,b) is the reduced centre-direction of the cell (with gcd(dx,dy) = 1). If two cells shared a direction-orbit, the corresponding centre-line would contain 4 points, violating no-three-in-line.
->
-> **Proof**. The centre-direction of cell (x,y) is (a,b) = (2x−(n−1), 2y−(n−1)) / gcd(…). The four points of its C₄ orbit lie at the four ends of the two lines through centre C with direction (a,b) and (−b,a). If a second cell has the same direction-orbit, its four lift points coincide with the same four centre-lines, putting 4 points on one line through C. Hence direction-orbits must be pairwise disjoint. ∎
->
-> **Computational verification**: 0 failures across 21,698 solutions. Gap analysis (m=7) shows condition is necessary but far from sufficient (only ≈0.03% of disjoint-orbit pseudographs are valid).
-
-> **Theorem 2.7c (Exact Slope Prohibition — Th-51, correcting Th-24).** In any rot4 solution, the reduced centre-direction (a,b) of every cell satisfies a,b both odd (by parity; Th-23). This immediately prohibits slopes 0 (a=0) and ∞ (b=0). Slope −1 (a=−b) is impossible by a coordinate argument: a=−b would force x+y=n−1, but Q1 coordinates satisfy x,y ≤ m−1, hence x+y ≤ 2m−2 < n−1 = 2m−1. Slope 1 (a=b) occurs **iff** the cell is a loop (x=y), i.e. exactly for diagonal solutions. Directions (3,±1) and (1,±3) are allowed and occur frequently (4,735 + 2,785 examples). The earlier claimed "low-slope forbidden region" (Th-24) is false.
->
-> **Computational verification**: Complete enumeration over 21,698 solutions confirms 0 cells with slope 0, ∞, or −1; 0 non-loop cells with slope 1.
-
-> **Theorem 2.7d (Q1-NTIL — Th-52).** The m Q1 cells of G (the set of cells (x,y) representing the m C₄ orbits) must themselves satisfy the no-three-in-line condition on the m×m grid.
->
-> **Proof**. Among the 16 independent C₄ lift-index triples, form (ka,kb,kc)=(0,0,0) gives the standard 2D cross product D = (x_b−x_a)(y_c−y_a) − (x_c−x_a)(y_b−y_a). If the three Q1 cells (x_a,y_a),(x_b,y_b),(x_c,y_c) are collinear, D=0 and the k=0 lifts are collinear in the full grid, violating the rot4 condition. ∎
->
-> **Computational verification**: 0 mismatches across 2,461 cached solutions for n=6..42.
-
-> **Theorem 2.7e (16-Form Linearity — Th-53).** For each of the 16 independent C₄ lift-index triples (the C₄-orbits of 4×4×4 lift assignments), the collinearity condition D=0 is **linear** in the coordinates of any single cell when the other two cells are fixed.
->
-> **Proof**. The symbolic expression for D in each of the 16 forms is a polynomial of total degree 2, but when any two cells' coordinates are fixed, the remaining variables appear only linearly. (Full symbolic computation in `analysis/classify_lift_forms2.py`.) ∎
->
-> **Consequence**: C₄ collinearity constraints can be encoded without multiplication — each constraint is a linear equation in one cell's coordinates. This simplifies CP-SAT encoding and explains why the 16 forms produce only pairwise-linear restrictions.
-
-**Open question**: Theorem 2.7e implies that for any pair of fixed cells (b,c), each form forbids at most a *line* of positions for cell a in the m×m grid. The number of such forbidden lines grows as 16·C(m,2), but for m ≥ 37 this exceeds m², making existence a delicate Diophantine problem. The CP-SAT solver for m=37 (n=74) shows oscillatory convergence (396–724 collinear triples after 19 iterations), suggesting extreme solution rarity at this scale.
-
-> **Supporting theorem — Mutual Edge Decomposition** (`analysis/results/mutual_edge_decomposition.md`): the geometric interaction of two C₄ orbits sharing a row/column (a mutual edge in the 2-regular graph) is fully characterized by the MB-1 and MB-2 lemmas (proven). This provides the algebraic foundation for why 2-cycle pairs (mutual edges) do not create self-collinear triples — complementing T15.5's empirical finding (§2.18).
-
-**Empirical observation — C₄ lift survival rate** (not a theorem; based on exhaustive enumeration for small m):
-| m | Candidate NTIL sets (satisfying Th-23/50/51) | Surviving C₄ lift | Survival rate |
-|---|---|---|---|
-| 5 | 16,996 | 153 | 0.90% |
-| 6 | 11,215 | 8 | 0.07% |
-
-The sampled survival rate drops sharply from m=5 to m=6, showing that the C₄ lift
-is a stringent filter in these two small cases. Two points are not a defensible
-extrapolation to m=37, so no large-m survival probability is inferred.
-
-### 2.8 Container Method Framework *(provisional)*
-
-We model the no-three-in-line problem on a **danger hypergraph** \(H_n\):
-
-- **V** = \(n \times n\) grid points (\(n^2\) vertices)
-- **E** = all collinear triples (each line with \(k\) points contributes \(\binom{k}{3}\) edges)
-
-A 2n-point NTIL solution is exactly an independent set of size \(2n\) in \(H_n\).
-Hypergraph-container theorems are a possible framework, but applying them requires
-checking their full degree hypotheses and deriving a quantitatively smaller
-container family; the measurements below do not by themselves establish that step.
-
-**Historical empirical measurements** (the original helper script is not currently
-present in this checkout):
-
-| n | |V| | max codegree | \(\Delta\) | \(\Delta / n^3\) | codeg / \(n\) |
-|---|---|---|---|---|---|---|
-| 10 | 100 | **8** (= n−2) | 176 | 0.176 | 0.800 |
-| 20 | 400 | **18** (= n−2) | 1098 | 0.137 | 0.900 |
-| 30 | 900 | **28** (= n−2) | 2904 | 0.108 | 0.933 |
-
-**Key findings**:
-- **max codegree = n−2 exactly** (the line through any two grid points contains at most n−2 other points)
-- \(\Delta = O(n^3)\) with coefficient ≈ 0.1 (decreasing with n)
-- the sampled codegree-to-degree ratios motivate a container calculation, but do
-  not constitute one
-
-**Open task.** Derive a valid container statement, with explicit hypotheses and
-container-size/edge-count bounds, for this particular hypergraph. The earlier
-`\exp(O(n))` and “highly structured” conclusion is withdrawn until that
-derivation is supplied.
-
-If completed, such a calculation could help classify the search space, but it does
-not currently imply symmetry or rarity of asymmetric configurations.
-
-**Status**: framework only; proof and reproducible measurement script required.
-
-### 2.9 The Intercept–Sidon Law (Th-56)
-
-For rot4 (C₄-symmetric) solutions, the \(m = n/2\) fundamental-domain cells \((x,y)\) map to odd-number pairs:
+Let
 
 \[
-a = 2(m-1-x)-1,\quad b = 2(m-1-y)-1 \quad\text{(odd numbers $1,3,\dots,2m-1$)}
+D(n)=\max\{|S|:S\subseteq\{0,\ldots,n-1\}^2,
+\text{ and no three points of }S\text{ are collinear}\}.
 \]
 
-**Theorem (Intercept–Sidon Law)**. For any rot4 solution, the values of each linear combination \(p a \pm q b\) appear at most twice across the \(m\) cells:
+Every row and every column contains at most two selected points, so
+`D(n) <= 2n`. The classical no-three-in-line question asks when equality is
+attained and, asymptotically, how large `D(n)` can be.
 
-- **4-form** (\(\{a-b,\,a+b\}\)): each value appears \(\le 2\) times (count(\(d\)) + count(\(-d\)) \(\le 2\)).
-- **8-form** (6 additional linear combinations: \(2a-b,\,a-2b,\,2a+b,\,a+2b,\,3a-b,\,a-3b\)): also satisfied.
+The live record page maintained by Achim Flammenkamp currently reports:
 
-**Historical scale measurements** (the original scripts are not currently present
-in this checkout):
-- **rot4 fundamental cells**: 4-form = **100%**, 8-form = **100%** across all cached solutions (n=6..72).
-- **Random m-cell baseline** (no NTIL constraint): 4-form pass rate decays rapidly (m=5: 45.6% → m=19: 1.1%), confirming the law is a *genuine structural constraint*, not a generic property.
-- **Important**: this law applies to the **m fundamental cells** (one per C₄ orbit), NOT to the raw \(2n\) row-pair representation of the full grid. An earlier version (v1) that tested raw row-pairs produced spurious 0% pass rates — this was a bug, not a contradiction.
+- `D(n)=2n` is known for every `n <= 70`;
+- solutions are also known for `n=72` and `n=74`;
+- the `n=72` and `n=74` record solutions have quarter-turn (`rot4`, or C4)
+  symmetry;
+- among `n <= 74`, the currently unresolved values are the odd cases `n=71`
+  and `n=73`.
 
-**Status**: regenerate before citing these percentages as reproducible evidence.
+See [Flammenkamp's live database and record log](https://wwwhomes.uni-bielefeld.de/achim/no3in/readme.html).
+Because that page is updated as new configurations arrive, it should be checked
+before making any “largest known `n`” claim.
 
-### 2.10 Fundamental Domain Rigidity (FDR) — proof audit open
+The universal statement `D(n)=2n` for all even `n` remains open. It is much
+stronger than the now-solved finite target `n=74`.
 
-The proposed FDR statement attempts to unify Th-56 and the observed
-symmetry-class Sidon conditions. The current general proof is **not closed**.
+## 2. Evidence and proof-status policy
 
-> **Provisional FDR statement.** Let \(G \le D_4\) be the symmetry group of an NTIL
-> configuration and let \(F_G\) be a specified orbit transversal. Under suitable
-> hypotheses on how \(G\) pairs the two diagonal line families, one expects a bound
-> of the form
-> \[
-> \operatorname{count}(d)+\operatorname{count}(-d)\le 2.
-> \]
-> The precise subgroup and fundamental-domain conditions still need a corrected
-> proof.
+The following labels are used throughout this README.
 
-**Proof gap.** The previous argument showed only that one orbit contributes at most
-one representative to a fixed line. It then incorrectly inferred that all distinct
-orbits together contribute at most one representative. That quantifier step is
-invalid. In addition, “preserves the slope-±1 family” must distinguish preserving
-the union from preserving each family separately. See
-[`analysis/results/fdr_theorem.md`](analysis/results/fdr_theorem.md) for the
-historical proof under repair.
-
-**Historical empirical table** (the referenced `natural_fd_laws.py` script is
-not currently present and the table should be independently regenerated):
-
-| Class | True \(|G|\) | Natural \(F_G\) | a-b ≤ 2% | Geometry |
-|---|---|---|---|---|
-| rot4 | 4 (C₄) | Quadrant \(x&lt;m,y&lt;m\) | **100%** | Rotation preserves slope lines |
-| rot2 | 2 (C₂) | Half-plane \(y&lt;m\) | **100%** | Rotation preserves slope lines |
-| rct4 | 2 (180°) | Half-plane \(y&lt;m\) | **100%** | Rotation preserves slope lines |
-| dia2 | 4 (D₂) | Half-plane \(y&lt;m\) | **100%** | Rotation preserves slope lines |
-| full | 8 (D₄) | Quadrant \(x&lt;m,y&lt;m\) | **100%** | Rotation preserves slope lines |
-| dia1 | 2 (diag.) | Below diagonal \(x&lt;y\) | **100%** | Diag. reflection preserves slope lines |
-| **ort1** | 2 (orth.) | Left half-plane \(x&lt;m\) | **0%** | **Orthogonal reflection *exchanges* slope lines** |
-| iden | 1 (trivial) | None | **0%** | No reduction |
-
-The `ort1` data suggest a boundary for this particular coordinate statistic,
-but do not prove that the proposed group-theoretic boundary is exact.
-
-**Current status.** The rot4 diagonal-capacity condition remains a useful necessary
-filter. Its uniform extension to all listed groups is a conjectural framework until
-the orbit-transversal proof is repaired.
-
-**Document**: [`analysis/results/fdr_theorem.md`](analysis/results/fdr_theorem.md)
-
-### 2.11 Symmetry Signature Conjecture
-
-Let \(E_m\) be the event that a **random** set of \(m\) cells in an \(m \times m\) grid satisfies the 4-form intercept law.
-
-> **Conjecture (Symmetry Signature).** \(\mathbb{P}(E_m) \to 0\) as
-> \(m \to \infty\) for the stated random model. The proposed implication for
-> symmetric NTIL configurations is conditional on a corrected FDR statement.
-
-**Proof status.** The earlier proof incorrectly claimed that the expected number of
-diagonals with occupancy 0 or 1 tends to zero. A valid proof would instead need to
-control collision counts (for example by Poisson approximation, Janson-type bounds,
-or a second-moment calculation). No such proof is supplied here.
-
-**Historical empirical support** (the original `per_n_signature.py` script
-is not currently present and these percentages should be regenerated):
-
-| m | rot4 pass rate | iden pass rate |
-|---|---|---|
-| 3 | 100% | 75% |
-| 6 | 100% | 53% |
-| 9 | 100% | 30% |
-| 10 | 100% | 21% |
-| 19 | 100% | ~0% |
-
-The sampled iden pass rate decreases with m. This is suggestive but does not by
-itself establish an asymptotically near-perfect classifier.
-
-**Status**: empirical observation plus open asymptotic proof.
-
-### 2.12 The Quadratic Gap — Why Sidon Is Not Enough
-
-The Intercept–Sidon law (Th-56) is a **linear** constraint on the pairing variables \((a,b)\): it limits the occupancy of each linear combination \(p a \pm q b\). However, the C₄ lift's full NTIL condition requires avoiding **cross-quadrant collinearity** — three lifted points from three different C₄ orbits and three different quadrants forming a line. The algebraic form of this condition is:
-
-> **Quadratic Gap calculation (R7; global scope under audit).** The
-> cross-quadrant collinearity determinant for rotation pattern (0,1,2) expands to:
-> \[
-> \det = (\beta_2+\alpha_1-1)(\beta_3+\beta_1+m-2) - (\alpha_3+\alpha_1+m-2)(\beta_1-\alpha_2)
-> \]
-> where \(\alpha_i = (a_i+1)/2,\ \beta_i = (b_i+1)/2\). This contains
-> product terms and is a genuine quadratic polynomial. The tested finite Sidon
-> families do not capture all such collinearities.
->
-> **Verified algebraic content.** The 64 rotation triples reduce to 16 determinant
-> forms, and the SymPy calculation in `analysis/prove_quadratic_gap.py`
-> reports them irreducible over the stated symbolic coefficient field. The explicit
-> m=6 witness also shows that the 15 tested pairwise Sidon forms are insufficient.
-> The stronger phrase “no finite linear filter” requires a quantified, uniform
-> statement over an infinite ambient domain; it is not valid as written for an
-> arbitrary fixed finite grid, where finite enumeration is always possible. See
-> `analysis/results/quadratic_gap_theorem.md`.
-
-**Empirical evidence** (`analysis/characterize_x.py`):
-
-| m | S4→S8 survival | S8→C4 lift survival |
-|---|---|---|
-| 4 | 72% | 43% |
-| 5 | 52% | **0%** |
-| 6 | 29% | **0%** |
-| 8 | 9% | **0%** |
-| 10 | 3% | **0%** |
-
-For m ≥ 5, **zero random Sidon-8 pairings survive C₄ lift**. Yet valid solutions exist for all m ≤ 36. The surviving solutions are not "barely avoiding" collinearity — they are structurally distant from the quadratic surfaces (`analysis/verify_quadratic_distance.py`):
-
-| m | Near-zero det rate |
+| label | meaning |
 |---|---|
-| 5 | 2% |
-| 10 | 0.33% |
-| 20 | 0.09% |
-| 36 | **0.01%** |
+| **PROVED** | a complete mathematical proof is present and has survived the current audit |
+| **EXACT FINITE** | a finite instance was exhaustively enumerated or certified by an exact solver; the claim is limited to that instance |
+| **VERIFIED DATA** | an explicit configuration or dataset passed an independent checker |
+| **EMPIRICAL** | repeatable numerical evidence, not a theorem |
+| **PROVISIONAL** | a potentially useful framework with a proof gap or an untested premise |
+| **WITHDRAWN** | a claim known to be false, generated by a faulty model, or stated beyond its certificate |
 
-**Interpretation**. The search for rot4 solutions operates in a \(2m\)-dimensional parameter space where:
-- Sidon constraints define a *linear* feasible region (necessary)
-- The C₄ lift imposes ≈ \(4.5\times10^6\) additional *quadratic* constraints at m=37
-- Known solutions lie on a smooth manifold far from all dangerous quadratic surfaces
+A filename containing words such as `theorem`, `formal`, `complete`, or
+`certificate` is not itself evidence of proof status. The scope written in this
+README takes precedence over status language in older exploratory notes.
 
-This explains why 55+ search methods (Z3, CP-SAT, SA, DFS, etc.) all failed for m=37 — they search within the linear Sidon space, where the quadratic constraint density is already prohibitive.
+## 3. The verified `n=74` C4 solution
 
-**★★★ The Quadratic Determination Principle** (`analysis/measure_forbidden_lines.py`). For every known valid rot4 solution (m=5..36), the 16 quadratic forms have a remarkable property: **each pair is uniquely determined by the other m−1 pairs**. Specifically:
+The database record contains 148 points. An independent verification parsed the
+74 rows, formed the canonical integer line through every point pair, and obtained:
 
-- For any valid solution, fix all pairs except one. The forbidden (α,β) positions for the free pair (from all C(m−1,2) × 16 quadratic forms) cover **exactly m²−1 out of m² grid positions** — leaving precisely one safe position, the pair's actual location.
-- This means the 16 quadratic forms define a **zero-dimensional system of equations**: solutions are isolated points in a high-dimensional space, with no continuous degrees of freedom.
-- The existence of a rot4 solution for a given m is therefore equivalent to the solvability of a polynomial system over ℤ, not a combinatorial search problem.
-- At m=36 the system is "critical": every pair is exactly determined. At m=37, the new pair adds 560 new forbidden lines but only 73 new grid positions per existing pair. Whether the over-determined system has a solution is the open question.
+| check | result |
+|---|---:|
+| selected points | 148 |
+| points in every row | 2 |
+| points in every column | 2 |
+| invariant under `(x,y) -> (y,73-x)` | yes |
+| point pairs | 10,878 |
+| distinct canonical pair-lines | 10,878 |
+| line generated by two different pairs | 0 |
 
-**Document**: `analysis/results/quadratic_complete_determination.md`
+If three selected points were collinear, their common line would be generated by
+three pairs. Hence the last two rows certify that this is a valid NTIL set.
+The full coordinate list and Flammenkamp encoding are stored in
+[`n74_rot4_prellberg_verified_2026-07-22.md`](analysis/results/n74_rot4_prellberg_verified_2026-07-22.md).
 
-### 2.13 Structural Invariants & the Open m=37 Instance
+### What the solution says about this repository's old search
 
-Two scaling analyses compare m=37 with smaller known instances. They describe
-continuity of selected statistics, but **cannot locate m=37 inside a satisfiable
-regime**. Full enumeration covers m=3–28 in the data used here; m=29–36 are sparse
-`.few` samples. Script: `analysis/structural_invariants_scaling.py`.
+The northwest `37 x 37` fundamental domain gives a 2-regular pseudograph with
+cycle lengths
 
-**Structural invariants (pairing-graph source/sink ratio, cycle structure).**
-- **Source ratio is constant ≈ 0.26.** Over the full-enumeration band m=7–28 the ratio of source-vertices (odd numbers appearing as `a` twice) to m is stable at mean **0.2647**, σ < 0.005 — an intrinsic property of rot4 solutions, not an artifact. Extrapolated to m=37: ≈ 10 sources, 10 sinks, 17 balanced.
-- **Multi-cycle is the norm.** Single-Hamilton-cycle solutions form only 0.17–0.39 of solutions in m=6–28; the m=36 single-36-cycle is a `.few`-sampling singleton, not a trend. Construction of m=37 should target **multi-cycle pairings** (2–3 cycles), not a single Hamiltonian cycle.
-- **Longest cycle scales ≈ 0.79·m** (m=20→15.8, m=28→22.0).
+```text
+31 + 5 + 1.
+```
 
-**Quadratic constraint density (`analysis/measure_forbidden_lines.py`).** Lines-per-position ratio grows monotonically but extremely gently: m=5 → 3.8×, m=28 → 7.2×, m=36 → **7.34×**, m=37 (extrapolated) → **7.36×** (+0.3%). The density does **not** cross any steep threshold at m=37.
+The one-cycle is a loop. Thus neither “the factor must be Hamiltonian” nor “the
+factor must be loop-free” is a valid necessary condition.
 
-**Conclusion.** The selected observables do not show a sharp m=36→37 transition.
-That absence is compatible with either an extremely sparse solution set or an empty
-one and provides no reliable SAT/UNSAT probability tilt. Historical analyses:
-`analysis/results/m37_satisfiability_window.md` and
-`analysis/results/structural_scaling_2026-07-12.md`.
+The true oriented fundamental-cell set and the repository's score-60 incumbent
+share only 2 of 37 cells, namely `(19,1)` and `(22,14)`. The overlap is still
+2 of 37 after edge orientation is forgotten, giving selected-cell deletion
+distance 35. This is
+the clearest explanation for the failure of increasingly expensive local searches:
+the correct solution lay in a different basin, not just beyond one more switch.
 
-> Caveat: m=29–36 are `.few` samples (19→1 solutions) with high statistical
-> noise. Continuity of selected statistics does not guarantee existence; a finite
-> Boolean constraint system can simply be empty.
+## 4. Audited structural results
 
-**SDP route — withdrawn pending re-audit.** The previous summary mixed the SDP
-objective with the number of geometric collinear triples and even described
-408/448-“edge” 2-factors, although a 37-vertex 2-factor has 37 edges. Its numerical
-claims are therefore not used as evidence here. The route may be restored only
-after the relaxation objective, dual bound, rounding direction, and independently
-checked fixed-factor instances are documented consistently.
+### 4.1 Saturation and the two-permutation decomposition — **PROVED**
 
-### 2.14 Exact C₄ Collinearity Encoding — R8
+Any NTIL set of size `2n` has exactly two points in every row and exactly two in
+every column. Regard rows and columns as the two vertex classes of a bipartite
+graph and selected cells as edges. This graph is 2-regular, so every component is
+an even cycle. Alternating the two edge colours around each component decomposes
+the configuration into two perfect matchings, hence into the graphs of two
+permutations.
 
-The determinant calculation shows why the tested linear Sidon laws are
-insufficient. The following orbit-triple partition gives an exact finite encoding
-of C₄-symmetric NTIL candidates.
+The alternating-cycle argument is essential. Row/column counts alone do not
+justify simply naming two arbitrary row choices as two permutations; that was a
+gap in an older draft of the framework.
 
-> **Exact encoding (R8).** A C₄-symmetric 2n-point configuration on an even
-> n×n grid (n=2m) is a no-three-in-line solution **if and only if** all lifted
-> triples covered by the following two families are non-collinear:
-> - **X-layer (cross-cell).** For every triple of *distinct* orbits \((i,j,k)\) and every one of the 16 equivalence classes of rotation triples (the C₄ board-rotation reduction of the naïve 64), the \(3\times3\) collinearity determinant is non-zero.
-> - **S-layer (same-cell).** For every pair of rotation images from the *same* orbit together with one image from a different orbit, the corresponding \(3\times3\) determinant is non-zero.
->
-> The tested diagonal-capacity condition is necessary but not sufficient. The
-> X-layer alone admits invalid candidates (m=5: 53 **false positives**, not false
-> negatives); adding the S-layer gives the exact triple partition described below.
+### 4.2 Even-order C4 orbit model — **PROVED**
 
-**Proof.** A finite-geometry case analysis partitions any collinear triple by its source orbits into exactly three cases — (A) three distinct orbits (X covers), (B) two images of one orbit + one of another (S covers), (C) three images of one orbit (geometrically impossible: a C₄ orbit has no three collinear points). (A),(B) are ruled out by (X),(S) and (C) never occurs, so (X)∧(S) ⇔ no-three-in-line. Full write-up: `analysis/results/r8_proof.md`.
+For `n=2m`, a non-central cell has a four-point orbit under quarter-turn rotation.
+A C4-symmetric extremal set therefore consists of exactly `m` such orbits. The
+`m` selected cells in the northwest fundamental square can be read as directed
+edges on `m` vertices. Row/column saturation becomes
 
-**Verification.** `analysis/quadratic_sidon_completeness.py` checks R8 against (i) all 93 known rot4 solutions for m=5..12 (100% pass) and (ii) 1,500 random 2-regular templates per m=5..9 (7,500 total): miss(X+S)=0, false(X+S)=0, and adding FDR does not change either count. Full statement and tables: `analysis/results/quadratic_sidon_completeness.md`.
+\[
+\deg^+(v)+\deg^-(v)=2.
+\]
 
-**Solver.** `analysis/constraint_prop_solver.py` is the first engine to search in the *correct* (X+S) quadratic space (every earlier Z3/CP-SAT/SA/Sidon attempt used the insufficient linear space). It backtracks over an **m-subset** of the m×m fundamental quadrant with (X+S) forward-checking; Stage V proves it SOUND (never prunes a valid prefix) and recovers known solutions (guided in ≤ m nodes; blind randomized DFS for m=6,8), and Stage D confirms the 16-class X / 12-class S forms are exactly equivalent to the full 64/24 (847 configs, 0 mismatches).
+After directions are forgotten, the object is a 2-regular **pseudograph**. The
+correct model must allow:
 
-**m=37 model distinction.** Two exact formulations must not be conflated:
+- loops `(u,u)`, which contribute two incidences at one vertex;
+- both `(u,v)` and `(v,u)`, which form a legal two-cycle of parallel edges;
+- longer cycle components with arbitrary orientation words.
 
-- In a **37-orbit coordinate formulation**, the 37 chosen representatives are the
-  objects, so the reduced formal triple-family count is
-  `C(37,3)×16 + 37×12×36 = 140,304`.
-- In a **1,369-variable Boolean selection formulation**, every cell of the 37×37
-  quadrant is a variable and the forbidden cell-pair/triple instances must be
-  generated over that full universe. The resulting conflict hypergraph contains
-  tens of millions of ternary conflicts (see §3.15), not 140,304 constraints.
+The old constraint `x_uv + x_vu <= 1` was incorrect. The correction and the
+independent geometry check of all 666 antiparallel pairs for `m=37` are in
+[`ROT4_MULTIGRAPH_MODEL_CORRECTION_2026-07-19.md`](analysis/even_n_existence_tools/ROT4_MULTIGRAPH_MODEL_CORRECTION_2026-07-19.md).
 
-These encodings express the same geometry in different variable spaces. Neither
-settles satisfiability; m=37 remains **OPEN**. See
-`analysis/results/r8_minimal_csp.md`.
+For odd `n`, a pure C4-invariant set of size `2n` is impossible by orbit
+cardinality: all non-central orbits have size four and the optional centre has
+size one, while `2n` is congruent to two modulo four.
 
-### 2.15 Costas Array Symmetry Classification — FDR-transfer (NEW 2026-07-13) ★
+### 4.3 Orbit centre and exact collinearity encoding — **PROVED / EXACT**
 
-The FDR symmetry-classification lens (§2.10) transfers to the **Costas array** problem — the *same* D₄ subgroup lattice, classified from the complementary side ("which subgroups *can occur*", not "which *force* rigidity").
+The centre of a non-degenerate C4 orbit is the circumcentre of any three of its
+points. This is a useful normalization fact, but it is not by itself a global
+rigidity theorem.
 
-> **Theorem (Costas admissible symmetry — C1–C6, R, C — PROVED 2026-07-13).** A Costas array of order `n>1` can have exactly **six** D₄ symmetry types *a priori* — `{id}`, `{id,C2}`, `<C4>`, `{id,D}`, `{id,AD}`, `{id,C2,D,AD}` (Klein four) — and **no others** (theorems C1–C5). The further theorems C6, R, and C below determine which of these six *actually occur* (answer: for `n≥3`, only `id`, `D`, `AD`):
-> - **C1 (ort1-boundary analogue).** `H`/`V` reflection is impossible (a permutation matrix invariant under H would force `π(i)=(n−1)/2` for all `i`, not a permutation). This is the FDR `ort1` exclusion lifted to permutation-matrix structure.
-> - **C5.** Full D₄ symmetry is impossible (it contains `H`,`V`).
-> - **C2.** `C4` symmetry requires `n ≡ 0,1 (mod 4)` (orbit counting: 4-cycles, plus a centre fixed point only when `n` is odd).
-> - **C3/C4.** `C2`, `D`, `AD` impose no congruence restriction.
+For a fixed `m`, all board lines containing at least three grid points can be
+enumerated exactly. Each selected fundamental cell contributes zero, one, or two
+points to a line, and every line receives a capacity-at-most-two constraint.
+Together with the degree-two pseudograph constraints, this is an exact 0-1 model
+of the C4 problem. Equivalent conflict-hypergraph encodings are also exact.
 
-> **Theorem C6 (C4 rotational Costas impossible — PROVED 2026-07-13).** No Costas array of order `n>1` is invariant under `C4` (90° rotation). *Proof (parallelogram).* A C4-symmetric set is a disjoint union of 4-orbits `{p, rp, −p, −rp}`, the vertices of a square. The two **distinct** ordered pairs `(p, rp)` and `(−rp, −p)` have the *same* displacement `rp − p`, violating the Costas (no-equal-displacement) condition. ∎ *Honesty note: this is an immediate corollary of the **classical parallelogram characterization** of Costas arrays (Costas ⇔ no four dots form a parallelogram), and is very likely known folklore; it is included because it is one clean brick of the complete classification below.*
+The so-called `R8-G` weighted-line formulation is best understood as this exact
+encoding, not as a separate theorem that forces existence or non-existence.
 
-> **Theorem R (rotational Costas impossible for n ≥ 3 — PROVED 2026-07-13).** A Costas array with non-trivial rotational symmetry (`C2` or `C4`) satisfies `n ≤ 2`. For **every `n ≥ 3`**, no Costas array admits `C2` or `C4` symmetry. *Proof.* C4 case is C6. For C2 (180°): two or more distinct 2-orbits `{p,−p}`, `{q,−q}` give ordered pairs `(p,q)` and `(−q,−p)` with equal displacement `q−p` ⇒ collision; a single 2-orbit + centre (`n=3`, `S={0,p,−p}`) gives `(0,p)`,`(−p,0)` both displacement `p` ⇒ collision; only `n=2` (`{(0,0),(1,1)}`, `{(0,1),(1,0)}`, both type `D2`) survives. ∎
+### 4.4 Orientation-independent bad triples — **PROVED**
 
-> **Theorem C (complete D₄ classification — capstone, PROVED 2026-07-13).** For a Costas array `A` of order `n`:
-> - `n=1 ⇒ G=D₄`;
-> - `n=2 ⇒ G=D2={id,C2,D,AD}`;
-> - **`n ≥ 3 ⇒ G ∈ {id, D, AD}`**.
->
-> The *only* non-trivial symmetries a Costas array can exhibit are the two diagonal involutions (`D` from n=5, `AD` from n=5); every rotation and every axis reflection is impossible beyond the degenerate `n ≤ 2` cases.
->
-> Combining C1–C6 and R, the symmetry types that *occur* are exactly `id`, `D`, `AD` (n≥5) and `D2` (n=2). The types that *never occur* are `C4` (all n>1), pure `C2` (all n), `D2` (n≠2), and any subgroup containing `H` or `V` (all n>1, including full `D4`).
+Three fundamental cells are unavoidably bad under every orientation if their
+coordinates have one of two simple patterns:
 
-**Empirical confirmation (scan to n=13 + independent CP-SAT / C2 sweeps).** `D4(full)=0` at every order (confirms C5); `C2=C4=D2=0` up to n=13 — these are now **theorems** (C6/R), no longer open questions. `diag = anti` at every order (the `D↔AD` duality); `trivial` dominates (asymmetry is the norm, paralleling NTIL).
+- equal `a+b`;
+- equal `|b-a|`.
 
-Independent corroboration: dedicated CP-SAT sweep **INFEASIBLE** at n=4,8,12,16,20,24,28,32; C2 enumeration gives **2 solutions at n=2, 0 at n=4,6,8,10**.
+These Type-1/Type-2 obstructions are proved in
+[`allbad_triple_theorem.md`](analysis/results/allbad_triple_theorem.md). They are
+useful clauses and preprocessing rules. They do not characterize every conflict.
 
-**Prior work / honesty.** The individual classical facts are not ours: the parallelogram characterization of Costas arrays is classical; `H`/`V` impossibility is the trivial permutation-collapse observation; full-D₄ impossibility follows. Transpose-symmetric (`D`/`AD`) Costas arrays are studied in Drakakis–Gow–Rickard, *On the symmetry of Welch- and Golomb-constructed Costas arrays* (Discrete Math. 309(8), 2559–2563, 2009; also DOI 10.1016/j.disc.2008.04.004). **Our genuine contributions** are: (i) the complete admissible-D₄-subgroup enumeration (Theorem C), (ii) the rotational impossibility packaged as Theorems R and C6 with rigorous edge-case stress tests, and (iii) the **FDR-transfer framing** unifying this with the NTIL rigidity program — all confirmed by the first full six-type D₄ tally at every order. Full proof, stress test, and table: `analysis/results/costas_symmetry_theorem.md`.
+## 5. Audited repository results beyond the basic model
 
-**Why this advances Costas.** Orders **32 and 33** are the first orders with *no known* Costas array (counts are known only to 29). The classification above narrows any symmetric witness there to the six-type list (and `C4` is allowed at both 32 and 33), while `cpsat_m37.py`'s per-line at-most-2 encoding is a direct template for the exact distinct-displacement CP-SAT attack on 32/33. Full statement, proof, and table: `analysis/results/costas_symmetry_theorem.md`; the broader bridge (FDR as 1-D Sidon shadow of Costas's 2-D Sidon; Welch-construction contrast) is in `analysis/results/costas_rigidity.md`.
-
----
-
-### 2.16 R8-G: Generic Symmetry-Reduced Line Encoding
-**Status: exact encoding; earlier “resolves Hypothesis H” wording withdrawn**
-
-For a fixed symmetry group, orbit representatives can be used to write an exact
-weighted line-capacity model. The construction was tested on the six groups
-C4, C2, D4, dia1, dia2, and D2d. See
-`analysis/results/r8_generalized.md`.
-
-> A G-symmetric configuration is NTIL iff its fundamental-domain selection `sel: F_G → {0,1}` satisfies the **per-line weighted at-most-2 constraint family**
-> ```
-> ∀ board lines L: Σ_{c∈F_G} w_{L,c}·sel[c] ≤ 2, where w_{L,c} = |{g·c : g∈G} ∩ L|
-> ```
-> Collinear lifted triples may equivalently be detected by 2×2 determinants.
-
-**Interpretation.** Soundness and completeness of the per-line model are
-definitional: “every line has occupancy at most 2” is exactly NTIL. The determinant
-form is a useful implementation and symmetry reduction, but this equivalence alone
-is not an existence theorem or a new rigidity theorem. In fact, the same weighted
-line construction works for any finite group action; the six-group restriction came
-from the provisional FDR hierarchy, not from exactness of the encoding.
-
----
-
-### 2.17 SIRH — Provisional Research Programme
-**Status: conceptual synthesis; not a closed umbrella theorem**
-
-SIRH is a useful organisational picture: symmetry suggests inexpensive linear
-filters, while full collinearity is expressed by determinant constraints. It is not
-currently a theorem because the uniform FDR proof is incomplete, the global R7
-quantifiers need narrowing, and R8-G is an exact encoding by definition.
-
-| Layer | Result | Content | Status |
+| result | status | reliable conclusion | research value |
 |---|---|---|---|
-| **Part I — Linear** | FDR | candidate necessary Sidon filters | **Proof incomplete** |
-| **Part II — Quadratic gap** | R7 | tested linear families miss determinant conflicts | **Scope-limited** |
-| **Part III — Exact encoding** | R8/R8-G | weighted line capacities / determinants | **Exact formulation** |
-| **Part IV — Reverse** | Sidon ⇏ symmetry | filters do not characterize symmetry | **Empirical + elementary counterexamples** |
-
-The following bullets record the intended programme, not a four-part theorem.
-
-- **Part I — candidate linear layer.** Repair the subgroup/orbit-transversal proof
-  and regenerate the empirical table from checked scripts.
-- **Part II — quantified quadratic gap.** State exactly which uniform linear-form
-  families are ruled out and over which ambient domain.
-
-Strict *insufficiency* is constructively witnessed:
-  - for C4 (Sidon-8 pairings → 0% C4-lift survival);
-  - for rot2 (random half-board Sidon sets contain a no-three-in-line triple after the 180° lift, at every tested order n∈{8,10,12,14,16}).
-- **Part III — exact encoding.** Keep the weighted line and determinant models as
-  solver formulations without promoting them to existence results.
-- **Part IV — reverse direction.** Simple counterexamples already show that a
-  Sidon-like filter does not force symmetry; stronger asymptotic counting claims
-  remain separate and require their own proof.
-
-Verification (Math skill rigor check, 2026-07-14): the a−b = −2(x−y) identity, the T15.2 (3-cycle) determinant identity `det = −½[(x−y)²+(y−z)²+(z−x)²]` (zero iff degenerate), the C6 parallelogram displacement argument, and the R8-G per-line⇔NTIL equivalence were each confirmed by symbolic derivation and numerical spot-checks (`analysis/results/verify_readme_theorems.py`, `analysis/results/verify_readme_theorems.json`).
-
-Historical synthesis documents:
-`analysis/results/rigidity_hierarchy_theorem.md` and
-`analysis/results/part4_reverse.md`. Their theorem labels are superseded by
-the status in this README until the proof audit is resolved.
-
----
-
-### 2.18 T15 — Cycle Type Refinement (NEW 2026-07-13)
-**Status: Theorems + empirical landscape | Under: R9h**
-
-- **T15.2** (proven): 3-cycle → **baseframe-safe** (determinant = −½[(x−y)²+(y−z)²+(z−x)²], zero only for degenerate loop).
-- **T15.4** (proven): Along-cycle step lengths satisfy Sidon bound `count(s)+count(−s) ≤ 2`.
-- **T15.5** (empirical): 2-cycles (mutual edges) **not structurally forbidden** — first appear m=13. Mechanical verification of 20,000 (m,x,y) samples confirms no self-collinear triple in 8 lifted points.
-- **T15.5** (empirical landscape): Distinct cycle types 1→65 (m=3→27); dominant [m]/[1,m-1] share decays 1.0→0.00 by m=35. Cycle type is **neither obstacle nor accelerator** for m=37.
-
-See `analysis/results/theorem_r9f_baseframe_3free.md`, `analysis/results/cycle_type_stats.json`.
-
-## 3. Empirical Findings
-
-All material in this section is **computational observation**, not proof. Headings and tables report what exhaustive search and the Flammenkamp / mvr databases actually contain.
-
-### 3.1 Prior heuristics are falsified by real computation
-
-Earlier conjectures based on small-n patterns — prime residue classification (4k+1 vs 4k+3) and the claim that "even n always has the center as a circumcenter" — are **falsified** by exhaustive computation at n ≥ 12:
-
-| n | Type | Total Solutions | With Center | Missing Center | Verified |
-|---|------|----------------|-------------|---------------|----------|
-| 2 | Even | 1 | 1 | 0 | ✅ |
-| 4 | Even | 11 | 11 | 0 | ✅ |
-| 6 | Even | 50 | 50 | 0 | ✅ |
-| 8 | Even | 380 | 380 | 0 | ✅ |
-| 10 | Even | 1,135 | 1,135 | 0 | ✅ |
-| **12** | **Even** | **4,348** | **4,296** | **52** | ✅ *First even n with missing-center solutions* |
-| 3 | Odd P | 2 | 2 | 0 | ✅ |
-| 5 | Odd P (4k+1) | 32 | 28 | 4 | ✅ |
-| 7 | Odd P (4k+3) | 132 | 128 | 4 | ✅ |
-| 9 | Odd C | 368 | 360 | 8 | ✅ |
-| 11 | Odd P (4k+3) | 1,120 | 1,084 | 36 | ✅ |
-| 13 | Odd P (4k+1) | 3,622 $^\\dagger$ | 3,330 | **292** | ✅ *(mode 1)* |
-
-$^\\dagger$ Mode 0 counts only 2‑per‑row solutions. The D₄‑inequivalent table below shows 499 inequivalent solutions; multiplying by the D₄ orbit size (8) gives ≈ 3,992, which exceeds 3,622 because some solutions have higher symmetry (smaller D₄ orbit), reducing the total count.
-
-$^\\ddagger$ Type classification: **Even** for even $n$, **Odd C** for odd composite $n$, **Odd P** for odd prime $n$. The (4k+1)/(4k+3) sub‑labels indicate the residue class of odd primes.
-
-**Extended analysis via D₄‑inequivalent solutions** (parsed from GPU-generated RLE data, [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line)):
-
-| n | Type | Total (inequiv.) | With Center | Missing Center | Rate |
-|---|------|------------------|-------------|---------------|------|
-| 7 | Odd P | 22 | 21 | 1 | 4.5% |
-| 8 | Even | 57 | 57 | 0 | 0.0% |
-| 9 | Odd C | 51 | 50 | 1 | 2.0% |
-| 10 | Even | 156 | 156 | 0 | 0.0% |
-| 11 | Odd P | 158 | 152 | 6 | 3.8% |
-| 12 | Even | 566 | 558 | 8 | 1.4% |
-| 13 | Odd P | 499 | 453 | 46 | 9.2% |
-| **14** | **Even** | **1,366** | **1,355** | **11** | **0.8%** ✅ |
-| 15 | Odd C | 3,978 | 3,624 | **354** | 8.9% |
-| **16** | **Even** | **5,900** | **5,797** | **103** | **1.7%** ✅ |
-| 17 | Odd P | 7,094 | 6,737 | **357** | 5.0% |
-| **18** | **Even** | **19,204** | **18,859** | **345** | **1.8%** ✅ |
-| 19 | Odd P | 32,577 | 30,214 | **2,363** | 7.3% |
-
-**Extended analysis via Flammenkamp configuration database** ([download](https://wwwhomes.uni-bielefeld.de/achim/no3in/download/)) — D₄-inequivalent solutions for n=7–53 (n=7–45 from Flammenkamp; n=47–53 from mvr/no-three-in-line c4near files, which contain rct4 solutions):
-
-| n | Total | Missing | Rate% | Available symmetry classes |
-|---|-------|---------|-------|---------------------------|
-| 7 | 22 | 1 | 4.5% | iden, rot2, dia1 |
-| 8 | 57 | 0 | 0.0% | iden, rot2, dia1, rot4, ort1 |
-| 9 | 51 | 1 | 2.0% | iden, rot2, dia1, rct4 |
-| 10 | 156 | 0 | 0.0% | iden, rot2, dia1, dia2, full, rot4 |
-| 11 | 158 | 6 | 3.8% | iden, rot2, dia1 |
-| 12 | 566 | 8 | 1.4% | iden, rot2, dia1, dia2, rot4 |
-| 13 | 499 | 46 | 9.2% | iden, rot2, dia1, dia2 |
-| 14 | 1,366 | 11 | 0.8% | iden, rot2, dia1, dia2, rot4 |
-| 15 | 3,978 | 354 | 8.9% | iden, rot2, dia1, dia2 |
-| 16 | 5,900 | 103 | 1.7% | iden, rot2, dia1, dia2, rot4 |
-| 17 | 7,094 | 357 | 5.0% | iden, rot2, dia1, rct4 |
-| 18 | 19,204 | 345 | 1.8% | iden, rot2, dia1, dia2, rot4 |
-| 19 | 32,577 | 2,363 | 7.3% | iden, rot2, dia1, rct4 |
-| 20 | 118,057 | 2,297 | 1.9% | iden, rot2, dia1, dia2, rot4 |
-| 21 | 2,426 | 190 | **7.8%** | rot2, dia1, rct4 |
-| 22 | 1,275 | 21 | 1.6% | rot2, dia1, dia2, rot4 |
-| 23 | 4,003 | 234 | 5.8% | rot2, dia1, dia2, rct4 |
-| 24 | 2,920 | 54 | 1.8% | rot2, dia1, dia2, rot4 |
-| 25 | 9,040 | 561 | 6.2% | rot2, dia1, dia2, rct4 |
-| 26 | 4,949 | 106 | 2.1% | rot2, dia1, ort1, rot4 |
-| 27 | 17,385 | 777 | **4.5%** | rot2, dia1, rct4 |
-| 28 | 12,203 | 306 | 2.5% | rot2, dia1, ort1, rot4 |
-| 29 | 44,890 | 2,136 | 4.8% | rot2, dia1, dia2 |
-| 30 | 24,925 | 534 | 2.1% | rot2, dia1, dia2, rot4 |
-| **31** | **72** | **1** | **1.4%** | dia1, dia2, rct4 |
-| 32 | 175 | 0 | 0.0% | dia1, dia2, rot4 |
-| 33 | 15 | 0 | 0.0% | rct4, rot2 |
-| 34 | 172 | 0 | 0.0% | rot4 |
-| 35 | 24 | 0 | 0.0% | rct4, dia2 |
-| 36 | 282 | 0 | 0.0% | dia2, rot4 |
-| 37 | 21 | 0 | 0.0% | rct4 |
-| 38 | 338 | 0 | 0.0% | dia2, rot4 |
-| 39 | 33 | 0 | 0.0% | rct4 |
-| 40 | 541 | 0 | 0.0% | rot4 |
-| 41 | 35 | 0 | 0.0% | rct4 |
-| 42 | 747 | 0 | 0.0% | dia2, rot4 |
-| 43 | 63 | 0 | 0.0% | rct4 |
-| 44 | 1,017 | 0 | 0.0% | dia2, rot4 |
-| 45 | 106 | 0 | 0.0% | rct4 |
-| 47 | 105 | 0 | 0.0% | rct4† |
-| 49 | 196 | 0 | 0.0% | rct4† |
-| 51 | 264 | 0 | 0.0% | rct4† |
-| 53 | 377 | 0 | 0.0% | rct4† |
-
-† n=47–53 rct4 solutions sourced from [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) c4near files (cross-validated against Flammenkamp rct4 counts at n=41–45).
-
-#### Missing-Center Absence in Catalogued Symmetry Classes at n≥33
-
-The complete odd-$n$ spectrum (n=7→45) reveals three distinct evolutionary phases **within the set of D₄-inequivalent solutions catalogued in the Flammenkamp database**:
-
-**Phase 1 — Abundance (n=7–19)**: Missing-center rate rises to 9.2% at n=13, driven by the iden symmetry class. The ratio oscillates with parity (4k+1 vs 4k+3) and compositeness.
-
-**Phase 2 — Decline (n=21–29)**: rot2 becomes the dominant class. Missing-center rate oscillates at lower levels than Phase 1: 7.8% (n=21) → 5.8% (n=23) → 6.2% (n=25) → 4.5% (n=27) → 4.8% (n=29), with even-n entries dipping to ~1.6–2.5%. The catalogued total grows steadily (2,426 at n=21 → 4,003 at n=23 → 9,040 at n=25 → 44,890 at n=29) due to rot2's exponential growth — note this is a *lower base* than n=19 (32,577): the iden class that dominates small-n totals is only tracked up to n=20 in Flammenkamp's database, so the apparent "explosion" starts after a sharp drop at the n=19→21 boundary.
-
-**Phase 3 — Absence in Catalogued Classes (n≥31)**: rot2 solutions become **empirically unsatisfiable at n=31** (zero solutions, confirmed by exhaustive enumeration) — a sharp SAT→UNSAT transition — yet a **single rot2 solution reappears at n=33** (Flammenkamp `n33_rot2.few`). The transition correlates with collinearity constraint density:
-
-| n | rot2 solutions | Available pairs | Need | $\binom{2n}{3}$ per pair |
-|---|---|---|---|---|
-| 27 | 17,332 | 364 | 27 | 68.1 |
-| 29 | 44,828 | 420 | 29 | 73.5 |
-| **31** | **0** | 480 | 31 | **78.8** |
-| 33 | 1 | 544 | 33 | 84.1 |
-
-The empirical threshold lies at ≈74 triples per available pair — the constraint density crosses a critical value where no rot2 assignment satisfies all collinearity constraints simultaneously. The exact mechanism remains an open combinatorial problem. Only rct4 solutions survive for n≥35 in the database (a single rot2 solution exists at n=33); all known rct4 solutions have the center as circumcenter (verified on all 326 catalogued odd-n rct4 solutions; a general proof is not established). Note that rct4 is R₁₈₀-invariant (hence governed by the C₂ theorem below), but its orbits can have size 2 (points on a reflection axis), so the "≥4 points per ring" argument used for C₄ does not apply. **Missing-center solutions are not found in any known symmetry class for odd n ≥ 33. However, iden-class (non-symmetric) solutions are only tracked up to n=20 in the database, so the possibility of iden-class missing-center solutions at larger n remains open.**
-
-| n | 31 | 33 | 35 | 37 | 39 | 41 | 43 | 45 |
-|---|----|----|----|----|----|----|----|-----|
-| Missing | 1 | **0** | **0** | **0** | **0** | **0** | **0** | **0** |
-| Symmetry | dia1 | rct4, rot2 | rct4 | rct4 | rct4 | rct4 | rct4 | rct4 |
-| rct4 count | 5 | 14 | 23 | 21 | 33 | 35 | 63 | 106 |
-
-Extended via [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) c4near data: n=47: 105 rct4, n=49: 196, n=51: 264, n=53: 377 — all with zero missing-center solutions. The sub-exponential growth continues (∼1.4× per 2-step increment).
-
-The rct4 solution count grows slowly (∼O(n) rather than exponential). For **rot4** (even n) solutions, every distance ring carries a population that is a **multiple of 4** (empirically 4, 8, 12, or 16 across all 21,601 rot4 solutions for n=12–72) — a parallel **symmetry argument** (distinct from, but analogous to, the C₄ theorem): each C₄-orbit is a square of 4 vertices equidistant from the centre, so it contributes exactly 4 points to a single distance ring. This "multiple of 4" law is specific to even-n rot4; it does **not** extend to rct4, whose size-2 midline orbits yield ring populations such as 2 or 6 (all 326 odd-n rct4 solutions show populations in {2,4,6,8,12}).
-
-**Observation for n=71**: All known solutions for odd n≥33 (and Heule's n=65, 67, 69) in the database are **rct4** — full D₄ symmetry, *not* C₄. (Recall the C₄ theorem applies only to even n; odd n cannot have C₄-symmetric 2n solutions.) If D(71)=2n, the solution would likely be rct4 as well. By the same D₄ group-theoretic argument that governs rct4 (not the C₄ theorem), such a solution would necessarily have the center as a circumcenter. This is consistent with the pattern: no missing-center solutions have been found in any known symmetry class beyond n=31. The caveat applies: iden-class solutions beyond n=20 are not tracked in the database.
-
-**Curious gap: n=11, 13, 15 have no known rct4 solutions.**  
-Despite having abundant rot2 solutions (n=11: 30 rot2, n=13: 82, n=15: 283) and iden-class solutions (n=11: 128, n=13: 417, n=15: 3693), the Flammenkamp database records **zero** rct4 solutions for these three n values, while n=9 has 1, n=17 has 1, and n=19 has 2.
-
-We conjecture this is a **structural gap** rather than a search artifact — the distance ring capacities for m=5,6,7 ($n=2m+1$) fall into a critical range where rct4's "concentrated" ring usage pattern cannot be satisfied. This is supported by:
-
-- **D₄ orbit analysis**: rct4 requires fewer distance rings than rot2 (n=17: 9 rings vs 15 for rot2). For n=11,13,15, the minimal achievable ring count exceeds the rct4 threshold.
-- **Number theory**: The 4k+3 prime factors in these n values restrict available d² values (via Fermat's sum-of-two-squares theorem), limiting ring selection flexibility.
-- **Empirical threshold analogy**: Analogous to rot2's UNSAT threshold at n=31, rct4 may have a narrower "existence window" bounded by n=9 on the low end and n=17 on the high end, with n=11,13,15 falling in a gap.
-
-This is a **conjecture** — no theoretical proof exists. The gap could potentially be filled by a dedicated rct4-targeted search.
-
-**C₄ rot4 solutions scale exponentially with n**:  
-n=44: 1,016 → n=46: 1,366 → n=48: 2,124 → n=50: 3,381 → n=52: 5,062 → n=54: 7,696 → n=56: 10,441  
-The growth rate is ≈1.5× per 2-step increment, with no sign of slowing. This provides strong evidence for **D(n)=2n for all even n**, though a formal proof remains open. n=71 is the only n ≤ 72 with no known 2n-point solution. No rot4 solution is known for n=74 as of 2026-06-25.
-
-**Key observations**:
-- **Even n**: n=8 and n=10 have **zero** missing-center solutions. Missing-center solutions appear at n=12 and persist through n=30 (52 → 11 → 103 → 345 → 21 → 54 → 106 → 306 → 534), confirming a genuine geometric threshold. At n≥32, catalogued solutions revert to zero missing-center, as only rot4 and dia2 symmetry classes survive (rot2 becomes UNSAT at n=31, with a single n=33 exception). See §3.11 for analysis.
-- **Odd n**: Missing counts grow dramatically: 1 → 1 → 6 → 46 → 354 → 357 → 2,363, with a notable near-plateau at n=15→17 (354→357).
-- Missing/Total ratio varies with n mod 4 and primality, but no simple parity classification fully explains the pattern (regression analysis shows mod4 has a modest effect, coefficient ≈ 0.77, while primality dominates at ≈ 2.95).
-
-### 3.2 Odd n Growth — n=11 Marks Ring-Pair Threshold >100
-
-The odd n sequence splits into two regimes (Missing counts: Full for n≤13, D₄-inequivalent for n≥15; rates are comparable since orbit multipliers cancel):
-
-| n | Type | Rings | Ring Pairs | Missing | Missing/Total |
-|---|------|-------|-----------|---------|--------------|
-| 3 | 4k+3 | 3 | 3 | 0 | 0% |
-| 5 | 4k+1 | 6 | 15 | 4 | 12.5% |
-| 7 | 4k+3 | 10 | 45 | 4 | 3.0% |
-| 9 | 4k+1 | 15 | **105** | 8 | 2.2% |
-| **11** | **4k+3** | **20** | **190** | **36** | **3.2%** |
-| 13 | 4k+1 | 27 | 351 | 292 | 8.1% |
-| 15 | 4k+3 | 34 | 561 | 354 | 8.9% |
-| 17 | 4k+1 | 42 | 861 | 357 | 5.0% |
-| 19 | 4k+3 | 51 | 1275 | 2363 | 7.3% |
-
-**The real bottleneck is not ring capacity but collinearity density.**
-Ring capacity grows faster than linearly (slack ratio increases with n), so capacity is not the constraint. Instead, the **number of ring-pair collinearity interactions** grows quadratically:
-
-n=7: 45 ring pairs → constraint graph sparse
-n=9: 105 ring pairs → manageable  
-**n=11: 190 ring pairs → constraint graph surpasses diversity threshold**  
-This increase in geometric diversity (from 105 to 190 pair interactions) enables missing-center solutions to grow from a handful (8 at n=9) to 36 at n=11 — a 4.5× jump.
-n=19: 1275 ring pairs → extremely dense
-
-The **n=15→17 near-plateau** (354→357, a 1.0× change) is a striking example that the missing-center count is not a simple function of n. The near-equality suggests a balancing effect between:
-
-1. **n mod 4 residue**: Has a modest effect (regression coefficient ≈ 0.77), but the pattern is not a clean 4k+3 vs 4k+1 split — primality (coefficient ≈ 2.95) is the stronger descriptive correlate
-2. **Prime vs composite**: Composite n (e.g., 15) can have anomalously high missing counts
-3. **Sum-of-two-squares structure**: Rings with populations divisible by 8 (off-axis orbits) change the combinatorial landscape
-
-This analysis suggests missing-center abundance is controlled by a **multi-dimensional phase space** — grid parity, primality, and collinearity constraint density interact in complex but non-random ways.
-
-### 3.3 The Even n Threshold is Real — and Caused by Collinearity
-
-A fundamental question is: **why n=12?** Why do n=6, 8, 10 all have zero missing-center solutions while n=12 has 52?
-
-#### Distance Ring Definition (clarification)
-
-We use **squared Euclidean distance** (scaled for integer arithmetic) from the grid center:
-
-d(c, r) = (2c − X)² + (2r − Y)²,   where X = Y = n−1 for even n, or X = Y = 2·⌊n/2⌋ for odd n.
-
-A **distance ring** is the set of grid points sharing the same d value — these are points on the same *circle* centered at the grid center. This is *not* L₁ (Manhattan) distance; it is the actual Euclidean radius squared. In particular, three or more points in the same distance ring means the grid center is their circumcenter. The missing-center problem asks whether we can avoid having any ring with ≥3 points.
-
-The number of distance rings grows with n: for an n×n grid, the squared distance d(x,y)=(2x−(n−1))²+(2y−(n−1))² takes roughly n²/8 distinct values (each a sum of two squares of integers with the same parity as n−1), i.e. **O(n²)** — not O(n²/2). The specific evolution is:
-
-| n | Distinct Rings (R) | 2·R (max pts without center) | 2n (pts needed) | Ratio 2n/(2R) | Relative slack | Missing |
-|---|-------------------|------------------------------|-----------------|---------------|----------------|---------|
-| 6 | 6 | 12 | 12 | 1.000 | 0% | 0 |
-| 8 | 9 | 18 | 16 | 0.889 | 11% | 0 |
-| 10 | 14 | 28 | 20 | 0.714 | 29% | 0 |
-| 12 | 19 | 38 | 24 | 0.632 | 37% | **52** |
-| 14 | 25* | 50* | 28 | 0.560* | 44%* | ? |
-
-#### Conjecture: The "Inner Ring Avoidance" Mechanism
-
-A plausible explanation for the n=12 threshold is the following (still conjectural):
-
-To construct a missing-center solution, we must **avoid putting ≥3 points into any single distance ring**. This is hardest for the **minimum-radius rings** — those with fewer grid points — because they have limited capacity.
-
-For example, in a 12×12 grid, the minimum-radius rings and their capacities are:
-
-| Ring d | Grid points | Max allowed | Constraint |
-|--------|------------|-------------|------------|
-| d=2 | 4 points | ≤2 | Must drop ≥2 points |
-| d=10 | 8 points | ≤2 | Must drop ≥6 points |
-| d=18 | 4 points | ≤2 | Must drop ≥2 points |
-| d=26 | 8 points | ≤2 | Must drop ≥6 points |
-| ... | ... | ... | ... |
-
-**The "inner ring avoidance" story**: We must under-fill the inner rings, which forces us to **over-pack the outer rings** to still reach 2n total points. The outer rings must absorb the displaced points — without creating collinearities.
-
-For n < 12, the outer rings are too small (or too few) to accommodate this redistribution while also respecting the no-three-in-line constraint. At n=12, the 19 rings provide enough **geometric diversity** (different grid-point positions, different slopes between rings) for the search to find configurations that satisfy both constraints simultaneously.
-
-<p align="center">
-  <img src="solution_12_0.svg" alt="n=12 missing-center solution: 24 points colored by distance ring" width="80%">
-  <br>
-  <em>A missing-center solution for n=12. Each color represents a different squared-Euclidean distance from the grid center (marked ×). No color has ≥3 bold points — confirming the center is not a circumcenter. The legend on the right shows the 15 distinct distance rings used (out of 19 total).</em>
-</p>
-
-#### Confirmation via Matrix Analysis
-
-We formalized the distance-ring constraints as a **counting matrix M[i][j]**:
-
-- Let row‑group i be all rows with the same x² value (e.g., rows 0 and 11 both have x² = 121).
-- M[i][j] = number of points that row‑group i contributes to column‑group j.
-- Constraint 1: M[i][i] ≤ 2 (pure‑square ring has capacity 2).
-- Constraint 2: M[i][j] + M[j][i] ≤ 2 for i ≠ j (mixed squares share a ring).
-
-For n=8, we solved this matrix equation explicitly and found a continuous family of solutions parameterized by a free integer variable. **Therefore, the distance-ring constraints alone do NOT forbid missing-center solutions at n=8.**
-
-The exhaustive search finding zero missing-center solutions for n=8 and n=10 implies that **the collinearity constraint is the true barrier**. The extra rings at n=12 (19 vs. 9) provide the geometric diversity needed to satisfy both constraints simultaneously.
-
-**Conclusion**: The threshold at n=12 is a genuine **combinatorial threshold** driven by the interaction between distance-ring capacity and the no-three-in-line constraint — not a pigeonhole effect, and not an artifact of the search heuristic.
-
-> **ⓘ Open problem**: A mathematical proof that **no missing-center solution exists for n≤10** remains elusive. The "inner ring avoidance" mechanism above is a plausible heuristic, not a theorem. Proving that for n≤10 every 2n configuration necessarily concentrates ≥3 points in at least one distance ring would turn the n=12 threshold into a rigorous result.
-
-### 3.4 Symmetry and Cycle Structure of Missing-Center Solutions
-
-Analysis of all D₄‑inequivalent solutions (n = 7–19) reveals strong structural patterns in missing-center solutions.
-
-#### Column-Pairing Cycle Decomposition
-
-Every 2-per-row solution defines a 2‑regular bipartite graph between rows and columns, which decomposes into disjoint even‑length cycles. Missing-center solutions strongly prefer **long cycles**:
-
-| n | Missing Solutions | Largest Cluster | Top cycle types |
-|---|-----------------|----------------|-----------------|
-| 13 | 46 | **25× (13,) — 54%** | (13,) ≫ (2,11) > (3,10) |
-| 14 | 11 | 3× (14,), 3× (7,7) | (14,) = (7,7) > (6,8) |
-| 15 | 354 | **124× (15,) — 35%** | (15,) ≫ (2,13) > (3,12) |
-| 16 | 103 | **37× (16,) — 36%** | (16,) ≫ (2,14) = (5,11) |
-| 17 | 357 | **117× (17,) — 33%** | (17,) ≫ (2,15) > (3,14) |
-| 18 | 345 | **114× (18,) — 33%** | (18,) ≫ (2,16) > (3,15) |
-| 19 | 2,363 | **745× (19,) — 32%** | (19,) ≫ (2,17) > (3,16) |
-| **20** | **2,297** | **695× (20,) — 30%** | (20,) ≫ (2,18) > (3,17) |
-| 21 | 190 | **80× (21,) — 42%** | (21,) ≫ (2,2,17) > (4,17) |
-| 22 | 21 | 4× (2,2,18), 4× (22,) | (22,) = (2,2,18) > (2,2,9,9) |
-| 23 | 234 | **98× (23,) — 42%** | (23,) ≫ (2,2,19) > (8,15) |
-| 24 | 54 | **18× (12,12) — 33%** | (12,12) > (24,) > (2,2,20) |
-| 25 | 561 | **216× (25,) — 38%** | (25,) ≫ (2,2,21) > (4,21) |
-| 26 | 106 | **26× (26,) — 24%** | (26,) > (13,13) > (2,2,11,11) |
-| 27 | 777 | **281× (27,) — 36%** | (27,) ≫ (2,2,23) > (6,21) |
-| 28 | 306 | **71× (14,14) — 23%** | (14,14) > (28,) > (4,12,12) |
-| 29 | 2,136 | **795× (29,) — 37%** | (29,) ≫ (2,2,25) > (4,25) |
-| 30 | 534 | **105× (15,15) — 20%** | (15,15) > (30,) > (2,2,26) |
-| 31 | 1 | 1× (5,13,13) | (5,13,13) |
-
-The pattern is consistent across all catalogued n ≥ 12:
-1. **Single Hamiltonian cycle** `(n,)` — most common by far for most odd n
-2. **Split cycles** — even n often favor `(n/2, n/2)` decompositions (n=14, 24, 26, 28, 30)
-3. **Near-Hamiltonian** — `(2, n-2)` or `(2,2,n-4)` are the most common non-trivial types
-
-This holds for all D₄-inequivalent data from n=12 to n=30 where missing-center solutions exist.
-
-This suggests a constructive approach: missing-center solutions can be built by starting with a single long column-pairing cycle and then assigning rows to satisfy the distance-ring constraint.
-
-### 3.5 C₄ Evolution Across Even n — From Theory to n=72
-
-Analysis of all known rot4 solutions (n=12, 14, 16, 18, 58–72) from the [Flammenkamp database](https://wwwhomes.uni-bielefeld.de/achim/no3in/) reveals a consistent orbit-ring structure (with the caveat that only a few data points are available, so these patterns are observations rather than proven universals):
-
-| n | Orbits | Rings | R/O | Orbits = n/2? | Pure orbits | Ring pop. |
-|---|--------|-------|-----|---------------|-------------|-----------|
-| 12 | 6 | 6 | 1.00 | ✓ | 100% | All 4 |
-| 14 | 7 | 6 | 1.17 | ✓ | 100% | 4/8 |
-| 16 | 8 | 8 | 1.00 | ✓ | 100% | All 4 |
-| 18 | 9 | 8 | 1.12 | ✓ | 100% | 4/8 |
-| **72** | **36** | **34** | **1.06** | ✓ | **100%** | **4/8/12/16** |
-
-**Consistently observed patterns (from available rot4 data):**
-
-1. **Orbits ≡ n/2** (theorem-grade): Every rot4 solution uses exactly n/2 C₄ orbits, each of size 4. This is the structural maximum: 2n points ÷ 4 points/orbit = n/2 orbits. No degenerate orbits (size 1 or 2) occur for even n.
-
-2. **100% pure orbit→ring mapping**: Each orbit's 4 points lie at the exact same distance from the center. Orbits never split across multiple rings. This means the C₄ orbit structure is perfectly aligned with the distance ring geometry.
-
-3. **Ring population (a proved multiple of 4)**: Each C₄ orbit is a square of 4 points equidistant from the centre, so every distance ring is a union of complete orbits — its population is a multiple of 4. Empirically the observed populations are 4, 8, 12, or 16 (one orbit = 4 pts; two, three, or four coalesced orbits give 8, 12, or 16). When orbits exceed rings (n=14, 18, 72), multiple orbits share a ring, but the total is always a multiple of 4.
-
-4. **n=72 confirms all patterns at a larger scale**: At n=72 (6× larger than n=12), the same structure appears: 100% pure orbit-to-ring mapping, multiple-of-4 ring populations (4/8/12/16), and n/2 orbit count. This consistency across scales is notable, though the small sample size (5 data points) precludes a claim of proven scale invariance.
-
-**Context for n=71**: The n=72 solution achieved 2n points through C₄ symmetry, which reduces the SAT search from selecting individual points to selecting fundamental orbits. n=71, being odd, cannot exploit C₄ symmetry — its rotation center is a lattice point, breaking the clean orbit structure. This structural difference helps explain the uneven SAT record: Heule solved D(n)=2n for n=70 and n=72 (even, via C₄) and for n=65, 67, 69 (odd, via rct4/D₄ symmetry — *not* C₄), but n=71 remains unsolved.
-
-The full n=72 coordinate list is available in `analysis/n72_rot4_coords.txt`, and the encoding from the Flammenkamp database is preserved in `analysis/n72_raw.html`.
-
-### 3.6 C₄ Orbit Selection: Cycle Decomposition Insight
-
-The **C₄ orbit selection problem** asks: for which even $n=2m$ does a rot4 solution exist?  This reduces to choosing $m$ orbits from the $m\times m$ orbit grid $\\{0,\dots,m-1\\}^2$ such that the original $n\times n$ grid has exactly 2 points per row/column and no three are collinear.
-
-**Key insight**: The row/column saturation constraint (2 points per row/column) turns orbit selection into a **2-regular graph on $m$ vertices**:
-
-- Each orbit $O(i,j)$ covers rows $\\{i,\\,j,\\,n-1-i,\\,n-1-j\\}$
-- Each vertex $r$ (representing opposite-row-pair $\\{r,n-1-r\\}$) must have degree exactly 2
-- Therefore the orbit set forms a **disjoint cycle decomposition** of the $m$ vertices
-
-This reduces the search space from $\binom{m^2}{m}$ (combinatorial explosion) to **integer partitions of $m$** plus vertex ordering — a much more tractable combinatorial design problem.
-
-**Verified cycle patterns** (from Flammenkamp rot4 solutions, $m=3$ to $m=23$):
-
-| $m$ | $n$ | Full $m$-cycle | $(1,m-1)$ | Other valid types |
-|:---:|:---:|:--------------:|:---------:|:-----------------|
-| 3 | 6 | ✅ | — | |
-| 4 | 8 | ✅ | ❌ | |
-| 5 | 10 | ✅ | ✅ | $(1,2,2)$ |
-| 6 | 12 | ❌ $^\\dagger$ | ✅ | $(3,3)$ |
-| 7 | 14 | ✅ | ✅ | $(3,4)$ |
-
-$^\\dagger$ m=6 has no full 6-cycle, but admits $[5,1]$ and $[3,3]$ decompositions.
-| 8 | 16 | ✅ | ✅ | $(1,3,4)$ |
-| 9 | 18 | ✅ | ❌ | |
-| 10 | 20 | ✅ | ✅ | $(4,6),\\(5,5)$ |
-| 11 | 22 | ✅ | ✅ | $(3,8)$ |
-| 12 | 24 | ✅ | ✅ | $(3,9),\\(5,7)$ |
-| 13 | 26 | ✅ | ✅ | $(5,8),\\(6,7)$ |
-| 15 | 30 | ✅ | ✅ | $(2,2,11)$ etc. |
-| 16 | 32 | ✅ | ✅ | $(1,4,11)$ etc. |
-| 21–23 | 42–46 | ✅ | ✅ | varied |
-
-**Pattern**: The full $m$-cycle and $(1,m-1)$-cycle types are valid for **all $m\ge 10$**. The only exceptions are $m=4$ and $m=9$ for $(1,m-1)$, and $m=6$ for the full $m$-cycle. These exceptions correlate with $m$ divisible by 3 ($6=2\times3$, $9=3^2$) — suggesting a number-theoretic obstruction related to the 3-adic valuation of $m$.
-
-**Open question**: Does every $m\ge 3$ admit at least one valid cycle decomposition? Empirical evidence strongly suggests **yes for every $m\ge 3$** — $m=6$ is merely the single value lacking a full $m$-cycle, but it still admits $(1,5)$ and $(3,3)$. (Note: a valid cycle decomposition is a *necessary* condition for a C₄ solution, so this supports, but does not by itself prove, the long-standing conjecture $D(2m)=2m$ for all $m$. For even $n\le 72$ this is already established; the only open case $\le 72$ is the odd $n=71$.)
-
-**Code**: `analysis/c4_cycles.cpp`, `analysis/c4_cycles_ext.cpp` — C++ cycle decomposition explorer; `analysis/c4_actual_orbits.py` — Flammenkamp orbit extraction.
-
-### 3.7 D₄ Reconstruction & Quantitative Model
-#### D₄ Equivalence Class → Full Solution Counts
-
-The Flammenkamp database stores **D₄-inequivalent solutions** (one representative per D₄ orbit). We verified the D₄ orbit multipliers empirically by applying all 8 group transformations to sampled solutions:
-
-| Symmetry class | D₄ orbit multiplier | Verified on |
-|:--------------:|:-------------------:|:-----------:|
-| iden (.) | ×8 | n=7-20 |
-| rot2 (:) | ×4 | n=7-20 |
-| dia1 (/) | ×4 | n=7-20 |
-| ort1 (-) | ×4 | n=8,10 |
-| rot4 (o) | ×2 | n=8-20 |
-| dia2 (x) | ×2 | n=10-20 |
-| rct4 (c) | ×1 | n=9,15+ |
-| full (*) | ×1 | n=10 |
-
-Cross-validation against C++ full enumeration matches D₄-inequivalent counts for n=7-13 (n=9: 368 C++ vs 365 reconstruction, within 0.8%).
-
-**D₄-inequivalent solution counts** (primary, verified from Flammenkamp/RLE database) with Full (all-symmetries) totals — see `analysis/d4_reconstruction_results.txt` for complete n=7-45:
-
-| n | D₄ Total | D₄ Missing | D₄ Rate | Full Total | Full Missing† |
-|---|:--------:|:----------:|:-------:|:----------:|:------------:|
-| 7 | 22 | 1 | 4.5% | 132 | 4 |
-| 8 | 57 | 0 | 0.0% | 380 | 0 |
-| 9 | 51 | 1 | 2.0% | 368 | 8 |
-| 10 | 156 | 0 | 0.0% | 1,135 | 0 |
-| 11 | 158 | 6 | 3.8% | 1,120 | 36 |
-| 12 | 566 | 8 | 1.4% | 4,348 | 52 |
-| 13 | 499 | 46 | 9.2% | 3,622 | 292 |
-| 14 | 1,366 | 11 | 0.8% | ~10,568 | ~85 |
-| 15 | 3,978 | 354 | 8.9% | ~30,634 | ~2,726 |
-| 16 | 5,900 | 103 | 1.7% | ~46,304 | ~808 |
-| 17 | 7,094 | 357 | 5.0% | ~55,573 | ~2,797 |
-| 18 | 19,204 | 345 | 1.8% | ~152,210 | ~2,735 |
-| 19 | 32,577 | 2,363 | 7.3% | ~258,170 | ~18,729 |
-| 20 | 118,057 | 2,297 | 1.9% | ~941,580 | ~18,326 |
-
-† For n≤13, Full counts are cross-validated against C++ full enumeration (2-per-row constraint). For n≥14, Full Missing is estimated as D₄_miss × (Full_total / D₄_total), assuming the D₄ symmetry class distribution of missing-center solutions mirrors the overall distribution. Exact per-class verification pending. D₄ totals and D₄ missing are authoritative (verified against Flammenkamp RLE database).
-
-#### Three-Factor Quantitative Model
-
-Using corrected D₄-inequivalent counts (verified against Flammenkamp RLE database) and exact ring counts $R$ (ring pairs $= \binom{R}{2}$), we built a weighted least squares regression model (n=7—20, 14 data points):
+| [No single conic](analysis/even_n_existence_tools/NO_SINGLE_CONIC_THEOREM.md) | **PROVED** | for even `n >= 6`, an extremal `2n` NTIL set cannot lie wholly on a nonzero real conic; `n=4` is exceptional | rules out a broad algebraic ansatz |
+| [Covariance spread](analysis/even_n_existence_tools/COVARIANCE_SPREAD_THEOREM.md) | **PROVED** | every extremal set satisfies `|Corr(X,Y)| < 1/2` and a determinant/area-square lower bound | structural diagnostic; for C4 sets covariance is zero, so the energy is constant and is not a useful search objective |
+| [Determinant-product barrier](analysis/even_n_existence_tools/DETERMINANT_PRODUCT_BARRIER.md) | **PROVED** | the forced small-prime valuation lower bound supplies only about half the main term needed by the naive determinant-product upper bound | tells us to stop pursuing that unrefined global product argument |
+| [Deletion-shadow Hall theorem](analysis/even_n_existence_tools/DELETION_SHADOW_HALL_THEOREM.md) | **PROVED** | after fixing retained points, row/column completion through allowed cells is exactly a bipartite `b`-matching/max-flow/Hall problem | one of the strongest interfaces between geometry and combinatorics in the repository |
+| [Corrected C4 deficit `f`-factor](analysis/even_n_existence_tools/ROT4_MULTIGRAPH_MODEL_CORRECTION_2026-07-19.md) | **PROVED / EXACT FINITE** | for a fixed deletion mask, zero-new-conflict completion is an exact loop-and-digon `f`-factor problem | exposes local star-capacity and Tutte-type obstructions |
+| [Two-adic compatibility obstruction](analysis/even_n_existence_tools/TWO_ADIC_COMPATIBILITY_OBSTRUCTION.md) | **COMPUTER-ASSISTED, FINITE** | one proposed construction family reduces to 128 compatible permutations modulo 8 and is eliminated | valid family obstruction, not a global theorem |
+| [Central-symmetry enumeration](analysis/even_n_existence_tools/CENTRAL_SYMMETRY_ENUMERATION.md) | **PROVED** | exact generating functions count several centrally symmetric candidate spaces | useful for entropy comparisons, not sufficient for NTIL existence |
+| [Conic permutation-layer classification](analysis/even_n_existence_tools/CONIC_PERMUTATION_LAYER_CLASSIFICATION.md) | **PROVED** | in the `n=p-1` setup, a perfect matching lying on the relevant conic reduces to a punctured-line/hyperbola family | sharpens the conic route |
+| [Hyperbola-layer completion obstruction](analysis/even_n_existence_tools/HYPERBOLA_LAYER_COMPLETION_OBSTRUCTION.md) | **EXACT FINITE** | tested arbitrary completions fail for `p=13,...,37` in that construction family | negative evidence for that family only |
+| [Finite-plane supersaturation](analysis/even_n_existence_tools/FINITE_PLANE_SUPERSATURATION.md) | **PROVED, LIMITED** | supplies modular collinearity pressure in the `n=p-1` setting | supporting lemma; a stronger local formulation supersedes its original role |
+| [Pair-codegree repulsion](analysis/results/pair_codegree_37/README.md) | **EMPIRICAL** | across archived C4 solutions, `log2(P(u,v)/(P(u)P(v)))` is approximately affine in normalized conflict codegree, with slope near `-0.169` | promising diversity score and possible clue toward a correlation theorem |
+
+Two cautions apply to the table:
+
+1. a theorem about a restricted construction family cannot be promoted to a
+   theorem about all NTIL configurations;
+2. a correct necessary condition may be nearly constant on C4 candidates and
+   therefore useless as an optimization score.
+
+## 6. Exact and empirical computational results
+
+### 6.1 Exact small-`m` C4 counts
+
+The oriented, labelled C4-NTIL solution counts for `m=3,...,10` are
+
+```text
+6, 8, 13, 8, 26, 26, 14, 32.
+```
+
+The `m=10` enumeration visited approximately 33 million nodes. These counts are
+finite facts about the stated labelled model; they are not asymptotic evidence
+for a positive limiting probability.
+
+### 6.2 Pair-codegree law
+
+For compatible fundamental cells `u,v`, let `D(u,v)` count the rotated
+third-cell conflict mechanisms containing the pair. In archived solutions for
+`m=18,...,28`, the observed relation is
 
 \[
-\text{missing %} = -1.22 + 0.77\cdot(\text{mod4}) + 2.95\cdot(\text{is\_prime}) + 0.44\cdot\log(\text{ring pairs})
+\log_2\frac{P(u,v)}{P(u)P(v)}
+\approx c_m-\alpha\frac{D(u,v)}m,
+\qquad \alpha\approx0.169.
 \]
 
-| Factor | Coefficient | Interpretation |
-|--------|:-----------:|:--------------|
-| mod4 | **+0.77** | Modest association — parity alone is a weak descriptive feature |
-| is_prime | **+2.95** | Prime n have systematically ~3% higher missing-center rates |
-| log(ring pairs) | **+0.44** | Small positive — counterintuitive (more constraints → slightly *more* missing), likely proxies for n |
-| **R²** | **0.834** | Three factors correlate with 83% of variance (descriptive, not causal; vs 62% with buggy data) |
+The archive is biased toward configurations found by existing solvers, so this
+is an empirical law under an unknown sampling measure. The early suggestion
+`alpha=1/6` is not supported at theorem-level precision. The useful content is
+the robust repulsion trend, not the exact decimal.
 
-**Key finding**: With corrected data, the strongest descriptive correlate is primality (prime n ≈ 3% higher missing rates). The previously reported strong negative log(ring-pairs) effect (−2.29) was an artifact of incorrect missing-center detection in the reconstruction file. The log(ring-pairs) coefficient is now small and positive — ring-pair density has minimal additional descriptive contribution, and its sign is likely an artifact of collinearity with n (larger grids have both more ring pairs and more missing solutions in absolute terms). The moderate R² (0.834, 14 data points with 4 parameters → adj. R² ≈ 0.78) indicates further structural factors not captured by these three features alone; the model should be treated as descriptive rather than predictive.
+### 6.3 The historical score-60 basin
 
-#### Refined Model: Sum-of-Two-Squares Theory
+Before the true `n=74` solution became public, the best repository incumbent had
+60 bad three-point lines. For one fixed undirected 2-factor, CP-SAT proved that
+60 was the optimal orientation objective. Its 60 bad lines form 15 C4 orbits;
+an exact minimum conflict hitting set has eight fundamental edges.
 
-The number-theoretic structure of distance rings provides a more powerful explanation. For each squared distance $d = x^2 + y^2$, the number of integer representations $r_2(d)$ is given by:
+Exact selected-cell balls of radius 8 through 12 around that incumbent are
+infeasible. Radius 13 returned `UNKNOWN`. Therefore the strict conclusion is:
+every C4 solution has selected-cell distance at least 13 from that seed. It is
+incorrect to infer distance 14 from the `UNKNOWN` radius-13 run.
 
-\[
-r_2(d) = 
-\begin{cases}
-0 & \text{if any } 4k+3 \text{ prime factor has odd exponent}\\
-4 \prod_{p_i \equiv 1 \pmod{4}} (e_i + 1) & \text{otherwise}
-\end{cases}
-\]
+One adaptive reduced-LNS release chain was later proved infeasible through
+`k=23`; `k=24,25,26` remained `UNKNOWN`. The scope and fixed-cell certificate are
+recorded in
+[`score60_reduced_lns_frontier_2026-07-22.md`](analysis/results/score60_reduced_lns_frontier_2026-07-22.md).
 
-The ring population on the grid equals $r_2(d)$, truncated by grid boundaries for large $d$. This predicts which rings can be used in missing-center solutions (need $\le 2$ points per ring).
+The true solution is much farther away: both oriented and undirected overlap
+are only 2/37, so the selected-cell deletion distance is 35. These local
+certificates are valid, but they are now best used as
+negative controls for capacity-collapse theory, not as a route to `n=74`.
 
-A refined weighted least squares model incorporating $r_2$-based features achieves **$R^2 = 0.897$** (both Model 1 with 3 features and Model 2 with 4 features converge to the same R²). This is a modest improvement over the three-factor model ($\Delta R^2 = +0.063$, adjusted gain $\approx +0.07$):
+### 6.4 Corrected V40 local exclusions
 
-| Feature | Coefficient | Interpretation |
-|---------|:-----------:|:--------------|
-| intercept | **+2.57** | Baseline missing rate for n=7 (unrealistic — model extrapolation) |
-| rings (total) | **+0.12** | More rings → slightly higher missing rate (counterintuitive, may proxy for n) |
-| r₂=0 count | **−0.23** | More impossible rings (r₂(d²)=0) reduce missing-center rate |
-| max 4k+1 factors | **−0.64** | More representable distances → *lower* missing rate (flips sign vs old model) |
-| **$R^2$** | **0.897** | Raw R² (Adjusted $R^2 \approx 0.87$) — number-theoretic features correlate with most of the variance (descriptive, not causal) |
+Four older `V=40` basins were completely audited in the corrected pseudograph
+model. All normalized deletion shells `k=0,...,12` were excluded, covering
+12,927,790,384 deletion masks through a sequence of conflict hitting, local
+star-capacity, exact `f`-factor, and short-direction tests. The conclusion is
+strictly local: the four basins have escape radius at least 13. It is not a
+non-existence certificate for `m=37`.
 
-**⚠️ Caveat**: This model is fitted on 14 data points (n=7—20) with 4 features, carrying a significant risk of overfitting despite the adjusted R². The "max 4k+1 factors" coefficient flipped sign (from +5.01 to −0.64) with corrected data — the earlier claim that "more representable distances drive missing-center abundance" does not survive data correction. With all features having small magnitudes (≤0.64), no single number-theoretic factor dominates. This is an **exploratory model** based on small-n data; its predictive power for larger n is untested. Cross-validation on rot2 data for n=21—29 would be valuable future work.
+### 6.5 Solver trust boundary
 
-**Revised assessment**: With corrected data, the ring count (a proxy for grid size n) and primality remain the most reliable descriptive correlates. The $r_2$-based number-theoretic features provide modest descriptive value but lack the dominant role previously claimed. The relationship between $4k+1$ prime factor structure and missing-center rates is more nuanced than simple abundance — larger n have both more missing solutions (absolute count) and more 4k+1 factors, creating spurious correlations that small-sample regressions cannot reliably disentangle.
+The old large random-UNSAT sweep from the custom DPLL solver is **withdrawn**
+because the solver produced false UNSAT answers. Six named `V=20` fixed-factor
+instances were independently cross-checked and may still be used within their
+stated scope; see
+[`validate_solver_report.md`](analysis/even_n_existence_tools/validate_solver_report.md).
 
-**Code**: `analysis/d4_reconstruct.py` (reconstruction), `analysis/sum_of_two_squares.py` (number theory),
-`analysis/three_factor_model.txt` (results)
+## 7. Withdrawn or downgraded directions
+
+This section is deliberately explicit so historical files are not accidentally
+cited as current results.
 
-### 3.8 Ring Collision Graph — Sum-of-Two-Squares Structure
+### 7.1 Carry/absorber `n=74` claim — **WITHDRAWN**
 
-The **ring collision graph** connects two distance rings if they contain points that form a collinear triple. Understanding this graph is key to explaining why the collinearity constraint eliminates certain orbit selections.
+The configuration claimed in `absorber_carry_theory.md` used lifted coordinates
+outside the `74 x 74` board. It was not an NTIL solution. The later Prellberg
+solution is real but is unrelated to that false positive. Claims of a proved
+polynomial-time random construction based on the same carry model are also
+unsupported.
 
-We computed the collision graph for $n=12$ to $n=30$ and correlated each ring's collision degree (percentage of other rings it conflicts with) with its population size, $r_2(d)$ (number of representations as sum of two squares), and 4k+1 prime factor count.
+### 7.2 Formal absorber theory — **PROVISIONAL**
 
-**Key findings**:
+The absorber notes assume independence and a constant-probability improvement
+that were not proved and are inconsistent with some of their own estimates.
+They may inspire a local-repair construction, but they are not an existence
+proof.
 
-1. **Collision degree is primarily driven by population size**, not by $r_2(d)$ or 4k+1 primes directly:
+### 7.3 FDR, SIRH, and “symmetry signature” — **PROVISIONAL**
+
+These are research vocabularies, not established theorems. The current files do
+not close the step from local orbit identities to global conflict control. In
+particular, linear or quadratic orbit equations do not imply that the global
+feasible variety is zero-dimensional, and a container-style conclusion needs
+quantitative hypotheses that have not been proved.
 
-| Ring population | Avg collision degree (n=12→30) |
-|:--------------:|:------------------------------:|
-| pop=4 | 35–62% |
-| pop=8 | 44–75% |
-| pop=12 | 74–97% |
-| pop=16 | 80–100% |
+### 7.4 Ordinary line-capacity LP separation — **DEAD END AS STATED**
 
-2. **The $d^2=32$ ring (pop=16) shows 100% collision where it appears** — it conflicts with every other ring in its range. This is because $32=2^5$ has many integer lattice points at radius $\sqrt{32}$, and these points participate in collinear triples with points from every other ring.
+For the unrestricted board LP, assigning `z_ij=2/n` to every cell satisfies
+every line-capacity constraint because a grid line contains at most `n` cells.
+It also attains the row upper bound `2n`. Thus the ordinary LP optimum is always
+exactly `2n` and cannot separate feasible from infeasible orders. Prellberg's
+checkerboard or symmetry-restricted LPs are different models and should not be
+conflated with this observation.
 
-3. **Collision degree monotonically decreases as n grows** — because more rings mean more pairwise diversity, reducing the proportional collision frequency.
+### 7.5 Random Gröbner scans — **FINITE ONLY**
 
-4. **$r_2(d)$ matters indirectly**: more representations → larger population → more collisions. The $r_2(d)=2$ rings consistently have slightly higher collision degree than $r_2(d)=0$ or $r_2(d)=4$ rings, but the population size accounts for ~80% of the variance.
+An UNSAT result for a fixed factor is a valid finite result if checked correctly.
+Randomly sampling factors and observing inconsistent ideals gives no global
+Nullstellensatz certificate for all factors.
+
+### 7.6 Transposition and Gray-graph arguments — **INSUFFICIENT**
 
-**Conclusion**: The original hypothesis is partially correct — the sum-of-two-squares structure predicts collision degree **through** population size, but there is no independent 4k+1 prime factor effect. The practical implication for the missing-center problem: **rings with pop≥12 are "dangerous"** because they collide with nearly all other rings, making it difficult to find co-usable pairs.
+Edge transpositions of a connected graph generate the symmetric group, so these
+documents establish reachability in permutation space. Reachability says nothing
+about whether an NTIL state exists or whether a path can stay feasible. One draft
+also incorrectly asserted that every invertible linear map preserves Hamming
+adjacency; that is false in general.
 
-**Code**: `analysis/direction_b_ring_collision.py` — ring collision graph builder and correlation analysis.
+### 7.7 Radial layers, heat maps, and higher-dimensional volume — **DESCRIPTIVE**
 
-### 3.9 Odd-n Missing-Center Existence Bounds
+These views are useful for feature discovery, but no audited implication from a
+radial profile, density image, or 3D visualization to 2D NTIL existence has been
+proved. They should be used to generate hypotheses and then tested out of sample.
 
-We analyzed the precise conditions under which odd $n$ grids admit missing-center solutions, using $n=7$ to $n=53$ with $D_4$-inequivalent data (n=7–45 from Flammenkamp, n=47–53 from mvr/no-three-in-line rct4 data).
+## 8. What the literature contributes
 
-**Key findings:**
+### 8.1 Classical constructions and bounds
 
-1. **Absence in catalogued symmetry classes at $n\ge 33$.** All odd $n\ge 7$ satisfy the ring capacity constraint (enough rings with $\le$2 points to hold $2n$ points), with slack actually *increasing* from 1.36× at $n=7$ to 5.21× at $n=45$. Within the catalogued symmetry classes:
+Guy and Kelly developed the classical probabilistic heuristic suggesting that
+the asymptotic maximum should be below `2n`. Hall, Jackson, Sudbery, and Wild
+constructed sets of size `(3/2-o(1))n`, still the leading classical asymptotic
+lower-bound scale. Flammenkamp's two papers established major exact-enumeration
+and symmetry-classification results and his live database remains the primary
+record source.
 
-   - At $n=31$, **rot2 solutions become empirically unsatisfiable** — zero solutions remain
-   - At $n\ge 33$, rct4 is the dominant surviving class, but **a single rot2 solution exists at $n=33$** (Flammenkamp `n33_rot2.few`), so rot2 does not universally vanish for all $n\ge 31$
-   - rct4 solutions inherently have $\ge 4$ points per distance ring ($D_4$ orbit structure) → center is always a circumcenter
-   - Therefore missing-center solutions are not found in any tracked symmetry class for odd $n\ge 33$. **Caveat**: iden-class solutions are only tracked up to $n=20$.
+These results warn against reading a long finite run of even solutions as an
+automatic proof of the all-even conjecture.
 
-2. **The $n=11$ acceleration in absolute count.** At $n=11$, the ring-pair collinearity density crosses $\binom{r}{2} = 190$, enabling the absolute count to jump from 8 (at $n=9$) to 36.
+### 8.2 Constraint programming
 
-3. **The $15\rightarrow 17$ near-plateau** (354 vs 357 missing-center solutions) remains unexplained — the near-equality suggests a balancing effect between parity and compositeness, but no single mechanism has been confirmed.
+Prellberg's 2026 CP-SAT work produced `2n` configurations for every `n <= 60`
+using exact collinearity constraints and symmetry reduction. Later searches by
+Prellberg, Heule, Riley, and others extended the record to 74. The practical
+lesson is that a faithful sparse exact model plus carefully chosen symmetry
+conditions can outperform elaborate handcrafted proxy objectives. Helper
+constraints must be ablated: some mathematically valid restrictions make the
+solver substantially slower.
 
-4. **Capacity is never the bottleneck.** The $n=9$ anomaly (only 1 missing-center solution despite 105 ring pairs) shows that collinearity constraints, not capacity, drive the pattern.
+### 8.3 Finite-field permutation graphs
 
-**Code**: `analysis/direction_c_odd_existence.py` — ring capacity, diversity, and extinction threshold analysis.
+Cooper and Hyatt characterize finite-field permutations minimizing collinear
+triples. Their setting is not the same as the integer-grid two-permutation
+decomposition, but it supplies a useful warning: modular permutation graphs have
+unavoidable structured triples. An integer construction must exploit carries or
+other failures of modular collinearity to lift to a genuinely collinearity-free
+set.
+
+### 8.4 The solved `k >= 3` problem and the exceptional `k=2` case
+
+Ghosal, Goenka, Grebennikov, Keevash, Kwan, and Pham proved that for every fixed
+`k >= 3` and sufficiently large `n`, exactly `kn` points can be selected with at
+most `k` on a line. Their proof separates heavy lines, builds a pseudorandom
+hypergraph matching, deletes the remaining defects, and completes the structure
+by randomized switching.
+
+The NTIL problem is precisely the missing critical case `k=2`. In the repository's
+corresponding line-count estimates, the light-line tail becomes harmonic at
+`k=2`, whereas the `k>=3` deletion budget is summable. This identifies a real
+mathematical bottleneck: a proof for `k=2` needs an additional cancellation,
+repulsion, or correlation estimate, not merely a re-run of the `k>=3` proof.
 
-### 3.10 The rot2 UNSAT Threshold at n=31
-
-We investigated the sharp SAT→UNSAT transition of the rot2 symmetry class at $n=31$ (44,828 solutions at $n=29$, zero at $n=31$).
-
-**What does NOT cause it:**
-
-1. **Not a center-crossing line capacity problem.** For every odd $n$, there are far more center-crossing lines than needed (e.g., $n=31$: 288 lines, only 31 needed).
-2. **Not a pairwise conflict problem.** The pair conflict graph (where two rot2 pairs conflict if their 4 points contain a collinear triple) has only $\le 3$ conflicts per pair out of 480 available pairs at $n=31$. The estimated independence number (Caro-Wei bound) is $\sim 311$, far above the 31 needed.
-3. **Not a center row/col constraint.** The constraints "exactly 1 pair on the center row" and "exactly 1 pair on the center column" are satisfiable for all odd $n$.
-
-**What does cause it:**
-
-The rot2 UNSAT is an **interaction-driven combinatorial threshold** — none of the individual constraints are problematic, but their **combined effect** becomes unsatisfiable at a critical density point:
-
-| $n$ | Available pairs | Constraints per variable | rot2 solvable? |
-|:---:|:--------------:|:----------------------:|:--------------:|
-| 27 | 364 | 68.3 | ✅ (17,332 solutions) |
-| 29 | 420 | 73.6 | ✅ (44,828 solutions) |
-| **31** | **480** | **78.9** | **❌ (0 solutions)** |
-| 33 | 544 | 84.2 | ? (1 known partial rot2 solution) |
-
-The transition occurs at **≈78.9 constraints per variable** — a density value beyond which solvability breaks down. While the empirical threshold is sharp for n=31 (confirmed UNSAT by exhaustive enumeration), n=33 is not comparably UNSAT: a single rot2 solution exists in the Flammenkamp catalogue (`n33_rot2.few`, verified valid: 2-per-row, 180° symmetric, zero collinear triples). This suggests the obstruction is specific to $n=31$ rather than a universal threshold beyond which rot2 is always impossible. Proving the $n=31$ UNSAT analytically remains an open challenge.
-
-**Conclusion**: The rot2 UNSAT at $n=31$ is a verified empirical fact — a sharp unsatisfiability transition in a structured combinatorial problem, analogous in character to phase transitions observed in random constraint satisfaction problems. Notably, $n=33$ is not comparably UNSAT (1 partial solution exists), indicating the obstruction is specific to $n=31$ rather than a general threshold. A compact mathematical proof for the $n=31$ UNSAT remains an open challenge. To prove it would require either (a) UNSAT core extraction from a SAT solver, (b) a novel combinatorial invariant, or (c) a dedicated structural argument specific to the rot2 symmetry class.
-
-**Eliminated proof approaches** (all shown insufficient by our analysis):
-- ❌ Center-crossing line count (288 lines at $n=31$, only 31 needed)
-- ❌ Pairwise conflict graph (avg $<3$ conflicts per pair)
-- ❌ Direction uniqueness (287 distinct directions at $n=31$, 31 needed)
-- ❌ Row/col degree feasibility (always satisfiable)
-- ❌ Opposite-row direction overlap (always 100%)
-
-**Key theoretical contribution**: We proved that the collinearity constraint for rot2 on odd $n$ reduces to a **direction uniqueness condition**: no two selected pairs can share the same reduced direction from the center. This equivalence (a formal proof is given in `analysis/direction_d_deep_reason.py` via determinant of the matrix $[(i_1-m)(j_2-m)-(i_2-m)(j_1-m)]$) is itself a non-trivial result. The UNSAT threshold occurs because, at $n=31$, the intersection of the direction-uniqueness constraint with the degree constraints becomes globally unsatisfiable, even though each constraint individually remains easily satisfiable.
-
-**Code**: `analysis/direction_d_rot2_threshold.py` — line-capacity and constraint-density analysis; `analysis/direction_d_conflict_graph.py` — pairwise conflict graph and independence number estimation; `analysis/direction_d_deep_reason.py` — combinatorial threshold characterization.
-
-### 3.11 The Even-n Threshold — Empirically Characterized
-
-The even-$n$ missing-center threshold is now confirmed across a far wider range thanks to the Flammenkamp D₄-inequivalent database (n=8 to n=44):
-
-| n | Total | Missing | Rate | Available symmetry classes |
-|---|-------|---------|------|---------------------------|
-| 8 | 57 | 0 | 0.0% | iden, rot2, dia1, rot4, ort1 |
-| 10 | 156 | 0 | 0.0% | iden, rot2, dia1, dia2, full, rot4 |
-| 12 | 566 | 8 | 1.4% | iden, rot2, dia1, dia2, rot4 |
-| 14 | 1,366 | 11 | 0.8% | iden, rot2, dia1, dia2, rot4 |
-| 16 | 5,900 | 103 | 1.7% | iden, rot2, dia1, dia2, rot4 |
-| 18 | 19,204 | 345 | 1.8% | iden, rot2, dia1, dia2, rot4 |
-| 20 | 118,057 | 2,297 | 1.9% | iden, rot2, dia1, dia2, rot4 |
-| 22 | 1,275 | 21 | 1.6% | rot2, dia1, dia2, rot4 |
-| 24 | 2,920 | 54 | 1.8% | rot2, dia1, dia2, rot4 |
-| 26 | 4,949 | 106 | 2.1% | rot2, dia1, ort1, rot4 |
-| 28 | 12,203 | 306 | 2.5% | rot2, dia1, ort1, rot4 |
-| 30 | 24,925 | 534 | 2.1% | rot2, dia1, dia2, rot4 |
-| 32 | 175 | **0** | 0.0% | dia1, dia2, rot4 |
-| 34 | 172 | **0** | 0.0% | rot4 |
-| 36 | 282 | **0** | 0.0% | dia2, rot4 |
-| 38 | 338 | **0** | 0.0% | dia2, rot4 |
-| 40 | 541 | **0** | 0.0% | rot4 |
-| 42 | 747 | **0** | 0.0% | dia2, rot4 |
-| 44 | 1,017 | **0** | 0.0% | dia2, rot4 |
-
-**Three-phase evolution**:
-
-1. **Below threshold (n=8–10)**: Zero missing-center — the collinearity constraint eliminates all ring assignments despite the ring-capacity matrix being satisfiable alone.
-
-2. **Active region (n=12–30)**: Missing-center solutions appear and persist across the full range. The rate oscillates between 0.8% and 2.5%. The iden class (non-symmetric) contributes the majority of missing-center solutions up to n=20 — and, as partial data confirm, at least through n=21 (17 missing-center among 142 known iden solutions; exhaustive count is presumably much higher). Beyond n=21, rot2 drives the observed count until its own UNSAT threshold at n=31.
-
-3. **Absence in catalogue data (n≥32)**: No missing-center solutions are known in the currently catalogued symmetry classes for n≥32. This coincides with the rot2 and iden symmetry classes no longer being exhaustively catalogued — only rot4 and dia2 survive. rot4 solutions always have the center as circumcenter (by the C₄ theorem), and dia2 solutions in the database also universally have the center as circumcenter, though a formal proof for dia2 is not yet established.
-
-**⚠️ Caveat — evidence points toward a data-blindness artefact**: The zero missing-center count for n≥32 applies **only to the symmetry classes that happen to be tracked in the Flammenkamp database**. The iden class (non-symmetric) accounts for the majority of missing-center solutions at small n — yet it is **not tracked exhaustively beyond n=20** in any public database. Crucially, **partial iden data do exist at n=21**: Flammenkamp's catalogue contains 142 iden-class solutions for n=21 (a fragment compared to the 117,347 known at n=20), and **17 of those 142 are missing-center**. This proves that iden-class missing-center solutions persist beyond n=20 — the apparent absence at n≥32 is far more likely a data-blindness artefact than a genuine geometric extinction. Similarly, the rot2 class (the second-largest contributor beyond n=20) disappears from the catalogue after n=31 due to its own UNSAT threshold (§3.10), not because we chose to stop tracking it. Notably, a partial rot2 solution exists at n=33 (`n33_rot2.few` in the Flammenkamp catalogue), suggesting that rot2 is not universally UNSAT beyond n=31 but that the specific value n=31 has special properties. A definitive answer would require exhaustive iden enumeration for n≥21, which remains an open computational challenge.
-
-This threshold is an **empirical finding** — it has not been proven mathematically.
-
-### 3.12 Relaxing the Row Constraint
-
-Our primary algorithm imposes "exactly 2 points per row" as a search heuristic. To verify that this does not distort the qualitative behavior, we implemented a **cell-by-cell backtracking** that imposes no row constraint (directory `d4/`).
-
-| n | Row Constraint | Total Solutions | Missing Center | Ratio |
-|---|---------------|----------------|---------------|-------|
-| 5 | 2-per-row | 32 | 4 | 12.5% |
-| 5 | Unconstrained | 3,209 | 28 | 0.87% |
-| 6 | 2-per-row | 50 | 0 | 0% |
-| 6 | Unconstrained | 91,358 | 0 | **0%** |
-| 7 | 2-per-row | 132 | 4 | 3.0% |
-| 7 | Unconstrained | 1,310,234 | 11,922 | **0.91%** |
-
-**Key finding**: The even‑n threshold (n=12) is **not** an artifact of the row constraint. Even with total placement freedom, n=6 has zero missing-center solutions. This confirms that the threshold is a genuine geometric property of even grids.
-
-**Code**: `d4_relaxed.cpp` performs a cell-by-cell backtracking search over *all* grid positions without
-the 2-per-row constraint. It uses the same backtracking approach but allows 0–N points per row.
-This is a distinct algorithm from `no3line.cpp` and lives in its own file for clarity.
-
-### 3.13 Construction Attempts & Open Problems
-
-A natural next step is to turn the invariants above into an **explicit construction** of 2n-point solutions for a whole infinite sub-family of even n (e.g. n ≡ 0 mod 4), lifting existence from computational evidence to a partial proof of D(n) = 2n.
-
-The C₂ theorem (§2.2) reduces this to a single clean obstacle: choose n R₁₈₀-orbit seeds whose central directions are pairwise distinct (this automatically rules out all collinearity *through* the centre), and avoid collinearity on lines *not* through the centre. Three explicit generators were tested and all failed broadly:
-
-- **Modular polynomial seeds** `c(i) = f(i) mod n`, R₁₈₀-doubled — across 8 formulas and even n ≤ 80, only n = 4 succeeded.
-- **R₁₈₀-doubled finite-field parabola** on prime grids p ≤ 59 — 0 successes (the doubled curve creates 2 + 1 collinear points).
-- **Deterministic greedy placement** with the C₂ direction rule enforced — 0 successes for even n ≤ 80 (the construction stalls immediately).
-
-These failures are *algorithmic limitations, not a proof of non-existence* (2n solutions are known to exist for all even n ≤ 72). They show that **off-centre collinearity is the genuine hard core** of the problem. The realistic contribution is therefore: (a) publish the C₄ and C₂ theorems as novel structural invariants, and (b) use them to *characterise* known solutions, not to claim a closed-form construction. The existence question D(n) ≥ 2n remains open in general.
-
-### 3.14 Empirical Observations on C₄ Solution Structure
-
-*(These observations are based on computational analysis of all 33,534 unique C₄ solutions in the Flammenkamp database (n=12..56). They are **empirical regularities**, not proven theorems.)*
-
-**1. Cycle Structure Law** — Among n=12–56 C₄ solutions, `[m]` (single m-cycle) and `[m-1, 1]` (single (m-1)-cycle + self-loop) are the two most common structures, together accounting for 35–67% of solutions (only ~35% at the largest m=28, so they are *not* "almost all"). The third most common structure is typically `[m-3, 3, 1]` or `[m-4, 4]`, appearing in less than 5% of cases. At larger n (n=58–72) multi-cycle decompositions dominate, so this regularity is specific to the n=12–56 window.
-
-| m | Main structure 1 | Main structure 2 | Combined |
-|:-:|:----------------:|:----------------:|:--------:|
-| 6 | [5, 1] (67%) | [3, 3] (33%) | 100% |
-| 12 | [12] (35%) | [11, 1] (15%) | 50% |
-| 18 | [17, 1] (24%) | [18] (18%) | 42% |
-| 28 | [27, 1] (18%) | [28] (17%) | 35% |
-
-**2. Collinearity Fraction Decay** — The fraction of collinear point triples among all C₄ orbit points decays as f(m) ≈ 0.32/m^{1.5}. Verified for m=4..37 (3.77% at m=4, 0.13% at m=37).
-
-**3. Solution Count Growth** — The number of unique C₄ solutions grows roughly exponentially with m (~1.4–1.6× per step), from 3 at m=6 to 10,175 at m=28.
-
-### 3.15 C₂ Direction Reduction, Conflict Hypergraph & GPU Exact Solver
-
-*(Detailed in `analysis/spectral_struct_n0mod4.md`. Honest scope labels: PROVEN / EMPIRICAL / COMPUTATIONAL EVIDENCE.)*
-
-**The reduction is exact (PROVEN).** The C₂ theorem (§2.2) shows that for R₁₈₀‑invariant solutions the centre‑line collinearity is *fully solved* by a single condition — the `n` central directions are pairwise distinct. The construction problem therefore reduces to **(★)** choosing `n` R₁₈₀‑orbits with distinct directions so that no three of the 2n points are collinear on a line *not* through the centre.
-
-**The obstruction is higher‑order, not pairwise (EMPIRICAL).** A pairwise (graph) conflict model is the wrong abstraction: `direction_d_conflict_graph.py` finds near‑zero orbit‑pair conflicts yet the corresponding SAT instance is UNSAT at n=31. The correct object is a **3‑uniform danger hypergraph** `H_n` (orbits = vertices; a triple is forbidden iff its 6 points contain an off‑centre collinear triple). A solution of (★) is exactly an independent set of size `n` in `H_n`.
-
-**Danger is non‑trivial but concentrated (EMPIRICAL, `danger_hypergraph.py`).** Forbidden triples *decrease* with `n` (12.14% → 8.20% → 5.51% of all orbit‑triples at n=12,16,20 — corrected from an earlier buggy count that reported values ~10× smaller). The danger‑degree is dominated by low‑slope directions — the main diagonal `(1,1)` alone carries 3261 → 10434 → 25057 of the danger at n=12,16,20 (far exceeding the next‑ranked `(3,±1)` directions by a factor of roughly 5). Real solutions have *lower* mean danger than a random `n`‑subset of directions (99 vs 118; 177 vs 320; 314 vs 631), i.e. they actively steer away from dangerous directions. In the genuine‑hypergraph sense (a triple is forbidden iff its 6 points contain an off‑centre collinear triple) the sampled solutions are independent sets in `H_n`; under the looser reading where any 6 points spanning a collinear triple are forbidden, solutions need not be independent sets, so the "every/verified" claim should not be taken absolutely.
-
-> **ⓘ Theoretical potential**: This hypergraph formulation recasts the existence problem as an independence-number question $\alpha(H_n) \ge n$ in a 3‑uniform hypergraph with non‑random structure. This perspective opens the door to tools not applicable to the original geometric formulation — Turán‑type bounds, the container method, or probabilistic arguments — and is arguably the most promising path toward a theoretical characterization of extremal no‑three‑in‑line configurations.
-
-**Exact conflict‑hypergraph parameters at m=37, and the conflict‑free‑matching verdict (COMPUTATIONAL, independently cross‑verified).** Building the full (X)/(S) conflict hypergraph over all $|V| = m^2 = 1{,}369$ fundamental cells (no 2‑factor restriction) gives, at m=37: $N(X) = 30{,}992{,}032$ ternary (collinear‑triple) hyperedges; per‑cell degree $\deg_3^{\max} = 92{,}488$, $\deg_3^{\text{avg}} = 67{,}915$; codegree (triples through a fixed cell **pair**) $\mathrm{co}_3^{\max} = 1{,}132$; binary (S)‑degree $\deg_2^{\max} = 288$ (`analysis/results/conflict_hypergraph.md`, `analysis/results/codegree_tail_analysis.md`, `analysis/results/extreme_pair_structure.md`). These were reproduced two independent ways: rebuilding the hypergraph from scratch with a *different* canonical‑line key (`verify_hardnumbers.py` — for m=5..9 every count matches `generate_constraints` exactly) and re‑running `codegree_m37.py`. Applying the conflict‑free hypergraph‑matching framework of Glock–Joos–Kim–Kühn–Osthus / Graves et al. (arXiv:2407.18144, arXiv:2205.05564) with host parameter $d = |V| = 1{,}369$: the low‑degree conditions **(C2)** hold with room to spare ($\deg_3 = 92{,}488 \ll 3d^2 = 5{,}622{,}483$; $\deg_2 = 288 \ll 3d = 4{,}107$), but the **codegree condition (C3)** — requiring $\mathrm{co}_3 \le d^{1-\varepsilon}$ — **fails**: $\mathrm{co}_3 = 1{,}132 > d^{0.95} = 954$, and the critical exponent $\varepsilon^{*} = 1 - \ln 1132/\ln 1369 \approx 0.0263$ is far too small for the theorem's auxiliary bounds to hold at this finite host degree. So this matching theorem — like symmetric LLL (§3.16 #6①) — does **not** apply as a black box at m=37; the obstruction is the near‑linear codegree. Full log: `analysis/results/verification_2026-07-14.md`.
-
-> **Caveat on the "radial ring" heuristic.** A separate radial‑layer analysis (`research_M/O/P`) conjectured a "≤2 cells per distance ring" law and a "{4,8}‑only" ring occupancy; **rigorous full‑enumeration recheck (2026‑07‑14) refutes both for m≥13** — real solutions reach 3 cells per ring (occupancy 12). Only the weaker **"ring occupancy ≡ 0 (mod 4)"** (§2.3, proved) survives. The observed preference radius $\rho\approx0.57$ is a soft statistical mean, not a law.
-
-**Direction availability is not the bottleneck (EMPIRICAL).** "Forbidden directions" (used by zero sampled solutions) collapse to 0% once the sample is large (n=44: 0%, n=56: 0%); the high % at n=60,64,68,72 is a `.few`‑cache sampling artefact (only 1–32 solutions stored), not a structural limit.
-
-**The n ≡ 0 (mod 4) structural property is universal within the rot4 sample (EMPIRICAL, `struct_n0mod4.py`).** For every sampled `n ≡ 0 (mod 4)` rot4 solution (n=12..72), orbit count = exactly `n`, central directions are all distinct, and the 90° closure `(a,b)↔(b,−a)` holds — 100% pass.
-
-**GPU exact solver (COMPUTATIONAL EVIDENCE).** Two independent GPU approaches were developed:
-
-1. **Custom CUDA backtracker (`analysis/gpu_smoke/`).** A CUDA‑accelerated exact 2n‑point backtracker offloads per‑row safe‑pair pruning to an RTX 4070 SUPER (CUDA 13.3 + MSVC 14.51). It is complete and provably correct; randomized‑restart mode locates a solution without exhausting a lexicographic dead region. Validated solutions: **n=4** (0.03 s), **n=8** (1.35 s), **n=12** (18.6–81.7 s). The search is exponential, so brute‑force reach beyond n=72 is a Heule‑scale problem beyond single‑GPU scope.
-
-2. **[mvr/no‑three‑in‑line CUDA C₄ solver](https://github.com/mvr/no‑three‑in‑line) (retargeted, current).** This warp‑bitboard engine performs DFS over the C₄ fundamental domain, pre‑computing all direction‑line masks for O(1) collinearity checks. It was adapted for the present project by adding **direction‑based cell pre‑filtering** (danger‑hypergraph exclusion of cells on top‑ranked collinear directions) and a **2M‑entry device stack** to accommodate large‑grid frontier search. Small‑n validation: re‑runs of n=12 through n=64 reproduce all known rot4 solution counts.
-
-**Pre‑filtering experiments (EMPIRICAL).** Direction‑based cell exclusion was tested at multiple strength levels on n=12 through n=52. For n≤36 all levels (up to top‑20 cells excluded) still find solutions; at n=48 the most aggressive level slowed the search ~16‑fold over baseline, and at n=52 the more aggressive settings all time out. The tentative pattern is that pre‑filtering becomes counter‑productive at larger n — a plausible explanation is that excluding cells pushes the single solution deeper into the search tree, increasing the time to reach it. A three‑way parallel search on n=76 was run for ~2 hours without finding a solution, consistent with the problem's exponential difficulty.
-
----
-
-### 3.16 Open Problems
-
-The following open problems arise directly from our analysis:
-
-**1. Cycle Universality Conjecture.** For the C₄ orbit selection problem (§3.6), the full $m$-cycle and the $(1,m-1)$ cycle pattern are valid for all $m \ge 10$ (verified $m=10..28$), with isolated exceptions at $m=6$ and $m=9$. Do these two patterns in fact generate valid C₄ solutions for **every** $m \ge 10$? A constructive proof would provide a framework for attacking $D(2m)=2m$; it would not by itself resolve the geometric collinearity obstacles that make the construction non-trivial.
-
-**2. The rot2 UNSAT at $n=31$.** The sharp SAT→UNSAT transition (44,828 solutions at $n=29$, zero at $n=31$) lacks a mathematical proof. Our analysis eliminated the natural candidate explanations (direction pool size, pairwise conflicts, center-row constraints), and identified the C₂ direction-uniqueness condition as the operative constraint, but the precise obstruction at $n=31$ remains open. Notably, $n=33$ has one known rot2 solution, confirming the obstruction is specific to $n=31$ rather than a general threshold.
-
-**3. Infinite existence of missing-center solutions.** Do missing-center solutions exist for arbitrarily large $n$? rot2 data shows they persist at least through $n=29$ (773 MC out of 17,332 rot2 solutions at $n=27$). The iden class is known to have MC at $n=21$ (17 out of 142 partial iden solutions). A definitive answer would require either an explicit infinite construction or an exhaustive iden-class search for $n\ge 21$.
-
-**4. The iden solution count growth rate.** The Flammenkamp cache shows iden
-(fully asymmetric) solutions growing rapidly for n=5..20 (n=20: 117,347 solutions,
-99.4% of all solutions). This contradicts any inference of “symmetry emergence”
-from the later, symmetry-biased sample. The asymptotic growth rate remains open.
-The provisional container discussion in §2.8 supplies no established asymptotic
-bound for this count.
-
-**5. Repair and quantify the linear-to-quadratic gap.** First prove the desired
-group-specific linear filters with correct orbit quantifiers; then specify which
-uniform linear-form families cannot encode all determinant conflicts. This is
-logically prior to promoting FDR or SIRH.
-
-**6. The m=37 C₄ instance (n=74).** The central open existence question. R8-G reduces it to satisfiability of a specific ~1.26M-constraint quadratic CSP over ~1,369 binary variables. Six computational directions were systematically evaluated (2026-07-13), plus a seventh from 2026-07-16:
-- **① LLL/Switching**: vanilla symmetric LLL `ep(d+1)>1` fails from m≥14, and at m=37 fails in *both* natural spaces — the bijection space gives `e·p·(d+1) ≈ 7.8×10²` and the stub‑matching space `≈ 8.9×10³` (probability factors `p₂=1/(73·71)=1.93×10⁻⁴`, `p₃=1/(73·71·69)=2.80×10⁻⁶` verified), both ≫ 1; Moser–Tardos random resample gives only 2.7% solve rate on m=10. (Lemma 1b's m ≥ 8 counting proof (`analysis/results/lemma1b_proof.md`) remains sound, but does not bridge the gap.)
-  > **⚠️ Critical correction (2026-07-16 Math-skill audit)**: The **Switch-Graph Theorem (Theorem 1)** in `analysis/results/switch_graph_theorem.md` was claimed to prove m=37 has a solution, but Lemma 1a's proof is **incomplete for m=37**. The algebraic pigeonhole argument only works for **m ≥ 65**; for 14 ≤ m ≤ 64 (including m=37), the "proof" relies on gating random sampling (thousands of 2-factors vs a super-exponential space ≈ C(m²,m)) — insufficient as a mathematical proof. The document's own text admits "the existence proof fails for m ≤ 64". Therefore Theorem 1 is **not established** for m=37, and any document claiming it "resolves" m=37 is misleading. Lemma 1b (S-layer conflict, m ≥ 8 counting argument) remains sound.
-- **② m=36→37 surgery**: N=72→74 change makes the seed solution geometrically invalid (152 bad lines under N=74).
-- **③ Lazy CP-SAT**: 30 iterations on m=17 — violated-line count oscillates without convergence. Avoids presolve wall but fails to converge.
-- **④ Energy bound**: all counting/pigeonhole-type arguments fail (direction key space and C4-orbit space are both in surplus).
-- **⑤ Data-driven**: no breakthrough invariant found.
-- **⑥ Algebraic geometry / Gröbner**: sympy cannot handle even the m=5 single-triple product polynomial (symbolic explosion).
-- **⑦ SDP route (withdrawn pending re-audit)**: the earlier report mixed clause,
-  relaxation, and geometric-triple counts and mislabelled 408/448-clause instances
-  as 2-factors with that many edges. Its numerical bounds are not evidence until the
-  objective and dual-certificate direction are reconstructed and independently checked.
-
-**Conclusion**: m=37 remains open. The trustworthy output is a collection of exact
-encodings, verified known solutions, bounded local certificates, and well-documented
-failed routes. A general symmetry-induced rigidity theorem has not been established.
-
-**Search direction retained with limited scope**: a full 2-factor edge-swap search
-(`csearch2` prototype, `analysis/results/conflict_hypergraph.md`).
-The recorded samples had `red_config_frac=1.0` for m≥14, but sampling does
-not show that *every* bad configuration has a reducing switch. This is a heuristic
-search direction, not a descent theorem.
-
----
-
-## 4. Methodology & Verification
-
-**⚠️ Critical data caveat: The iden-class sampling bias.** The Flammenkamp cache underpinning all symmetry-class analyses in this project has a **severe sampling bias** that we discovered and debunked in July 2026:
-
-- **iden (fully asymmetric) solutions are exhaustively enumerated only for n=5–20** (n=21, 22, 27 are `.few` partial samples — the counts 142, 2, 1 are **sampling limits**, not true solution counts).
-- **From n≥28, the cache contains zero iden-class data** — not because iden solutions stop existing, but because enumerating them at these grid sizes is computationally prohibitive (the search space for asymmetric solutions is 8–16× larger than for symmetric classes).
-- **Within the full-enumeration range (n=5–20), iden solutions grow exponentially**: n=20 has 117,347 iden solutions, constituting **99.4% of all known solutions at that n**. There is zero evidence of "symmetry emergence" or "iden extinction."
-- The apparent dominance of symmetric classes (rot4, rct4) at n≥33 is a **survivorship bias**: symmetric classes are sampled because their reduced search space (factor 8–16) made enumeration feasible. The "Symmetry Emergence" conjecture — that asymmetric solutions vanish at large n — **has no empirical basis** and is contradicted by the available full-enumeration data.
-
-**Moral**: Any claim about the asymptotic prevalence of symmetric over asymmetric
-solutions is unsupported until direct enumeration or a valid counting argument for
-large n becomes available. The container idea in §2.8 is only one unproved option.
-
-**Exhaustive search (`no3line.cpp`).** A backtracking search places exactly 2 points per row and column, pruned by a precomputed collinearity accumulator (O(1) per candidate) and a distance-ring filter that forbids any ring from reaching 3 points (the missing-centre detector). Mode 0 enumerates all solutions; mode 1 counts missing-centre solutions only (recommended for n ≥ 12). The same engine was cross-checked against the independent C++ full enumeration and against the Flammenkamp / mvr databases (D₄-inequivalent counts agree to <1%).
-
-**Independent verifier (`verify_solution.py`).** Every published solution dump is re-checked from scratch with three independent tests: (1) no three points collinear (exact integer area), (2) centre-presence via the distance-ring distribution, (3) each column used exactly twice. This is the primary reliability guarantee for all counts reported above.
-
-**Unconstrained search (`d4_relaxed.cpp`).** A cell-by-cell backtrack with no 2-per-row rule, used to confirm that the even-n threshold is geometric, not a search artefact (§3.12).
-
-**Historical audit (2026-07-16,
-`analysis/results/AUDIT_nonREADME_2026-07-16.md`).** This audit was useful
-for locating claims, but later checks found additional proof and solver defects,
-including in the SIRH/FDR chain. Its aggregate “theorem-grade” counts are therefore
-withdrawn; individual results must be checked against current dated corrections.
-- **2 severe overclaims**: `switch_graph_theorem.md` + `lemma1a_algebraic_proof.md` (Theorem 1 not proven for m=37 — see §3.16 #6), `alpha_breakthrough.md` ("Computational Proof" title)
-- **5 minor overclaims**: `container_analysis.md` §4.1, `hypergraph_theory.md` §2.1, `quadratic_complete_determination.md`, `part4_reverse.md` P4.2, `research_directions.md` §1 (withdrawn claims hidden in appendix)
-- **All findings incorporated into the open-problem statements above** — the audit corrected no substantive theorem errors in the README's §2 (proven results) but tightened the honesty calibration of several §3 claims.
-
-## 5. Higher-Dimensional Generalizations
-We extended the no-three-in-line problem to higher dimensions (3D and beyond), building on the foundational work of Pór and Wood (2004).
-
-**Background**: The 3D problem asks for the maximum number of points in an n×n×n grid with no three collinear. Pór and Wood proved this is Θ(n²) by constructing Vp = {(x, y, x²+y² mod p)} for primes p ≡ 3 (mod 4), and showed the minimum bounding box volume for 3D drawings of Kn is Θ(n^{3/2}).
-
-**Note on number theory**: The condition p ≡ 3 (mod 4) in the Por-Wood construction prevents collinearity on the 3D quadratic surface (it ensures the binary quadratic form v_x²+v_y² has no non-trivial zeros modulo p). This is a separate mechanism from the 2D distance-ring analysis, where p ≡ 1 (mod 4) primes generate more representable distances. The two results operate in different mathematical settings — the former in finite-field collinearity, the latter in integer distance representation — and are not in conflict.
-
-Our higher-dimensional findings:
-
-### 1. Evidence for a Missing-Spherecenter Phenomenon (3D Diagonal Construction)
-
-We discovered that the diagonal of the Por-Wood construction:
-\[
-D_p = \{(x, x, 2x^2 \bmod p) \mid 0 \le x < p\} \subset [0,p-1]^3
-\]
-satisfies:
-
-**(i) No three collinear points.**  
-Proof: For three distinct points (xᵢ, xᵢ, 2xᵢ² mod p) with i=1,2,3, the direction vectors are (Δx, Δx, 2Δx·(x₁+x₂)) and (Δx', Δx', 2Δx'·(x₁+x₃)). For collinearity, the first two equal coordinates force x₂ = x₃, contradicting distinctness.
-
-**(ii) Missing-spherecenter** (no 4 points share the same squared distance from the cube center).  
-Proof: The squared distance d²(x) = 2(2x-(p-1))² + (2(2x² mod p)-(p-1))² satisfies d²(x) = d²(p-x) by symmetry. The claim that d²(x₁) = d²(x₂) with x₁ ≠ ±x₂ (mod p) has no solutions for p ≡ 3 (mod 4) is supported by computational verification up to p ≤ 97 (max multiplicity ≤ 2 for p ≡ 3 mod 4, ≤ 3 for all p ≤ 97). A complete algebraic proof of the missing-center property remains open.
-
-This gives a clean 3D analogue of the 2D Erdős parabola, with a complete algebraic proof of no-collinearity and computational evidence (up to p ≤ 97) for the missing-spherecenter property.
-
-### 2. Conjecture: Higher-Dimensional Moment Curves Are Missing-Center
-
-The d-dimensional moment curve:
-\[
-C_p^{(d)} = \{(x, x^2 \bmod p, \ldots, x^d \bmod p) \mid 0 \le x < p\} \subset [0,p-1]^d
-\]
-is conjectured to be **missing-center** for all d ≥ 2: no ⌈d/2⌉+1 points share the same squared distance from the hypercube center. This is supported by computational evidence for d = 2,3,4,5,6 across all primes p ≤ 100. A rigorous proof for d ≥ 3 remains open.
-
-### 3. Why 4D is Fundamentally Harder
-
-The problem vol(n,d,1) (minimum bounding box volume for n points in d-dimensions with no 3 collinear) has been solved for d=2 (Erdős) and d=3 (Pór-Wood), but remains open for d ≥ 4. Recent work using the compression method [arXiv:2106.15621] shows D₄(n) = Θ(n³) points can be placed in an n⁴ grid, implying vol(n,4,1) = O(n^{4/3}) matching the lower bound.
-
-Our attempts to construct a 4D analogue of the Por-Wood quadratic surface reveal the fundamental obstruction:
-
-**Why the quadratic surface fails in 4D**: The natural 4D generalization Vp^(4) = {(x, y, z, x²+y²+z² mod p)} always contains collinear triples. The collinearity condition reduces to the ternary quadratic form:
-\[
-v_x^2 + v_y^2 + v_z^2 \equiv 0 \pmod{p}
-\]
-Over the finite field F_p, this equation always has non-trivial solutions — every element of F_p is a sum of three squares. This is in contrast to the 3D case where the binary form v_x²+v_y² ≡ 0 (mod p) can be avoided by choosing p ≡ 3 (mod 4).
-
-We systematically tested alternative approaches for constructing a 4D no-3-collinear set with > p² points (including higher-degree surfaces, product constructions, and shifted families). Every 3-parameter construction we tested introduces collinear triples, confirming that the 4D case requires fundamentally different techniques beyond simple algebraic surfaces.
-
-The key barrier: for d ≥ 4, any construction of the form Vp^(d) = {(x₁,...,x_{d-1}, Q(x₁,...,x_{d-1}) mod p)} where Q is a quadratic form will contain collinear triples, because (d-1)-ary quadratic forms over F_p are always isotropic for d-1 ≥ 3.
-
-### 4. Analysis Scripts
-
-All higher-dimensional analysis scripts are in the [`analysis/`](analysis/) directory:
-- [`porwood_3d_analysis.py`](analysis/porwood_3d_analysis.py) — Initial 3D Por-Wood construction analysis
-- [`porwood_deep_analysis.py`](analysis/porwood_deep_analysis.py) — Deep analysis of diagonal Dp and moment curves
-- [`higher_dim_missing_center.py`](analysis/higher_dim_missing_center.py) — Full higher-dimensional exploration
-- [`shifted_parabola_proof.py`](analysis/shifted_parabola_proof.py) — Exact algebraic proof that shifted parabola product gives k_max=1
-- [`forbid_matrix_spectral.py`](analysis/forbid_matrix_spectral.py) — Spectral analysis of the co-collinearity graph
-
----
-
-
----
-
-## 6. Structural Theory Breakthroughs (2026-07-10)
-
-> This section documents a comprehensive structural theory of no-three-in-line 2n-point solutions, developed through systematic analysis of ~225,000 known solutions (Flammenkamp database + mvr CUDA extensions). The theory establishes deep connections between NTIL solutions and classical combinatorics (Motzkin paths, Catalan numbers).
-
-**Core documents** (in [`analysis/`](analysis/)):
-- [`theory_structural.md`](analysis/theory_structural.md) — Master theory document (28 theorems, 34 empirical laws)
-- [`theory_motzkin_breakthrough.md`](analysis/theory_motzkin_breakthrough.md) — Motzkin path theorem (Th-17)
-- [`theory_th19.md`](analysis/theory_th19.md) — Motzkin height identity (Th-19)
-- [`theory_c4_necessity.md`](analysis/theory_c4_necessity.md) — C4 necessity phase transition
-- [`theory_rct4_complete.md`](analysis/theory_rct4_complete.md) — rct4 (odd-n C4-identity) structure theorems (R1-R7)
-- [`theory_final_synthesis.md`](analysis/theory_final_synthesis.md) — Final research synthesis
-- [`math_audit_report_final.md`](analysis/math_audit_report_final.md) — Independent math audit results
-- [`data_catalog.md`](analysis/data_catalog.md) — Complete data catalog
-
-### 6.1 The (π,σ) Framework
-
-Every 2n-point NTIL solution can be decomposed into two per-row functions: **π(i)** = smaller column in row i, **σ(i)** = larger column. This gives the column-sharing **signature**: L (left-exclusive, column appears in π twice), B (balanced, once in each), R (right-exclusive, appears in σ twice). The decomposition of 2n-point sets into two permutations is noted in prior work (Cooper–Hyatt, *Designs, Codes and Cryptography* 93, 2025); the L/B/R signature taxonomy and the connection to Motzkin paths below are original.
-
-**Theorem Th-10 (列非排列)**. Neither π nor σ is a permutation for n ≥ 6. Column 0 is always left-exclusive (L), column n-1 is always right-exclusive (R). The columns partition into L ∪ B ∪ R with |L| = |R|. *Verified: 211,386 solutions, zero counterexamples.*
-
-### 6.2 Motzkin Path Theorem (Th-17)
-
-**The NTIL column-sharing signature (L→+1, B→0, R→-1) constitutes a valid Motzkin path** — starts at 0, ends at 0, never negative.
-
-**Proof** (three lines):
-1. Th-16 (Dyck condition): prefix sum never negative — from column-count ordering
-2. Th-10: |L| = |R| — path ends at 0
-3. Step set {+1,0,-1} by definition
-
-**Corollaries**:
-- **|V(n)| ≤ M_n** (Motzkin number) — first combinatorial upper bound on NTIL solution count
-- **E[k]/n → 1/π** — k = |L| converges to 1/π, analytically proven via Motzkin path balance statistics (Banderier-Flajolet 2002)
-
-*Verified: 205,869 solutions, zero counterexamples.*
-
-### 6.3 Motzkin Height Identity (Th-19)
-
-**h(c) = count_π(≤c) − (c+1)**
-
-A precise algebraic bridge between the Motzkin path height and the cumulative distribution of π values. *Verified: 22,847 solutions, zero counterexamples.*
-
-### 6.4 Symmetry Classification (Flammenkamp, prior work)
-
-The D₄ symmetry classes of the n×n grid (iden, rot2, rot4, dia1, dia2, ort1, ort2, full) are standard in the NTIL literature (Flammenkamp 1992–2026). The rct4 class (rotational symmetry except on the long diagonals) was introduced by Flammenkamp (1997). We reproduce the classification for reference; the original source is [Flammenkamp's symmetry remarks](https://wwwhomes.uni-bielefeld.de/achim/no3in/symmetry_remarks.html).
-
-The empirical observation below — that for n ≥ 33, all known solutions satisfy the C4 identity (π(i) + π(n-1-i) = n-1 − σ(i) + σ(n-1-i) = ...) — is our original computational finding, consistent with Flammenkamp's classification but not previously documented.
-
-### 6.5 rct4 Structure Theorems (R1-R7, Flammenkamp's class, our theorems)
-
-The rct4 pseudo-symmetry class was introduced by Flammenkamp (1997). The following structural theorems are our original contributions characterizing rct4 solutions in the (π,σ) framework:
-
-| Theorem | Statement |
-|---------|-----------|
-| R1 | C4 identity: π(n-1-i) = n-1-σ(i) holds for all rct4 |
-| R2 | C2 symmetry: invariant under 180° rotation |
-| R3 | Π-upper bound: π(i)+π(n-1-i) ≤ n-2 |
-| R4 | Σ-lower bound: σ(i)+σ(n-1-i) ≥ n |
-| R5 | Irreducibility: 100% irreducible (sig[1]≠R) |
-| R7 | Reconstruction: first ⌈n/2⌉ rows determine entire solution |
-
-### 6.6 Motzkin Zero Theorem (Th-18, Computational)
-
-For rot4 solutions from Flammenkamp data: **first zero fz ∈ {1, n-1}** (100%, 21,701 solutions). The mvr CUDA extension contains 1 counterexample at n=52 (fz=2), giving 99.992% overall.
-
-### 6.7 C4 Necessity Phase Transition
-
-| n range | C4 identity hold rate | Notes |
-|---------|---------------------|-------|
-| 7-20 | 0.6-45% | Mixed, non-C4 dominated |
-| 21-30 | 93.9-99.9% | C4 strongly dominant |
-| 31-32 | 1.4-9.7% | Anomaly (dia1 class resurgence) |
-| **33+** | **100%** | **All known solutions C4** |
-
-Non-C4 solutions have bounded k = |L| ≤ 14 (observed max), while Motzkin paths require k ∼ n/π → ∞, explaining why non-C4 solutions cannot exist at large n.
-
-### 6.8 Empirical Laws (Selected)
-
-| Law | Statement | Verified |
-|-----|-----------|----------|
-| L10 | Single-m-cycle rot4 survival `rate ∼ 4.47·exp(−0.2037·m²)` | R²=0.993 |
-| L15 | Cycle-type phase transition: single-cycle share →17% asymptote | n=14..54 |
-| L23 | k/n → 1/π (now theorem, Th-17 corollary) | Motzkin proof |
-| L25 | rot4 signature → solution unique (n≥12) | 100% verified |
-
-### 6.9 Historical Result Inventory *(not a theorem count)*
-
-| Category | Count | Examples |
-|----------|-------|---------|
-| **Previously labelled proven; re-audit required** | — | Th-2,7,9,10,11,13,14,16,17,20; R1-R5,R7 |
-| **Computationally checked on finite data** | 6 | Th-5,8,18; R2,R4,R6 |
-| **Empirical laws** | 34 | L1-L34 |
-| **Symmetry frameworks** | 3 | rot4/rct4/general |
-
-The old title “28 verified theorems” mixed proofs, finite checks, and empirical
-laws and also had inconsistent arithmetic. No aggregate theorem count is claimed.
-
-### 6.10 Data Sources
-
-| Source | URL | Coverage |
-|--------|-----|----------|
-| Flammenkamp database | [wwwhomes.uni-bielefeld.de/achim/no3in/](https://wwwhomes.uni-bielefeld.de/achim/no3in/readme.html) | n=2..72, 9 symmetry classes |
-| mvr CUDA extension | [github.com/mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) | rct4 n=41-53, rot4 n=44-52, sporadic n=61-68 |
-| Heule (2026) SAT | Marijn Heule, CMU | n=72 rot4 solution |
-
----
-
-## 7. m=37 Attack — External-Agent Theory, Gaussian-Resource Decomposition & Search Bottom (2026-07-19/20)
-
-> **Superseding status note (2026-07-21).** The old custom
-> `benders_subproblem.dpll_model` produced false UNSAT answers. Any large
-> random sweep, MUS statistic, density conclusion, or “likely no solution” claim
-> derived from that implementation is withdrawn. The six V20 negative instances
-> and known positive instances at m=5/10/14/36 were subsequently cross-checked with
-> Z3, Glucose4, the repaired DPLL, and the exact geometry oracle; see
-> [`validate_solver_report.md`](analysis/even_n_existence_tools/validate_solver_report.md).
-> The global status remains **OPEN**.
->
-> **Status & provenance.** This section consolidates (a) structural
-> theory produced by parallel autonomous agents studying `even_n_existence`
-> (theoretical arm) and `ising_m37` (experimental search arm) — both read-only
-> external sources, not modified — and (b) the findings of our own 10-hour
-> autonomous study. Every claim is labelled by confidence level:
-> **[THEOREM]** = claimed algebraic identity or lemma; readers should still inspect
-> the linked proof because historical status labels are not authoritative;
-> **[COMPUTATIONAL CERTIFICATE]** = machine-checked over an exhaustive finite
-> search, but not independently reproduced here;
-> **[OBSERVATION]** = empirical, from finite computation;
-> **[OPEN]** = unresolved.
-> An independent re-verification of the core algebraic identities (Gaussian norm
-> identity, delete-window spectrum, antiparallel-orbit disjointness, q=1 diagonal
-> labels) is in `analysis/verify_theory_identities.py` — all four pass with max
-> absolute error 0.0. *(Math-skill discipline: computational closures are labelled
-> as such and are NOT promoted to theorems.)*
-
-### 7.1 Setup recap (m=37, n=74)
-rot4 NTIL ⇔ a 2-regular pseudograph on 37 vertices whose 37 directed edge-cells
-`(u,v)∈{0..36}²` are each lifted by C₄ to four grid points; this produces
-`4m=148=2n` points, not 74.
-The four `V=40` basins are the strict 2-swap local minima (40 bad collinear
-triples) identified by the ising-style framework; all m≤36 have known rot4
-solutions, **m=37 is [OPEN]**.
-
-### 7.2 Gaussian-resource closed form [THEOREM]
-Centralise a cell to odd coordinates `X=2u−73`, `Y=2v−73`. For a primitive
-direction `ν=(a,b)`, its C₄ line-orbit touches the two resource labels
-`r=|aX+bY|`, `s=|bX−aY|`. Writing `α=a+bi`, `z=X+iY`, the signed resources are
-`α·z̄ = (aX+bY)+i(bX−aY)`. The Gaussian norm identity holds exactly:
-
-```
-r² + s² = (a²+b²)(X²+Y²)
-```
-
-Independently re-verified over 42 primitive/axis directions × 1369 cells
-(max abs error 0.0). Consequence: every direction resource shares one cell
-radius and scales by the Gaussian norm `a²+b²`, so the per-direction capacity
-problems are not independent arbitrary graphs. Compound directions are integer
-linear transforms of older ones (e.g. (1+2i)²=−3+4i), so q-layers add Gaussian
-prime directions plus sign-correlated composites of old ones.
-
-### 7.3 Delete-window spectrum [THEOREM]
-Deleting k edges from the 37-vertex 2-factor splits into s contiguous segments
-of lengths `ℓ₁…ℓ_s` (Σℓ_i=k). Let `W_r` be the number of cyclic windows covering
-r consecutive deleted edges. Then `W_r = Σ_i (ℓ_i−r+1)_+`, and the segment-length
-multiset is recovered by the discrete second difference
-
-```
-t_r = W_r − 2·W_{r+1} + W_{r+2}
-```
-
-Hence `(A,B,C)=(W_2,W_3,W_4)` are not auxiliary statistics but the discrete
-2nd-integral coordinates of the segment distribution. Re-verified over 20000
-random compositions (error 0). This turns "delete k edges" into an exact finite
-enumeration of segment profiles, avoiding the `(37 choose k)` blow-up. A fully
-deleted length-L factor cycle contributes `W_r=L` for r≤L (the extra `(A,B,C)=(4,4,4)`
-correction for the length-4 components of `v40_03/04`).
-
-### 7.4 q=1 double-resource model [THEOREM]
-Each cell (u,v) consumes two explicit integer resource bins `d=|u−v|`,
-`s=73−u−v` (the diagonal conjugate graph). The q=1 non-axis line capacity is
-exactly `Σ w_t(u,v) ≤ 2` for t=0..71, where `w_t` is the per-cell occupancy of
-the diagonal line `x−y=−t`. Re-verified: the 4 C₄ rotations of (u,v) land on
-diagonal labels `{+d,+s,−d,−s}` for all 1369 cells (error 0). General short-direction
-layers (q≤36) are each a weighted bipartite degree-≤2 constraint (Gaussian-integer
-closed form of §7.2); `q=36` is the finite completeness endpoint (any 3-point line
-has primitive step (p,q) with `max(|p|,|q|)≤36`). The four V=40 basins are q=1-safe
-but already heavily saturated (25–28 of 72 boxes at capacity 2).
-
-### 7.5 Multigraph correction: antiparallel orbits [FACT, formerly a bug]
-The old model forbade `x_uv + x_vu ≤ 1`. This is **wrong**: `(u,v)` and `(v,u)`
-lift to two *disjoint* C₄ orbits (8 distinct points) and can co-exist as a digon
-(2-cycle). Independently re-verified over all 1332 unordered pairs: 0
-intersections, each pair occupies 4 rows + 4 columns, 2 points per row/col,
-internally collinearity-free. **Consequence:** all earlier k=11/k=12 infeasibility
-certificates that used the simple-undirected-graph constraint were withdrawn; the
-corrected multigraph re-derivation (§7.6) supersedes them.
-
-### 7.6 Corrected k=0..12 closure → escape radius ≥ 13 [COMPUTATIONAL CERTIFICATE]
-Using the corrected multigraph model (parallel edges allowed) with the layered
-decomposition (segment branches → local star capacity → exact multigraph f-factor
-→ q=1 Gaussian resource), the external agent reports:
-- k=0..11: all 2,097,591,716+ masks at k=5..11 have q=0 f-factor infeasible;
-  k=11 has only 2 q=0 exceptions, both q=1 infeasible.
-- k=12: the full `4·(37 choose 12) = 7,409,931,984` delete masks are covered; the
-  funnel `7.4e9 → 156.6e6` (hit all old defects) `→ 285` (q=0 feasible) `→ 4`
-  (q=1 fail) `→ 0` (all 4 fail at q=2). Hence **no exact NTIL repair of distance 12
-  exists from any of the four V=40 basins.**
-- Combined: the four V=40 basins have normalised escape radius ≥ 13.
-
-**Labelling & caveat [MATH-SKILL DISCIPLINE]:** This is a *machine certificate*
-with audit JSONs, **not a hand proof, and not independently reproduced** in this
-repo. Most importantly it is a statement about *proximity to the four known V=40
-local minima*, **not** about global existence of an m=37 solution. A non-empty
-zero-set's local connectivity does not imply the set is non-empty; m=37 has **no
-known zero solution**, so §7.6 does not decide the problem.
-
-### 7.7 Our finding — orbit-generator counterexample (n=42) [OBSERVATION]
-In the 10h study, the full orbit generator was exercised over 21701 outputs; one
-(n=42, m=21, solution #101) was flagged and CP-SAT confirmed it as a genuine valid
-NTIL (0 collinear triples). Recorded as `orbit_generator_counterexample_n42.json`.
-*(The 10h output files were produced by a background agent and are not all present
-in this repo; this figure is from that study's summary, pending file recovery —
-treat as [OBSERVATION], not yet re-verified in-repo.)*
-
-### 7.8 C₄ entropy–energy constant ≈ −1.93 [OBSERVATION]
-The entropy–energy figure of merit for continuous-method existence arguments:
-generic 2-permutation ≈ −0.43, C₂ ≈ −1.43, **C₄ ≈ −1.93**. All negative; C₄
-symmetry makes the problem harder (entropy drops ~4× while E[Z] stays the same
-order), so LLL / lopsided-LLL-style continuous existence proofs are not directly
-available for rot4.
-
-### 7.9 m=37 search bottom — 7 strategies, non-convergent [OBSERVATION]
-Seven independent search strategies (v1–v7) built on the Gaussian/double-resource
-model were run against m=37. All stall with 160–300 residual collinear triples and
-never reach 0. **Root cause (Bug 3, structural):** the Gaussian resource model is
-*necessary but not sufficient* — C₄ rotation does not preserve the resource value,
-so cross-quadrant collinear triples spread across bins and the capacity-2 bound
-cannot catch them. (Bugs 1–2, the weight on s=0 and the missing negative-slope
-directions, were fixed and re-validated against known solutions.) Conclusion: the
-search-method front has hit a wall; the open route is theoretical (LLL / lopsided
-LLL / Container method), supported by the empirically very sparse conflict
-hypergraph (§2.13, `conflict_hypergraph_params.json`).
-
-### 7.10 m=37 status [OPEN]
-m=37 remains **[OPEN]**. What is established:
-- All m=3..36 have rot4 solutions (the m=23–26 "no solution" was a loader bug,
-  since fixed).
-- The **best known** rot4 m=37 configuration is **V=20** (20 geometric bad triples,
-  5 C₄ orbits) — the one-loop root of the local barrier archive; six such factors are
-  each proven non-zero by an exact rational metric-LP certificate (`E_F ≥ 5`), see
-  §7.11.4 (`ising_m37` arm).
-- From the four **V=40** basins (a *separate, worse* family), no distance-≤12 exact
-  repair exists (§7.6, computational); those basins, the directed-cell LNS closures,
-  and the matching-shell rigidity certificates are detailed in §7.11.5–§7.11.7.
-  ⚠️ This closure is about a *worse* family than the V=20 record and does **not**
-  bound the V=20 neighbourhood.
-- The **V=20 six-basin rot4 multigraph** model is closed through replacement
-  radius **k=14**: 19 capacity-feasible masks give 23 completed 2-factors, and all
-  23 fail the exact no-three-collinear oracle. See §7.11.9. The neighbourhood is
-  still **OPEN** for k≥15.
-- Every direct search to date diverges at 160–300 collinear triples (§7.9).
-
-What is **not** established: whether a replacement-radius-≥15 escape (or a solution in a
-completely different basin) exists. The question *"does every even n admit 2n points
-with no three collinear?"* is **unresolved** for n=74 and in general.
-
-### 7.11 Ising / signed-NAE experimental search arm (`ising_m37`) — V=20 best record, V=40 family & local rigidity [COMPUTATIONAL CERTIFICATE / OBSERVATION]
-
-> **Provenance & labelling.** A *second* read-only external agent directory
-> (`ising_m37`, independent of `even_n_existence`) is the *experimental* arm that
-> actually **produced** the four `V=40` basins and most of the funnel-closure data
-> quoted in §7.6. It reframes the fixed-2-factor orientation problem as a signed
-> NAE-3 / quadratic-Ising optimisation and then runs exact CP-SAT / SAT local
-> searches. Everything below is the source agent's *machine certificate* (audit
-> JSONs + `.py` scripts present in that dir); it is **not independently reproduced
-> in this repo** and is labelled accordingly. *(Math-skill discipline: these are
-> computational closures, NOT promoted to theorems; they describe proximity to the
-> four known V=40 local minima, never global existence.)*
-
-#### 7.11.1 signed-NAE-3 ⇔ quadratic Ising reduction [THEOREM]
-Forbidden orientation patterns enter in complementary pairs `(a, −a)`; the violation
-indicator sum is exactly quadratic — linear and cubic terms cancel, leaving only the
-`ZZ` coupling:
-```
-1[s=a] + 1[s=−a] = (1 + a_i a_j s_i s_j + a_i a_k s_i s_k + a_j a_k s_j s_k)/4
-```
-Independently re-verified here (`analysis/verify_theory_identities.py` **[T5]**: max
-abs err 0.0 over 100000 random `(a,s)∈{±1}³`; each forbidden pair blocks exactly 2
-of 8 spin assignments). Consequence: the inner (fixed-2-factor) orientation problem is
-an exact signed-MaxCut, solvable to `OPTIMAL` in seconds.
-
-#### 7.11.2 Clause count is NOT a proxy [OBSERVATION]
-Three baselines solved exactly: `m=36` known solution → `V=0` (0 bad triples);
-`m=37` 408-clause factor → `V=16 OPTIMAL` (**64** geometric bad triples);
-`m=37` "newest" 404-clause factor → `V=17 OPTIMAL` (**68** bad triples — a
-*regression*, not a breakthrough). A standard MaxCut SDP gives a strict positive
-lower bound (≥13) on both m=37 factors, confirming they cannot be 0, but no uniform
-positive bound across all 2-factors yet. Lesson: optimising clause/trial count
-navigates a wide, ridge-and-dead-end `V=16` plateau spanning clause counts 410–564.
-
-#### 7.11.3 Weighted-geometry correction (a modelling bug, corrected) [FACT]
-The legacy 3-cell Boolean objective *over-penalises* a bad triple shared by two C₄
-orbits (it repeats the triple for every arbitrary third orbit). The corrected program
-counts each geometric bad triple exactly once (true multiplicity of C(occupancy,3)).
-Applying the correction dropped the best fixed-factor record from 64 → **48** bad
-triples.
-
-#### 7.11.4 Best known record is V=20 — notation, correction & certificates [COMPUTATIONAL CERTIFICATE / OBSERVATION]
-**Notation.** In `ising_m37`, `V` = number of *geometric bad triples* = 4 × (number
-of C₄ defect orbits). So `V=40` = 40 triples = 10 orbits; `V=20` = 20 triples = 5
-orbits. Lower V = closer to a solution. (The source agent's own docs occasionally
-reuse `V` for the *orientation* count in other tables — always check the column
-header; here `V` is the geometric triple count, consistent with §7.11.5–§7.11.7.)
-
-**Correction (an earlier draft of this README was wrong).** The *best known* rot4
-m=37 record is **V=20** (20 bad triples, 5 C₄ orbits), the one-loop *root* of the
-local barrier archive — `research_directions §6.1` reports the archive minimum as
-one-loop **20**, no-loop/two-loop **28**. The source agent's 2026-07-17 "V=40 new
-record" write-up was *local* to the 48→40 defect-hitting thread and did **not**
-supersede the V=20 root; V=40 is a *separate, worse* family (next paragraph).
-
-**V=20 is a proven barrier, not a near-solution.** Six mutually-distant V=20 factors
-each carry an exact rational metric-LP certificate (`metric_lp_exact_certificates…
-2026-07-19`): every one has lower bound `E_F ≥ 5` (≥5 violated signed-NAE groups under
-*any* orientation), so none can be re-oriented to 0. The shortest certificate needs
-only 7 orientation variables / 7 groups / 4 triangle inequalities and is a hand-checkable
-proof that `E_F ≥ 1`. No local escape mechanism (beam, crossover, annealing,
-core-escape) has reached 36 from V=20 either.
-
-**V=40 family (verified but worse) [COMPUTATIONAL CERTIFICATE].** Repairing the
-48-factor by *allowing one old defect to survive* ("max-cover-minus-1") yields a
-verified fixed factor with **40** geometric bad triples (10 C₄ defect orbits, 0
-diagonal defects, 0 slope ±1 defects), checked three ways: line-key enumeration,
-brute-force 148-point triple determinants, second exact CP-SAT (`OPTIMAL 40`). Solid
-*local* record, but **not** the global best (V=20 is lower). Its four-basin structure
-and deep local closures are in §7.11.5–§7.11.7.
-
-#### 7.11.5 Four V=40 basins + 25-edge cold core [OBSERVATION]
-Exact archive now holds **four distinct V=40 factors** with cycle types `37`, `4+33`,
-`4+16+17` (so V=40 needs no specific cycle type or 2-orbit defect). They share a
-**25-edge / 21-directed-cell cold core** but **no common exact defect orbit**. Within
-and between basins, all tested escape mechanisms failed to reach 36:
-- shortest safe path between two basins = edge-distance 4, but intermediate factors
-  have exact minimum **60** (a 60 energy pass between basins);
-- multi-start beam (4145 / 8077 distinct safe factors), factor crossover (650692
-  symmetric-difference subsets → best 48), joint factor-spin annealing (72000
-  proposals → only returns known 40/44), consensus-core escape (breaking the 25-edge
-  core raises the floor to 48+). **No V=36 found by any local mechanism.**
-
-#### 7.11.6 Directed-cell exact LNS [COMPUTATIONAL CERTIFICATE]
-The recommended local *master problem* deletes k factor edges and lets CP-SAT choose
-arbitrary replacement directed cells (residual degree + FDR diagonal capacity + exact
-`C(occ,3)` line cost), targeting `≤36`. Across selected 7–13 edge neighbourhoods,
-**120** target-36 models were run: **119 proved `INFEASIBLE`**, 1 (`v40_02`, 13-edge)
-stayed `UNKNOWN` (600 s, retained a 40 incumbent + 36 lower bound). Fine print:
-- 12-edge / 24-endpoint wide neighbourhoods: **all 4 basins closed (INFEASIBLE)**;
-- 13-edge / 26-endpoint wide neighbourhoods: **3 of 4 closed**; `v40_02` open.
-This is the strongest *local* rigidity evidence around V=40 to date — but still only
-proves that *these* large neighbourhoods cannot drop to 36.
-
-#### 7.11.7 Matching-shell rigidity (the open `v40_02` 13-edge) [COMPUTATIONAL CERTIFICATE]
-The open `v40_02` 13-edge neighbourhood was decomposed into a perfect-matching master
-+ a 13-bit exact orientation subproblem, then **fully enumerated** at switch distances
-2–6 (every FDR-feasible matching scored `OPTIMAL`, not a time-bound):
-
-| dist d | FDR-feasible matchings | exact min value |
-|---:|---:|---:|
-| 2 | 12 | 64 |
-| 3 | 42 | 56 |
-| 4 | 278 | 60 |
-| 5 | 1679 | 56 |
-| 6 | 10089 | 56 |
-
-Distance 6 closed via 8 mutually-exclusive partner partitions, all `INFEASIBLE`.
-Conclusion: **any V=36 configuration in this neighbourhood must replace ≥7 of the 13
-original matching edges (retain ≤6)** — a *matching-shell barrier*, not mere search
-stagnation (local energy must first rise ≥16). FDR diagonal capacity alone discards
-98–99% of raw swaps at d=2..4. Open: distances 7–13 of `v40_02`, or a 36/0 config far
-from the four known basins.
-
-#### 7.11.8 Status of this arm
-`V=40` is a robust *local* record (4 basins, 3 cycle types, three-way verified), and
-both the directed-cell LNS and matching-shell enumerations give genuine *local*
-lower-bound certificates around it. But it is **not** the global best — that is the
-V=20 one-loop root (§7.11.4). None of this decides global existence: the V=40 basins
-are local minima with no known zero nearby, and the only unclosed V=40 window is
-`v40_02` at match-distance ≥7. The deepest open question is instead whether the V=20
-neighbourhood (or a basin far from both) hides a 0/36 configuration. **m=37 remains
-[OPEN]**.
-
-#### 7.11.9 V=20 six-basin rot4 multigraph — corrected k=14 audit [COMPUTATIONAL CERTIFICATE]
-
-A GPU/C++ pipeline enumerated replacement masks, applied q=0→q=3 necessary
-line-capacity filters, enumerated **all** completing 2-factors, and finally checked
-every orientation with the exact 148-point geometry oracle.
-
-- k≤13 had already been closed by the earlier pipeline.
-- At k=14, 74,259,409 root-option masks were scanned across six basins.
-- The capacity funnel retained 19 masks.
-- Four masks have two completions; therefore the complete audit contains **23**
-  2-factors, not 19.
-- The all-completions enumeration was not truncated, and all **23/23** factors are
-  UNSAT under exhaustive 2¹⁴ orientation checks plus the exact geometry oracle.
-
-Thus no solution exists within replacement radius k≤14 of these six V=20 basins.
-This is a bounded local certificate, not a global m=37 result. Radius k≥15 and all
-other basins remain **OPEN**. Full corrected report:
-[`analysis/results/k14_corrected_certification.md`](analysis/results/k14_corrected_certification.md).
-<!-- End of the m=37 research-status section -->
-
-## Usage
-### Build
-
-**Linux**:
-```bash
-make
-```
-
-**Windows (MinGW)**:
-```batch
-compile.bat
-```
-
-**Windows (MSVC)**:
-The batch file auto-detects MSVC if MinGW is not found.
-
-### Run
-
-```bash
-# Mode 0: Full search (count all solutions + missing-center)
-./no3line <n> 0 <threads>
-
-# Mode 1: Missing-center only (distance pruning, recommended for n≥12)
-./no3line <n> 1 <threads>
-
-# Examples
-./no3line 12 1 16    # n=12 missing-center only, 16 threads
-./no3line 15 1 16    # n=15 (needs cloud-grade hardware)
-```
-
-### Batch run
-
-**Linux**: `./run_cloud.sh [mode] [threads] ["n1 n2 n3 ..."]`
-**Windows**: Edit `run.bat` or run `run.bat`
-
-## Repository Structure
-The tree below documents the original executable and analysis entry points. It is
-illustrative rather than exhaustive; current m=37 work additionally lives under
-`analysis/results/` and `analysis/even_n_existence_tools/`.
-
-```
-├── no3line.cpp                  # C++ source: backtracking search for missing-center solutions
-│                                #   mode 0 = full enumeration
-│                                #   mode 1 = missing-center only (distance pruning)
-├── d4_relaxed.cpp               # C++ source: unconstrained search
-│                                #   cell-by-cell backtracking w/o "2-per-row" rule
-├── verify_solution.py           # Python: independent solution verifier
-│                                #   checks: (a) no 3 collinear, (b) center presence
-├── visualize.py                 # Python: distance-ring colored grid visualization
-│                                #   supports: SVG (standalone) + matplotlib (rich)
-├── Makefile                     # Linux build (g++ -static -O3 -march=native)
-├── compile.bat                  # Windows MinGW build
-├── run.bat                      # Windows batch runner
-├── run_cloud.sh                 # Linux batch runner (threads and n-range presets)
-├── README.md                    # This file
-├── solutions/
-│   └── sols_n12.csv             # All 28 (base) missing-center solutions for n=12
-├── results/
-│   ├── result_n5_mode0.csv .. result_n13_mode1.csv   (2-per-row search)
-│   └── result_d4_n5.csv .. result_d4_n7.csv           (unconstrained search)
-├── analysis/
-│   ├── analyze.py               # Distance ring statistics for 2-per-row solutions
-│   ├── analyze_d3.py            # Even-n threshold: matrix M[i][j] analysis
-│   ├── analyze_rle.py           # RLE parser: analyze mvr/no-three-in-line GPU data
-│   ├── analyze_cycles.py        # Column-pairing cycle decomposition analysis
-│   ├── symmetry_analysis.py     # D₄ symmetry classification of solutions
-│   ├── find_hidden_symmetries.py# GL(2,p) affine transformation search
-│   ├── analyze_d2_spectrum.py   # Circumcircle spectrum
-│   ├── analyze_d2_deep.py       # Deep D2: cross-solution spectrum comparison
-│   ├── construct_n14.py         # Construction tests: ring replacement analysis
-│   ├── analyze_assignments.py   # Ring assignment pattern analysis
-│   ├── prove_c4_theorem.py      # C₄ theorem: empirical verification script
-│   ├── c4_evolution.py          # C₄ evolution analysis: n=12,14,16,18,72 comparison
-│   ├── n72_rot4_coords.txt      # Full coordinate list of n=72 rot4 solution (144 pts)
-│   ├── n72_raw.html             # Raw CGI data from Flammenkamp database (n=72)
-│   ├── odd_n_deep.py            # Deep structural analysis of odd n (n=3-19)
-│   ├── odd_n_deeper.py          # Sum-of-two-squares ring structure & parity
-│   ├── odd_n_conjecture.py      # Unified theory conjecture for odd n
-│   ├── flammenkamp_analyzer.py  # Download & analyze Flammenkamp DB (n=7-30, all symmetries)
-│   ├── n12_rot4.html            # Raw CGI data: n=12 rot4 solution
-│   ├── n14_rot4.html            # Raw CGI data: n=14 rot4 solution
-│   ├── n16_rot4.html            # Raw CGI data: n=16 rot4 solution
-│   ├── n18_rot4.html            # Raw CGI data: n=18 rot4 solution
-│   └── ring_solver/             # Ring-guided construction solver
-│       ├── ring_guided_solver.cpp  # C++ solver: given ring assignment → placement
-│       ├── ring_solver.py          # Python ring-by-ring search prototype
-│       ├── prep_ring_assignment.py # Extract ring assignments from RLE solutions
-│       ├── analyze_all_assignments.py  # Compare ring patterns across solutions
-│       └── ring_assignment_n12_from_rle.txt  # Example working assignment
-└── viz_output/
-    └── solution_12_0.svg        # Sample visualization (auto-generated by visualize.py)
-```
-
-## Results Data
-Each CSV row: `n,total_solutions,with_center,missing_center,time_seconds,mode`
-
-- Mode 0: total includes all solutions, with_center = total − missing
-- Mode 1: only missing_center is counted (with distance pruning)
-- D4 CSVs: unconstrained search results
-
-**Verification**: All solution dumps can be independently verified with `verify_solution.py`:
-
-```bash
-python verify_solution.py solutions/sols_n12.csv
-# Output: All 28 solutions valid — no collinear triples found.
-```
-
-This produces a report with three independent checks:
-1. **no-three-in-line**: O(k³) exhaustive point-triple area check
-2. **Center presence**: Distance ring distribution analysis (max ring count ≥ 3?)
-3. **Column usage**: Verification that each column appears exactly twice
-
-The repository also includes **RLE-format solution analysis** (`results/result_rle_n7-19.csv`), computed by parsing GPU-generated solution files from [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line) using `analysis/analyze_rle.py`. This extends the missing-center analysis to n = 7–19 without requiring local exhaustive search for n ≥ 14.
-
-**2026-07-13 historical theory documents** (`analysis/results/`; status
-labels inside these files are superseded by this README's audit notes):
-- `rigidity_hierarchy_theorem.md` — provisional SIRH synthesis
-- `r8_generalized.md` — generic weighted line encoding
-- `part4_reverse.md` — reverse-direction exploration
-- `theorem_r9f_baseframe_3free.md` — T15 cycle type refinement
-- `final_direction_ruling_2026-07-13.md` — 6-direction evaluation
-- `direction4_formal_complete.md` — Energy bound analysis
-- `gating_lll_r1.json` — LLL/Switching numerical feasibility (m=10..30)
-- `cycle_type_stats.json` — Full cycle signature statistics (m=3..36)
-- `e3_slope_stats.json` — Direction key multiset statistics (m=5..36)
-
-## References
-1. **H. E. Dudeney** (1917). "317. A puzzle with pawns." In *Amusements in Mathematics*. Edinburgh: Nelson, p. 94 (solution p. 222). — The original formulation of the No-Three-In-Line problem (the n=8 chessboard case; first posed in the *London Tribune*, 7 Nov 1906). *(Corrects an earlier misattribution of the "original formulation" to Erdős 1935.)*
-
-2. **K. F. Roth** (1951). "On a problem of Heilbronn." *Journal of the London Mathematical Society* 26(3): 198–204. — Contains Erdős's modular-parabola construction, giving f(n) ≥ n−o(n) when n is prime: the first non-trivial lower bound.
-
-3. **R. K. Guy and P. A. Kelly** (1968). "The No-Three-In-Line Problem." *Canadian Mathematical Bulletin* 11: 527–531. — Classic survey; conjectured the c·n asymptotic upper bound (c ≈ π/√3 ≈ 1.814 after Ellmann's 2004 correction of the original heuristic).
-
-4. **M. A. Adena, D. A. Holton, and P. A. Kelly** (1974). "Some thoughts on the no-three-in-line problem." In D. A. Holton (ed.), *Combinatorial Mathematics* (Proc. 2nd Australian Conf.), Lecture Notes in Mathematics 403, pp. 6–17. — Early structural advances (saturated subsets).
-
-5. **R. R. Hall, T. H. Jackson, A. Sudbery, and K. Wild** (1975). "Some advances in the no-three-in-line problem." *Journal of Combinatorial Theory, Series A* 18(3): 336–341. — Modular-hyperbola construction; best known lower bound f(n) ≥ 3n/2 − o(n) (unbeaten).
-
-6. **A. Flammenkamp** (1992). "Progress in the no-three-in-line problem." *J. Combin. Theory Ser. A* 60(2): 305–311. — (1998). "Progress in the no-three-in-line problem, II." *J. Combin. Theory Ser. A* 81(1): 108–113. — Authoritative enumeration; exact 2n solutions pushed to n=52; D₄ symmetry classification (rot4/rot2/iden/dia1/dia2/ort1/ort2/rct4/full) used throughout this work. Also maintained at [wwwhomes.uni-bielefeld.de/achim/no3in/](https://wwwhomes.uni-bielefeld.de/achim/no3in/).
-
-7. **M. J. H. Heule** (2026). "$D(65)=D(67)=D(69)=D(70)=D(72)=2n$" (unpublished). — SAT solver discovery of the n=72 record solution with C₄ symmetry. Reported on [Flammenkamp's website](https://wwwhomes.uni-bielefeld.de/achim/no3in/readme.html).
-
-8. **mvr/no-three-in-line** (2024). "GPU-based exhaustive search for the No-Three-In-Line problem." [GitHub repository](https://github.com/mvr/no-three-in-line). — GPU enumeration of D(n) for n up to 19, with solution files in RLE format.
-
-9. **OEIS A000755** — "Maximal number of points on an n×n grid with no three collinear." [OEIS](https://oeis.org/A000755). — Known values of D(n).
-
-10. **OEIS A000769** — "Number of solutions to the No-Three-In-Line problem on an n×n grid." [OEIS](https://oeis.org/A000769). — Solution counts.
-
-11. **J. H. Conway and R. K. Guy** (1996). *The Book of Numbers*. Springer. — Fermat's theorem on sums of two squares (used in the refined model).
-
-12. **A. Pór and D. R. Wood** (2007). "No-Three-in-Line-in-3D." *Algorithmica* 47(4): 481–488 (orig. *Proc. GD 2004*, LNCS 3383, pp. 395–402). — Proved the 3D maximum is Θ(n²) and established the vol(n,d,1) framework; the construction Vp = {(x, y, x²+y² mod p)} for p ≡ 3 (mod 4) underlies our higher-dimensional analysis.
-
-13. **T. Agama** (2021–2026). "On the general no-three-in-line problem." arXiv:2106.15621. — Extended the problem to arbitrary dimensions via the compression method, achieving Ω(n^{d-1}·d^{1/(2d)}) points. Implies vol(n,4,1) = O(n^{4/3}). **Caveat**: not peer-reviewed as of 2026.
-
-14. **D. Eppstein** (2018). *Forbidden Configurations in Discrete Geometry*. Springer. — ILP / backtracking formulations of NTIL and related lattice-point problems.
-
-15. **P. Brass, W. O. J. Moser, and J. Pach** (2005). *Research Problems in Discrete Geometry*, §10.1 "Packing lattice points in subspaces," pp. 417–421. Springer. — Call NTIL "one of the oldest and most extensively studied geometric questions concerning lattice points."
-
-16. **B. Green** (open problem). Conjectures the answer is ≈ 1.5n, i.e. that the Hall–Jackson–Sudbery–Wild modular-hyperbola bound is asymptotically optimal. — Documented in Brass–Moser–Pach and subsequent surveys.
-
-17. **B. Kovács, Z. L. Nagy, and D. R. Szabó** (2025). "Settling the no-(k+1)-in-line problem when k is not small." arXiv:2502.00176. — Proves the no-(k+1)-in-line answer is kn for k > C√(n log n) (major result on the generalization).
-
-18. **P. Ramanathan, T. Prellberg, M. Lewis, P. D. Joshi, R. A. Dandekar, R. Dandekar, and S. Panat** (2025). "Three Methods, One Problem: Classical and AI Approaches to No-Three-in-Line." arXiv:2512.11469. — Comparison of ILP, PatternBoost, and PPO; ILP reports optimal solutions through 19×19.
-
-19. **T. Prellberg** (2026). CP-SAT symmetry-reduction enumeration of NTIL configurations. arXiv:2602.07751. — Methodological basis for large-n (incl. C₄) computational searches; directly relevant to our CP-SAT pipeline.
-
-20. **Z. Dong and Z. Xu** (2025). "Large grid subsets without many cospherical points." arXiv:2506.18113. — Improves the Erdős–Purdy lower bound; frames NTIL as a general lattice-subset problem.
-
-## Acknowledgments
-The author gratefully acknowledges:
-
-- **Achim Flammenkamp** for maintaining the comprehensive No-Three-In-Line database ([wwwhomes.uni-bielefeld.de/achim/no3in/](https://wwwhomes.uni-bielefeld.de/achim/no3in/)) spanning nearly three decades, and for making all configuration files publicly available.
-- **Marijn J. H. Heule** (CMU) for the discovery of the n=72 rot4 solution (2026-06-25), which provided key validation of the C₄ theorem at large scale.
-- **mvr** for the GPU-based exhaustive search of n≤19 and the RLE solution format used in [mvr/no-three-in-line](https://github.com/mvr/no-three-in-line).
-- **Thomas Prellberg** (Queen Mary University of London) for the CP-SAT symmetry-reduction enumeration of NTIL configurations (arXiv:2602.07751, 2026), which provides the methodological basis for our large-n (incl. C₄) computational search pipeline.
-- The developers of [Z3](https://github.com/Z3Prover/z3) (SMT solver) and [SCIP](https://www.scipopt.org/) (MIP solver), evaluated as candidate engines for the attempted n=74 C₄-solution search (§2.4).
-
-## Citation
-If you use this work in research, please cite this repository:
-
-```
+## 9. Recommended research programme
+
+The discovery of the true `n=74` solution changes the priority order. More local
+search around score60 should stop. The new solution is a ground-truth sample that
+can distinguish structural signals from artefacts of failed basins.
+
+### Priority A — Autopsy the true `n=74` solution
+
+Measure every serious repository statistic on the verified solution, on the
+`n=72` solution, on archived smaller solutions, and on matched near-misses:
+
+- pair-codegree and cavity scores;
+- line-length and primitive-direction spectra;
+- deletion-shadow degrees and Hall slack;
+- modular carry profiles for several small and medium primes;
+- cycle lengths, loops, orientation words, and switch neighbourhoods;
+- radial/heat-map features, used only as held-out predictors.
+
+For every statistic, perform an out-of-sample test: can it rank the true solution
+above near-misses without being fitted to `n=74`? Discard features that fail. This
+is the fastest way to find out which accumulated ideas contain genuine signal.
+
+### Priority B — Turn capacity collapse into a theorem
+
+Fix a retained core `F`. Remove every candidate orbit blocked by a secant of `F`
+and ask whether the remaining loop-and-digon pseudograph has the required degree
+deficits. This produces an exact `f`-factor problem before new-new collinearities
+are considered.
+
+The target theorem should identify a small, checkable obstruction—local star
+deficit, a Tutte `f`-factor cut, or a Hall-type weighted cut—that explains an
+infeasible fixed core. Computationally:
+
+1. hide controlled subsets of the true `n=74` solution and measure completion
+   thresholds;
+2. run the same test on score60 and V40 negative controls;
+3. extract minimal cut certificates from infeasible instances;
+4. generalize recurring certificates into a deterministic lemma.
+
+This route connects the strongest exact local method in the repository with a
+mathematical object that can scale beyond one board size.
+
+### Priority C — Build the missing `k=2` correlation estimate
+
+Adapt the heavy-line/matching/switching architecture of the `k>=3` theorem, but
+sample from a measure already conditioned on row/column degree two—equivalently,
+a random 2-factor or pair of permutations. The required new statement is a
+quantitative spread/negative-correlation theorem strong enough to remove the
+harmonic light-line loss.
+
+The empirical pair-codegree repulsion law suggests what such a theorem might
+look like, but the archive distribution is not a uniform or Gibbs measure. A
+credible progression is:
+
+1. prove the correlation bound for a tractable weighted 2-factor measure;
+2. show that heavy-line conditioning preserves enough spread;
+3. use cluster expansion, switching, or a lopsided local lemma to bound the
+   residual three-point lines;
+4. design an absorber that restores the exact degree-two condition.
+
+This is the highest-upside theoretical route because it attacks the precise
+place where the now-solved `k>=3` theory breaks.
+
+### Priority D — Test a genuine `n -> n+2` border absorber
+
+For the all-even conjecture, attempt an induction that embeds an `n x n` solution
+inside an `(n+2) x (n+2)` board, deletes a controlled number of old points, and
+repairs the four new row/column deficits by alternating cycles. The repair must
+be checked against every old secant, so the deletion-shadow `f`-factor is the
+right first layer.
+
+The useful question is not whether a single hand-designed extension works, but
+whether the number of required deletions stays bounded or grows slowly across a
+large archive. If it grows proportionally to `n`, abandon constant-size induction
+and return to the probabilistic programme.
+
+### Priority E — A modular zero-carry inverse theorem
+
+For several primes `p` and direction shells `Q`, count triples whose integer
+determinant is `kp`. If true solutions systematically suppress the `k=0` mass,
+try to prove that such suppression forces Fourier concentration or a low-entropy
+permutation structure. Then combine that inverse structure with the conic and
+hyperbola obstructions.
+
+Stop if the argument merely reproduces the audited determinant-product `1:2`
+barrier. The goal is an inverse theorem with structural output, not another
+global valuation sum.
+
+### Side target — odd orders 71 and 73
+
+Finding `n=71` or `n=73` would update the finite record and test the `rct4`/half-
+turn search machinery, but it is logically separate from proving all even orders.
+It should not displace Priorities B and C if the goal is a general theorem.
+
+## 10. Repository map and reproducibility
+
+| path | purpose |
+|---|---|
+| [`analysis/results/n74_rot4_prellberg_verified_2026-07-22.md`](analysis/results/n74_rot4_prellberg_verified_2026-07-22.md) | explicit `n=74` coordinates and independent verification |
+| [`analysis/results/pair_codegree_37/`](analysis/results/pair_codegree_37/) | pair-codegree experiments, score60 certificate, Hamming balls, small-`m` exact data |
+| [`analysis/even_n_existence_tools/`](analysis/even_n_existence_tools/) | all-even structural lemmas, corrected C4 model, finite obstruction tools |
+| [`analysis/results/score60_reduced_lns_frontier_2026-07-22.md`](analysis/results/score60_reduced_lns_frontier_2026-07-22.md) | final scoped report on the historical score60 basin |
+| [`verify_solution.py`](verify_solution.py) | independent point-set checker |
+| [`visualization/overview.html`](visualization/overview.html) | interactive visual guide; descriptive, not proof evidence |
+| [`main.tex`](main.tex) | manuscript source; may lag this README's audit status |
+
+Build helpers are provided in [`Makefile`](Makefile) and
+[`compile.bat`](compile.bat). Solver output must always be checked against the
+full integer-board collinearity predicate. `FEASIBLE`, `OPTIMAL`, `INFEASIBLE`,
+and `UNKNOWN` have different logical meanings and must not be interchanged.
+
+## 11. References
+
+1. H. E. Dudeney, “A Puzzle with Pawns,” puzzle 317 in *Amusements in
+   Mathematics*, 1917, pp. 94 and 222.
+
+2. R. K. Guy and P. A. Kelly, “The No-Three-In-Line Problem,” *Canadian
+   Mathematical Bulletin* 11(4), 527–531, 1968.
+   [doi:10.4153/CMB-1968-062-3](https://doi.org/10.4153/CMB-1968-062-3)
+
+3. R. R. Hall, T. H. Jackson, A. Sudbery, and K. Wild, “Some Advances in the
+   No-Three-In-Line Problem,” *Journal of Combinatorial Theory, Series A* 18(3),
+   336–341, 1975.
+   [doi:10.1016/0097-3165(75)90043-6](https://doi.org/10.1016/0097-3165(75)90043-6)
+
+4. A. Flammenkamp, “Progress in the No-Three-In-Line Problem,” *Journal of
+   Combinatorial Theory, Series A* 60(2), 305–311, 1992.
+   [doi:10.1016/0097-3165(92)90012-J](https://doi.org/10.1016/0097-3165(92)90012-J)
+
+5. A. Flammenkamp, “Progress in the No-Three-In-Line Problem, II,” *Journal of
+   Combinatorial Theory, Series A* 81(1), 108–113, 1998.
+   [doi:10.1006/jcta.1997.2829](https://doi.org/10.1006/jcta.1997.2829)
+
+6. T. Prellberg, “Constraint Satisfaction Programming for the No-three-in-line
+   Problem,” arXiv:2602.07751, 2026.
+   [arXiv](https://arxiv.org/abs/2602.07751)
+
+7. J. Cooper and J. Hyatt, “Permutations Minimizing the Number of Collinear
+   Triples,” *Designs, Codes and Cryptography*, 2025.
+   [doi:10.1007/s10623-025-01632-w](https://doi.org/10.1007/s10623-025-01632-w) ·
+   [arXiv:2501.02331](https://arxiv.org/abs/2501.02331)
+
+8. A. Ghosal, R. Goenka, A. Grebennikov, P. Keevash, M. Kwan, and H. T. Pham,
+   “No-`(k+1)`-in-line Problem for `k >= 3`,” arXiv:2607.05255, 2026.
+   [arXiv](https://arxiv.org/abs/2607.05255)
+
+9. Achim Flammenkamp, [No-Three-in-Line database and live record
+   log](https://wwwhomes.uni-bielefeld.de/achim/no3in/readme.html), accessed
+   2026-07-22.
+
+10. OEIS [A272651](https://oeis.org/A272651), maximal number `D(n)`;
+    [A000755](https://oeis.org/A000755), total numbers of extremal
+    configurations in the enumerated small cases; and
+    [A000769](https://oeis.org/A000769), numbers up to square symmetry.
+
+## 12. Citation and licence
+
+```bibtex
 @software{du2026_no3inline_rigidity,
   author = {Du, Junrong},
-  title = {No-Three-In-Line: Symmetry Reductions, Exact Encodings,
-           and the Open n=74 Case},
+  title = {No-Three-In-Line: Audited C4 Structure, a Verified n=74 Solution,
+           and the All-Even Question},
   year = {2026},
   url = {https://github.com/aujurd22/no3inline-rigidity},
   note = {AI-assisted computational research notebook}
 }
 ```
 
-## License
 MIT. See [`LICENSE`](LICENSE).

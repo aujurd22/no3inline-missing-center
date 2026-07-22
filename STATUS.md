@@ -1,5 +1,10 @@
 # Research Status — no3inline-rigidity
 
+> **SUPERSEDED (2026-07-22).** This navigation file predates the independently
+> verified rot4 `n=74` solution and overstates the proof status of FDR/SIRH and
+> several absorber/carry claims. Use [`README.md`](README.md) as the authoritative
+> status audit. The remainder is retained only as a historical index.
+
 > **What this repo is.** A computational notebook / research diary for an
 > AI-assisted exploration of *No-Three-In-Line* that has grown into a theory of
 > **symmetry-induced rigidity in extremal lattice configurations**.  NTIL is the
